@@ -1,6 +1,9 @@
-# Ignore everything
-*
+# Ignore all of this shit. May need to add more later.
+*.DS_Store
+*.qpf
+*.qsf
+*.pdf
+*.log
+db/
+ hex_7seg_test/
 
-# But not these files...
-!.gitignore
-!.v
