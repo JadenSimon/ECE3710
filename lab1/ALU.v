@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: Superfriends team
-// Engineer: Jaden, Dan, Kyle
+// Engineer: Jaden, Dan, Kyle, Melvin
 // 
 // Create Date:    08/30/2018 
 // Design Name:    ALU
