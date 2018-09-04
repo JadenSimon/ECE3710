@@ -4,6 +4,21 @@
 *.qsf
 *.pdf
 *.log
+*.rpt
+*.bak
+*.txt
+transcript
+hls/
+ip/
+licenses/
+logs/
+modelsim_ase/
+nios2eds/
+quartus/
+uninstall/
 db/
 hex_7seg_test/
+incremental_db/
+output_files/
+simulation/
 
