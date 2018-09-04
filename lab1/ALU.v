@@ -35,8 +35,8 @@ parameter SUB  = 4'b1001;
 parameter CMP  = 4'b1011;
 
 //Shift group
-parameter LSH 	= 4'b0100;
-parameter RSH	= 4'b1100;
+parameter LHS 	= 4'b0100;
+parameter RHS	= 4'b1100;
 
 //
 parameter Register = 4'b0000;
@@ -152,8 +152,8 @@ begin
 			end
 		default:
 			begin
-			C=0;
-			Flags = 5'b00000;
+				C=0;
+				Flags = 5'b00000;
 			end
 		endcase
 	default: 

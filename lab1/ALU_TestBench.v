@@ -25,12 +25,26 @@ module ALU_TestBench;
 	initial begin
 	
 	// Initialize Inputs
-	x = 0;
+	Opcode = 0;
 	Src = 0;
 	Dest = 0;
 	
+	$monitor("Src: %0d, Dest: %0d, C: %0d, Flags[4:0]: %b, time:%0d", Src, Dest, C, Flags[4:0], $time );
+
+	// [4] = z, [2] = overflow, 
+	
 	#10;
-	Opcode = 0;
+	
+	// add (signed)
+	Opcode = 8'b00000101;
+	
+	// overflow
+	Src = 16'b0111111111111111; Dest = 16'b0111111111111111;
+	#10;
+	// zero
+	Src = 16'd2; Dest = -16'd2;
+	#10;
+
 	
 //	//Random simulation
 //	for( i = 0; i< 10; i = i+ 1)
