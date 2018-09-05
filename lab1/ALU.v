@@ -139,8 +139,8 @@ begin
 			end*/
 		default:
 			begin
-			C=0;
-			Flags = 5'b00000;
+				C=0;
+				Flags = 5'b00000;
 			end
 		endcase
 	Special:

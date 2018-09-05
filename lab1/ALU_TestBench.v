@@ -37,8 +37,6 @@ module ALU_TestBench;
 	
 	// add (signed)
 	Opcode = 8'b00000101; 
-	#10;
-	
 	// overflow
 	Src = 16'b0111111111111111; Dest = 16'b0111111111111111;
 	#10;
@@ -48,9 +46,77 @@ module ALU_TestBench;
 	
 	// add (unsigned)
 	Opcode = 8'b00000110;
+	// carry
+	Src = 16'b1111111111111111; Dest = 1;
+	#10;
+	// zero
+	Src = 0; Dest = 0;
+	#10;
+	// carry
+	Src = 16'b1111111111111111; Dest = 1;
 	#10;
 	
-	Src = 16'b1111111111111111; Src = 1;
+	// subtract
+	Opcode = 8'b00001001;
+	#10;
+	// zero
+	Src = 16'd3; Dest = 16'd3;
+	#10;	
+	// overflow
+	Src = 16'b1111111111111110; Dest = 16'b0111111111111111;	
+	#10;
+	
+	//and
+	Opcode = 8'b00000001;
+	#10;
+	// zero
+	Src = 16'b0; Dest = 16'b1;	
+	#10;
+	
+	//or
+	Opcode = 8'b00000010;
+	#10;
+	// zero
+	Src = 16'b0; Dest = 16'b0;
+	#10;
+	
+	//xor
+	Opcode = 8'b00000011;
+	#10;
+	// zero
+	Src = 16'b0; Dest = 16'b0;
+	#10;
+	
+	// compare
+	Opcode = 8'b00001011;
+	#10;
+	//negative = 1
+	Src = 16'b1; Dest = 16'b0;
+	#10;
+	//negative = 0
+	Src = 16'b0; Dest = 16'b1;
+	#10;
+	// negative = 0
+	Src = 16'b1111111111111110; Dest = 16'b1111111111111111;
+	#10;
+	
+	// LHS
+	Opcode = 8'b10000100
+	#10;
+	Dest = 16'b1;
+	#10;
+	// Should this result in zero?
+	Dest = 16'b1000000000000000;
+	#10;
+	
+	// RHS
+	Opcode = 8'b10001100
+	#10;
+	Dest = 16'b1;
+	#10;
+	Dest = 16'b1000000000000000;
+	#10;
+	
 	
 	
 
