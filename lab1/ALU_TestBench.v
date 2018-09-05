@@ -36,7 +36,8 @@ module ALU_TestBench;
 	#10;
 	
 	// add (signed)
-	Opcode = 8'b00000101;
+	Opcode = 8'b00000101; 
+	#10;
 	
 	// overflow
 	Src = 16'b0111111111111111; Dest = 16'b0111111111111111;
@@ -44,6 +45,14 @@ module ALU_TestBench;
 	// zero
 	Src = 16'd2; Dest = -16'd2;
 	#10;
+	
+	// add (unsigned)
+	Opcode = 8'b00000110;
+	#10;
+	
+	Src = 16'b1111111111111111; Src = 1;
+	
+	
 
 	
 //	//Random simulation
