@@ -101,7 +101,7 @@ module ALU_TestBench;
 	#10;
 	
 	// LHS
-	Opcode = 8'b10000100
+	Opcode = 8'b10000100;
 	#10;
 	Dest = 16'b1;
 	#10;
@@ -110,7 +110,7 @@ module ALU_TestBench;
 	#10;
 	
 	// RHS
-	Opcode = 8'b10001100
+	Opcode = 8'b10001100;
 	#10;
 	Dest = 16'b1;
 	#10;
