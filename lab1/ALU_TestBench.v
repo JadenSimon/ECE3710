@@ -83,7 +83,7 @@ module ALU_TestBench;
 	SRC = 16'd3; DST = 16'd3;
 	#10;	
 	// overflow
-//	SRC = 16'b1000000000000000; DST = 16'b1000000000000000;	
+//	SRC = 16'b1000000000000000; DST = 16'b1000000000000000;
 //	#10;
 //	// Random
 //	for( i = 0; i< 10; i = i+ 1)
@@ -156,7 +156,7 @@ module ALU_TestBench;
 //	end
 //	#10;
 	
-	// LHS
+	// lhs
 	Opcode = 8'b10000100;
 	DST = 16'b1;
 	#10;
@@ -172,7 +172,7 @@ module ALU_TestBench;
 //	end
 //	#10;
 	
-	// RHS
+	// rhs
 	Opcode = 8'b10001100;
 	DST = 16'b1;
 	#10;
@@ -187,10 +187,84 @@ module ALU_TestBench;
 //	end
 //	#10;
 
+	//andi
 	Opcode = 8'b00010000;
-	DST = 16'b0000000000000011; Immediate = 16'b1;
+	// zero
+	Immediate = 16'b0; DST = 16'b1;	SRC = 16'bx;
 	#10;
+//	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		Immediate = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 
+	//ori
+	Opcode = 8'b00100000;
+	// zero
+	Immediate = 16'b0; DST = 16'b0; 
+	#10;
+//	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		Immediate = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
+
+	//xor
+	Opcode = 8'b00110000;
+	// zero
+	Immediate = 16'b0; DST = 16'b0; 
+	#10;
+	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		Immediate = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
+
+	// add (signed)
+	Opcode = 8'b01010000; 
+	// overflow
+	Immediate = 16'b0111111111111111; DST = 16'b0111111111111111;
+	#10;
+	// zero
+	Immediate = 16'd2; DST = -16'd2;
+	#10;
+	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		Immediate = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
+	
+	// add (unsigned)
+	Opcode = 8'b01100000;
+	// carry
+	Immediate = 16'b1111111111111111; DST = 1;
+	#10;
+	// zero
+	Immediate = 0; DST = 0;
+	#10;
+	// carry
+	Immediate = 16'b1111111111111111; DST = 1;
+	#10;
+	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		Immediate = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 	
 	$finish(2);
 		   
