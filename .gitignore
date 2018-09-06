@@ -6,6 +6,7 @@
 *.log
 *.rpt
 *.bak
+*.json
 *.txt
 transcript
 hls/
