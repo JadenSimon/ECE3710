@@ -2,10 +2,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 // Company: Superfriends team
 // Engineer: Jaden, Dan, Kyle, Melvin
-// 
-// Create Date:    08/30/2018 
+//
+// Create Date:    08/30/2018
 // Design Name:    ALU
-// Module Name:    ALU 
+// Module Name:    ALU
 // Project Name:   Lab 1
 //////////////////////////////////////////////////////////////////////////////////
 module ALU( DST, SRC, C, c_in,Opcode, Flags);
@@ -27,7 +27,7 @@ output reg [4:0] Flags;
 // There aren't many Shift instructions so they could just be handled by a shifter module.
 
 // Immediate Instructions:
-// A CPU controller can also handle immediate instructions pretty easily, no reason to add a bunch of 
+// A CPU controller can also handle immediate instructions pretty easily, no reason to add a bunch of
 // boiler plate code when there's a much more elegant solution. If you look at the chart of instructions
 // and their corresponding opcodes, you'll notice that the high 4-bits of the opcode for immediate instructions
 // are the exact same as the lower 4-bits of the non-immediate version. The control unit would simply route the
@@ -74,7 +74,7 @@ begin
 			begin
 			C = SRC | DST;
 			Flags[3:0] = 4'b0000;
-			Flags[4] = C == 0;		
+			Flags[4] = C == 0;
 			end
 		XOR:
 			begin
@@ -94,7 +94,7 @@ begin
 		ADDU:
 			begin
 			{Flags[3], C} = SRC + DST; // Set the carry flag
-			if (C == 0) Flags[4] = 1'b1; 
+			if (C == 0) Flags[4] = 1'b1;
 			else Flags[4] = 1'b0;
 			Flags[2:0] = 3'b000;
 			end
@@ -112,13 +112,13 @@ begin
 			C = SRC - DST;
 			if (C == 0) Flags[4] = 1'b1;
 			else Flags[4] = 1'b0;
-			if( (~SRC[15] & ~DST[15] & C[15]) | (SRC[15] & DST[15] & ~C[15]) ) Flags[2] = 1'b1;
+			if( (~SRC[15] & DST[15] & C[15]) | (SRC[15] & ~DST[15] & ~C[15]) ) Flags[2] = 1'b1;
 			else Flags[2] = 1'b0;
 			Flags[1:0] = 2'b00; Flags[3] = 1'b0;
 			end
 		CMP: // Signed comparison
 			begin
-			if( $signed(SRC) > $signed(DST) ) Flags[1:0] = 2'b11;
+			if( $signed(SRC) < $signed(DST) ) Flags[1:0] = 2'b11;
 			else Flags[1:0] = 2'b00;
 			C = 0;
 			Flags[4:2] = 3'b000;
@@ -192,7 +192,7 @@ begin
 			end
 		endcase
 		end
-	default: 
+	default:
 		begin
 			C = 0;
 			Flags = 5'b00000;
