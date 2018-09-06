@@ -118,7 +118,7 @@ begin
 			end
 		CMP: // Signed comparison
 			begin
-			if( $signed(SRC) < $signed(DST) ) Flags[1:0] = 2'b11;
+			if( $signed(SRC) > $signed(DST) ) Flags[1:0] = 2'b11;
 			else Flags[1:0] = 2'b00;
 			C = 0;
 			Flags[4:2] = 3'b000;

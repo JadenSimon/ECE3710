@@ -5,6 +5,7 @@ module ALU_TestBench;
 	reg [7:0] Opcode;
 	reg [15:0] SRC;
 	reg [15:0] DST;	
+	reg c_in;
 	
 	// Outputs
 	wire [15:0] C;
@@ -31,7 +32,7 @@ module ALU_TestBench;
 	DST = 0;
 	c_in = 0;
 	
-	$monitor("SRC: %0d, DST: %0d, C: %0d, Flags[4:0]: %b, time:%0d", SRC, DST, C, Flags[4:0], $time );
+	$monitor("SRC: %0h, DST: %0h, C: %0d, Flags[4:0]: %b, time:%0d", SRC, DST, C, Flags[4:0], $time );
 
 	// [4] = z, [2] = overflow, 
 	
@@ -46,13 +47,13 @@ module ALU_TestBench;
 	SRC = 16'd2; DST = -16'd2;
 	#10;
 	// Random
-	for( i = 0; i< 10; i = i+ 1)
-	begin
-		#10
-		SRC = $random % 16;
-		DST = $random % 16;
-	end
-	#10;
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		SRC = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 	
 	// add (unsigned)
 	Opcode = 8'b00000110;
@@ -66,13 +67,13 @@ module ALU_TestBench;
 	SRC = 16'b1111111111111111; DST = 1;
 	#10;
 	// Random
-	for( i = 0; i< 10; i = i+ 1)
-	begin
-		#10
-		SRC = $random % 16;
-		DST = $random % 16;
-	end
-	#10;
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		SRC = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 	
 	// subtract
 	Opcode = 8'b00001001;
@@ -80,44 +81,44 @@ module ALU_TestBench;
 	SRC = 16'd3; DST = 16'd3;
 	#10;	
 	// overflow
-	SRC = 16'b1111111111111110; DST = 16'b0111111111111111;	
+	SRC = 16'b1000000000000000; DST = 16'b1000000000000000;	
 	#10;
-	// Random
-	for( i = 0; i< 10; i = i+ 1)
-	begin
-		#10
-		SRC = $random % 16;
-		DST = $random % 16;
-	end
-	#10;
+//	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		SRC = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 
 	//and
 	Opcode = 8'b00000001;
 	// zero
 	SRC = 16'b0; DST = 16'b1;	
 	#10;
-	// Random
-	for( i = 0; i< 10; i = i+ 1)
-	begin
-		#10
-		SRC = $random % 16;
-		DST = $random % 16;
-	end
-	#10;
+//	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		SRC = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 
 	//or
 	Opcode = 8'b00000010;
 	// zero
 	SRC = 16'b0; DST = 16'b0;
 	#10;
-	// Random
-	for( i = 0; i< 10; i = i+ 1)
-	begin
-		#10
-		SRC = $random % 16;
-		DST = $random % 16;
-	end
-	#10;
+//	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		SRC = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 	
 	//xor
 	Opcode = 8'b00000011;
@@ -125,13 +126,13 @@ module ALU_TestBench;
 	SRC = 16'b0; DST = 16'b0;
 	#10;
 	// Random
-	for( i = 0; i< 10; i = i+ 1)
-	begin
-		#10
-		SRC = $random % 16;
-		DST = $random % 16;
-	end
-	#10;
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		SRC = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 	
 	// compare
 	Opcode = 8'b00001011;
@@ -145,13 +146,13 @@ module ALU_TestBench;
 	SRC = 16'b1111111111111110; DST = 16'b1111111111111111;
 	#10;
 	// Random
-	for( i = 0; i< 10; i = i+ 1)
-	begin
-		#10
-		SRC = $random % 16;
-		DST = $random % 16;
-	end
-	#10;
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		SRC = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 	
 	// LHS
 	Opcode = 8'b10000100;
@@ -161,13 +162,13 @@ module ALU_TestBench;
 	DST = 16'b1000000000000000;
 	#10;
 	// Random
-	for( i = 0; i< 10; i = i+ 1)
-	begin
-		#10
-		SRC = $random % 16;
-		DST = $random % 16;
-	end
-	#10;
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		SRC = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 	
 	// RHS
 	Opcode = 8'b10001100;
@@ -176,13 +177,13 @@ module ALU_TestBench;
 	DST = 16'b1000000000000000;
 	#10;
 	// Random
-	for( i = 0; i< 10; i = i+ 1)
-	begin
-		#10
-		SRC = $random % 16;
-		DST = $random % 16;
-	end
-	#10;
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		SRC = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
 	
 	$finish(2);
 		   
