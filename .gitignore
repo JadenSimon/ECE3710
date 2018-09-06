@@ -7,7 +7,6 @@
 *.rpt
 *.bak
 *.json
-!*.json
 *.txt
 transcript
 hls/
