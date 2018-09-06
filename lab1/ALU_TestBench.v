@@ -4,7 +4,8 @@ module ALU_TestBench;
 	// Inputs
 	reg [7:0] Opcode;
 	reg [15:0] SRC;
-	reg [15:0] DST;	
+	reg [15:0] DST;
+	reg [15:0] Immediate;
 	reg c_in;
 	
 	// Outputs
@@ -15,9 +16,10 @@ module ALU_TestBench;
 	integer i;
 	
 	// Instantiate the DE1 Soc(de1soc)
-	ALU test1(
+	ALUWrapper test1(
 		.SRC(SRC), 
 		.DST(DST),
+		.Immediate(Immediate),
 		.Opcode(Opcode),
 		.c_in(c_in),
 		.Flags(Flags),
@@ -32,7 +34,7 @@ module ALU_TestBench;
 	DST = 0;
 	c_in = 0;
 	
-	$monitor("SRC: %0h, DST: %0h, C: %0d, Flags[4:0]: %b, time:%0d", SRC, DST, C, Flags[4:0], $time );
+	$monitor("OPCODE: %b, SRC: %0h, DST: %0h, C: %0d, Flags[4:0]: %b, time:%0d", Opcode, SRC, DST, C, Flags[4:0], $time );
 
 	// [4] = z, [2] = overflow, 
 	
@@ -81,8 +83,8 @@ module ALU_TestBench;
 	SRC = 16'd3; DST = 16'd3;
 	#10;	
 	// overflow
-	SRC = 16'b1000000000000000; DST = 16'b1000000000000000;	
-	#10;
+//	SRC = 16'b1000000000000000; DST = 16'b1000000000000000;	
+//	#10;
 //	// Random
 //	for( i = 0; i< 10; i = i+ 1)
 //	begin
@@ -184,6 +186,11 @@ module ALU_TestBench;
 //		DST = $random % 16;
 //	end
 //	#10;
+
+	Opcode = 8'b00010000;
+	DST = 16'b0000000000000011; Immediate = 16'b1;
+	#10;
+
 	
 	$finish(2);
 		   

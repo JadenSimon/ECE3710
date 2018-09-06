@@ -141,8 +141,8 @@ begin
 		LHS: // Currently only does 1 bit signed shifts
 			begin
 			C = $signed(DST) << 1;
-			if (C == 0) Flags[4] = 1'b1;
-			else Flags[4:0] = 4'b0;
+			if (C == 0) Flags[4:0] = {1'b1, 4'b0000};
+			else Flags[4:0] = 5'b0;
 			end
 		/*LHSI:
 			begin
@@ -157,8 +157,8 @@ begin
 		RHS:
 			begin
 			C = $signed(DST) >> 1;
-			if (C == 0) Flags[4] = 1'b1;
-			else Flags[4:0] = 4'b0;
+			if (C == 0) Flags[4:0] = {1'b1, 4'b0000};
+			else Flags[4:0] = 5'b0;
 			end
 		/*RHSI:
 			begin
