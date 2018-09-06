@@ -21,7 +21,7 @@ reg [15:0] decoded_src;
 output [15:0] C;
 output [4:0] Flags;
 
-ALU alu(DST, SRC, C, c_in, decoded_opcode, Flags);
+	ALU alu(DST, decoded_src, C, c_in, decoded_opcode, Flags);
 
 // If the high 4-bits of the opcode aren't apart of a group
 // then just feed the ALU {4'b0000, Opcode[7:4]}
