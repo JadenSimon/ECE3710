@@ -56,6 +56,21 @@ module ALU_TestBench;
 //		DST = $random % 16;
 //	end
 //	#10;
+
+	// addc
+	Opcode = 8'b00000111; 
+	// overflow
+	SRC = 16'b0111111111111111; DST = 16'b0000000000000000; c_in=1;
+	#10;
+	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		SRC = $random % 16;
+//		DST = $random % 16;
+//		c_in = $urandom % 1;
+//	end
+//	#10;
 	
 	// add (unsigned)
 	Opcode = 8'b00000110;
@@ -187,6 +202,12 @@ module ALU_TestBench;
 //	end
 //	#10;
 
+	// mov
+	Opcode = 8'b00001101;
+	SRC = 16'b1;
+	#10;
+
+
 	//andi
 	Opcode = 8'b00010000;
 	// zero
@@ -215,7 +236,7 @@ module ALU_TestBench;
 //	end
 //	#10;
 
-	//xor
+	//xori
 	Opcode = 8'b00110000;
 	// zero
 	Immediate = 16'b0; DST = 16'b0; 
@@ -229,7 +250,7 @@ module ALU_TestBench;
 //	end
 //	#10;
 
-	// add (signed)
+	// addi
 	Opcode = 8'b01010000; 
 	// overflow
 	Immediate = 16'b0111111111111111; DST = 16'b0111111111111111;
@@ -246,7 +267,7 @@ module ALU_TestBench;
 //	end
 //	#10;
 	
-	// add (unsigned)
+	// addui
 	Opcode = 8'b01100000;
 	// carry
 	Immediate = 16'b1111111111111111; DST = 1;
@@ -265,6 +286,63 @@ module ALU_TestBench;
 //		DST = $random % 16;
 //	end
 //	#10;
+	
+	// addci
+	Opcode = 8'b01110000; 
+	// overflow
+	Immediate = 16'b0111111111111111; DST = 16'b0000000000000000; c_in=1;
+	#10;
+	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		Immediate = $random % 16;
+//		DST = $random % 16;
+//		c_in = $urandom % 1;
+//	end
+//	#10;
+
+	// subi
+	Opcode = 8'b10010000;
+	// zero
+	Immediate = 16'd3; DST = 16'd3;
+	#10;	
+	// overflow
+//	Immediate = 16'b1000000000000000; DST = 16'b1000000000000000;
+//	#10;
+//	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		Immediate = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
+
+	// cmpi
+	Opcode = 8'b10110000;
+	//negative = 1
+	Immediate = 16'b1; DST = 16'b0;
+	#10;
+	//negative = 0
+	Immediate = 16'b0; DST = 16'b1;
+	#10;
+	// negative = 0
+	Immediate = 16'b1111111111111110; DST = 16'b1111111111111111;
+	#10;
+	// Random
+//	for( i = 0; i< 10; i = i+ 1)
+//	begin
+//		#10
+//		Immediate = $random % 16;
+//		DST = $random % 16;
+//	end
+//	#10;
+
+	// movi
+	Opcode = 8'b11010000;
+	Immediate = 16'b1;
+	#10;
 	
 	$finish(2);
 		   
