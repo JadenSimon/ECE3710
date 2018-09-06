@@ -112,13 +112,13 @@ begin
 			C = SRC - DST;
 			if (C == 0) Flags[4] = 1'b1;
 			else Flags[4] = 1'b0;
-			if( (~SRC[15] & ~DST[15] & C[15]) | (SRC[15] & DST[15] & ~C[15]) ) Flags[2] = 1'b1;
+			if( (~SRC[15] & DST[15] & C[15]) | (SRC[15] & ~DST[15] & ~C[15]) ) Flags[2] = 1'b1;
 			else Flags[2] = 1'b0;
 			Flags[1:0] = 2'b00; Flags[3] = 1'b0;
 			end
 		CMP: // Signed comparison
 			begin
-			if( $signed(SRC) > $signed(DST) ) Flags[1:0] = 2'b11;
+			if( $signed(SRC) < $signed(DST) ) Flags[1:0] = 2'b11;
 			else Flags[1:0] = 2'b00;
 			C = 0;
 			Flags[4:2] = 3'b000;
@@ -141,8 +141,8 @@ begin
 		LHS: // Currently only does 1 bit signed shifts
 			begin
 			C = $signed(DST) << 1;
+			Flags = 5'b00000;
 			if (C == 0) Flags[4] = 1'b1;
-			else Flags[4:0] = 4'b0;
 			end
 		/*LHSI:
 			begin
@@ -157,8 +157,8 @@ begin
 		RHS:
 			begin
 			C = $signed(DST) >> 1;
+			Flags = 5'b00000;
 			if (C == 0) Flags[4] = 1'b1;
-			else Flags[4:0] = 4'b0;
 			end
 		/*RHSI:
 			begin
