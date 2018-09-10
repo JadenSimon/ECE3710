@@ -2,14 +2,15 @@
 //////////////////////////////////////////////////////////////////////////////////
 // Company: Superfriends team
 // Engineer: Jaden, Dan, Kyle, Melvin
-//
-// Create Date:    08/30/2018
+// 
+// Create Date:    08/30/2018 
 // Design Name:    ALU
-// Module Name:    ALU
+// Module Name:    ALU 
 // Project Name:   Lab 1
 //////////////////////////////////////////////////////////////////////////////////
-module ALU( DST, SRC, C, c_in,Opcode, Flags);
+module ALU( DST, SRC, Immediate, C, c_in, Opcode, Flags);
 input [15:0] DST, SRC;
+input [7:0] Immediate; // This should be taken from a 16-bit instruction, however, for now it is provided to the ALU as is.
 input [7:0] Opcode;
 input c_in;
 
@@ -18,8 +19,8 @@ output reg [4:0] Flags;
 // Flag [4] = Z (Zero)
 // Flag [3] = C (Carry)
 // Flag [2] = O (Overflow) Note: This flag may sometimes be called 'F' in some documents
-// Flag [1] = L (Low)
-// Flag [0] = N (Negative)
+// Flag [1] = L (Low) (Unsigned comparison)
+// Flag [0] = N (Negative) (Signed comparison)
 
 // Currently the ALU design can handle 3 groups of opcodes: Special, Register, and Shift
 // Eventually, it may be better to have Special and Shift instructions handled outside of the ALU.
@@ -27,17 +28,18 @@ output reg [4:0] Flags;
 // There aren't many Shift instructions so they could just be handled by a shifter module.
 
 // Immediate Instructions:
-// A CPU controller can also handle immediate instructions pretty easily, no reason to add a bunch of
+// A CPU controller can also handle immediate instructions pretty easily, no reason to add a bunch of 
 // boiler plate code when there's a much more elegant solution. If you look at the chart of instructions
 // and their corresponding opcodes, you'll notice that the high 4-bits of the opcode for immediate instructions
 // are the exact same as the lower 4-bits of the non-immediate version. The control unit would simply route the
-// higher 4-bits to the ALU and set a flag for a mux to take in the immediate value at SRC.
-
+// higher 4-bits to the ALU and set a flag for a mux to take in the immediate value at SRC. Currently the ALU
+// implements immediate instructions directly.
 
 // Special group
 parameter LOAD = 4'b0000;
 
 // Register group
+// Immediate versions of this group use the same 4 bits in the upper 4 bits of the opcode
 parameter AND  = 4'b0001;
 parameter OR   = 4'b0010;
 parameter XOR  = 4'b0011;
@@ -49,155 +51,126 @@ parameter CMP  = 4'b1011;
 parameter MOV  = 4'b1101;
 
 // Shift group
-parameter LHS 	= 4'b0100;
-parameter RHS	= 4'b1100;
+parameter LSH 	= 4'b0100;
+parameter LSHI = 3'b000;
 
 // Upper 4 bits of the opcode define groups
 parameter Register = 4'b0000;
 parameter Shift = 	4'b1000;
 parameter Special = 	4'b0100;
 
+// Immediate instructions located outside any group
+parameter ANDI  = 4'b0001;
+parameter ORI   = 4'b0010;
+parameter XORI  = 4'b0011;
+parameter ADDI  = 4'b0101;
+parameter ADDUI = 4'b0110;
+parameter ADDCI = 4'b0111;
+parameter SUBI  = 4'b1001;
+parameter CMPI  = 4'b1011;
+parameter MOVI  = 4'b1101;
+
 // Always block for combinational logic
-always @(SRC, DST, Opcode, c_in)
+always @(SRC, DST, Immediate, Opcode, c_in)
 begin
+	// Always reset the flags at the start
+	Flags[3:0] = 4'b0000;
+
 	case (Opcode[7:4]) // First case statement is for the upper 4-bits
 	Register:
 		begin
 		case(Opcode[3:0]) // Check the lower 4-bits in the Register group
-		AND: // Logical operations are simple; only need to check for Z flag
-			begin
-			C = SRC & DST;
-			Flags[3:0] = 4'b0000;
-			Flags[4] = C == 0;
-			end
-		OR:
-			begin
-			C = SRC | DST;
-			Flags[3:0] = 4'b0000;
-			Flags[4] = C == 0;
-			end
-		XOR:
-			begin
-			C = SRC ^ DST;
-			Flags[3:0] = 4'b0000;
-			Flags[4] = C == 0;
-			end
+		// Logical operations are simple, just do the operation
+		AND: 	C = SRC & DST;
+		OR: 	C = SRC | DST;
+		XOR:	C = SRC ^ DST;
 		ADD: // Signed addition
 			begin
-			C = SRC + DST;
-			if (C == 0) Flags[4] = 1'b1;
-			else Flags[4] = 1'b0;
-			if( (~SRC[15] & ~DST[15] & C[15]) | (SRC[15] & DST[15] & ~C[15]) ) Flags[2] = 1'b1; // Check for signed overflow here
-			else Flags[2] = 1'b0;
-			Flags[1:0] = 2'b00; Flags[3] = 1'b0;
+				C = SRC + DST;
+				Flags[2] = (~SRC[15] & ~DST[15] & C[15]) | (SRC[15] & DST[15] & ~C[15]); // Check for signed overflow here
 			end
-		ADDU:
-			begin
-			{Flags[3], C} = SRC + DST; // Set the carry flag
-			if (C == 0) Flags[4] = 1'b1;
-			else Flags[4] = 1'b0;
-			Flags[2:0] = 3'b000;
-			end
+		ADDU: {Flags[3], C} = SRC + DST; // Set the carry flag
 		ADDC: // Signed addition with a carry in
 			begin
-			C = SRC + DST + c_in; // Same as ADD but use c_in
-			if (C == 0) Flags[4] = 1'b1;
-			else Flags[4] = 1'b0;
-			if( (~SRC[15] & ~DST[15] & C[15]) | (SRC[15] & DST[15] & ~C[15]) ) Flags[2] = 1'b1; // Check for signed overflow here
-			else Flags[2] = 1'b0;
-			Flags[2:0] = 2'b00; Flags[3] = 1'b0;
+				C = SRC + DST + c_in; // Same as ADD but use c_in
+				Flags[2] = (~SRC[15] & ~DST[15] & C[15]) | (SRC[15] & DST[15] & ~C[15]); // Check for signed overflow here
 			end
 		SUB: // Signed subtraction, could add unsigned subtraction later, though it doesn't make much sense
 			begin
-			C = SRC - DST;
-			if (C == 0) Flags[4] = 1'b1;
-			else Flags[4] = 1'b0;
-			if( (~SRC[15] & DST[15] & C[15]) | (SRC[15] & ~DST[15] & ~C[15]) ) Flags[2] = 1'b1;
-			else Flags[2] = 1'b0;
-			Flags[1:0] = 2'b00; Flags[3] = 1'b0;
+				C = SRC - DST;
+				Flags[2] = (~SRC[15] & DST[15] & C[15]) | (SRC[15] & ~DST[15] & ~C[15]); // Subtraction overflow
 			end
-		CMP: // Signed comparison
+		CMP: // Comparison (does SRC < DST)
 			begin
-			if( $signed(SRC) < $signed(DST) ) Flags[1:0] = 2'b11;
-			else Flags[1:0] = 2'b00;
-			C = 0;
-			Flags[4:2] = 3'b000;
+				// Verilog was not returning the borrow, so we had to use $unsigned to force it
+				C = SRC - DST;
+				// We know that if C is positive then Imm < DST if overflow occurred, likewise, we know that if C is negative then Imm < DST 
+				// if overflow did not occur. This only applies to signed integers. Check if DST is equal to zero as well.
+				Flags[0] = C[15] ^ ((~SRC[15] & DST[15] & C[15]) | (SRC[15] & ~DST[15] & ~C[15]));
+				Flags[1] = $unsigned(SRC) < $unsigned(DST);
 			end
-		MOV: // Sets all flags to 0 and C = SRC
-			begin
-				C = SRC;
-				Flags[4:0] = 5'b00000;
-			end
-		default:
-			begin
-			C = 0;
-			Flags = 5'b0000;
-			end
+		MOV: C = SRC; // Just moves SRC to the output
+		 
+		default: C = 0;
 		endcase
 		end
 	Shift: // Shift group, may be moved into a separate module eventually
 		begin
 		case(Opcode[3:0])
-		LHS: // Currently only does 1 bit signed shifts
+		LSH: // Currently only does 1 bit logical shifts to the left
 			begin
-			C = $signed(DST) << 1;
-			if (C == 0) Flags[4:0] = {1'b1, 4'b0000};
-			else Flags[4:0] = 5'b0;
+				C = DST << 1;
 			end
-		/*LHSI:
-			begin
-			C = $signed(DST) << 1;
-			Flags = 5'b00000;
-			end
-		LHSIS:
-			begin
-			C = $signed(DST) << 1;
-			Flags = 5'b00000;
-			end*/
-		RHS:
-			begin
-			C = $signed(DST) >> 1;
-			if (C == 0) Flags[4:0] = {1'b1, 4'b0000};
-			else Flags[4:0] = 5'b0;
-			end
-		/*RHSI:
-			begin
-			C = $signed(DST) >> 1;
-			Flags = 5'b00000;
-			end
-		RHSIS:
-			begin
-			C = $signed(DST) >> 1;
-			Flags = 5'b00000;
-			end*/
-		default:
-			begin
-				C=0;
-				Flags = 5'b00000;
-			end
+		{LSHI, 1'b0}: C = Immediate << 1; // Left shift immediate by 1 
+		{LSHI, 1'b1}: C = Immediate >> 1; // Right shift immediate by 1
+		
+		default: C = 0;
 		endcase
 		end
 	Special:
 		begin
 		case(Opcode[3:0])
-			LOAD:
-			begin
-				C = SRC;
-				Flags = 5'b00000;
-			end
-		default:
-			begin
-				C=0;
-				Flags = 5'b00000;
-			end
+			LOAD: C = SRC; // Basically just MOV, may change later
+			
+		default: C = 0;
 		endcase
 		end
-	default:
+	// Start the immediate case handling
+	ANDI: C = Immediate & DST;
+	ORI:	C = Immediate | DST;
+	XORI: C = Immediate ^ DST;
+	ADDI: // Signed addition with immediate
 		begin
-			C = 0;
-			Flags = 5'b00000;
+			C = {{8{Immediate[7]}}, Immediate[7:0]} + DST; // Sign extend the immediate and add to DST
+			Flags[2] = (~Immediate[7] & ~DST[15] & C[15]) | (Immediate[7] & DST[15] & ~C[15]); // Check for signed overflow here
 		end
+	ADDUI: {Flags[3], C} = Immediate + DST; // Set the carry flag, no need to sign extend
+	ADDCI: // Signed addition with a carry in
+		begin
+			C = {{8{Immediate[7]}}, Immediate[7:0]} + DST + c_in; // Same as ADD but use c_in
+			Flags[2] = (~Immediate[7] & ~DST[15] & C[15]) | (Immediate[7] & DST[15] & ~C[15]); // Check for signed overflow here
+		end
+	SUBI: // Signed subtraction, could add unsigned subtraction later, though it doesn't make much sense
+		begin
+			C = DST - {{8{Immediate[7]}}, Immediate[7:0]};
+			Flags[2] = (Immediate[7] & ~DST[15] & C[15]) | (~Immediate[7] & DST[15] & ~C[15]);
+		end
+	CMPI: // Comparison with immediate (does Imm < DST)
+		begin
+			C = {{8{Immediate[7]}}, Immediate[7:0]} - DST;	
+			// We know that if C is positive then Imm < DST if overflow occurred, likewise, we know that if C is negative then Imm < DST 
+			// if overflow did not occur. This only applies to signed integers.
+			Flags[0] = C[15] ^ ((~Immediate[7] & DST[15] & C[15]) | (Immediate[7] & ~DST[15] & ~C[15]));
+			// Easier to just extend and compare than use flags for this comparison
+			Flags[1] = {8'b00000000, Immediate[7:0]} < DST;
+		end
+	MOVI: C = Immediate; // Moves immediate directly to output
+	
+	default: C = 0;
 	endcase
+			
+	// Always set the zero flag if C == 0
+	Flags[4] = C == 0;
 end
 
 endmodule
