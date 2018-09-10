@@ -23,7 +23,7 @@
 
 // Shift:
 // LHS
-// RHS
+// LHSI
 
 // Special:
 // LOAD // Needs register file to actually work
@@ -45,12 +45,14 @@ input Carry;
 
 reg [15:0] DST, SRC;
 reg [7:0] decoded_opcode;
-wire [15:0] OUT;
+wire [15:0] Immediate, OUT;
 
 output [3:0] C;
 output [4:0] Flags;
 
-ALU alu(DST, SRC, OUT, Carry, decoded_opcode, Flags); 
+assign Immediate = 16'b0000000000000000;
+
+ALU alu(DST, SRC, Immediate, OUT, Carry, decoded_opcode, Flags); 
 
 // Connect the upper 4 bits of OUT to C
 assign C = OUT[15:12];
