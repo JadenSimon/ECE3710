@@ -1,6 +1,6 @@
 // Given below is a 2D-memory array implementation
 // For simplicity, I'm designing a 4-bitX4  memory
-module regfile(ALUBus, r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, regEnable, clk, reset);
+module RegFile(ALUBus, r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, regEnable, clk, reset);
 	input clk, reset;
 	input [15:0] ALUBus;
 	input [15:0] regEnable;
