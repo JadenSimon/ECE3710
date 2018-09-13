@@ -21,19 +21,23 @@ module Decoder(Instruction, Clock, Reset, Flags, ALUBus);
 	wire [15:0] RegEnable;
 	wire [7:0] Opcode;
 	wire [4:0] ALUFlags;
+	wire [4:0] FlagsEnable;
 	
 	// ALU DST/SRC Muxes
 	assign InputDST = RegWire[Instruction[11:8]];
 	assign InputSRC = RegWire[Instruction[3:0]];
 
 	// Decode the DST register for the RegFile. If the instruction is CMP or CMPI set all to 0.
-	assign RegEnable = (Instruction[15:12] == 4'b1011 || (Instruction[15:12] == 4'b0000 && Instruction[7:4] == 4'b1011)) ? 16'b0 : 1 << Instruction[11:8];
+	assign RegEnable = (Instruction[15:12] == 4'b1011 || (Instruction[15:12] == 4'b0000 && Instruction[7:4] == 4'b1011)) ? 16'b0 : 16'b1 << Instruction[11:8];
 	
 	// Set the opcode
 	assign Opcode = {Instruction[15:12], Instruction[7:4]};
 	
+	// Set the flags enable
+	assign FlagsEnable = 5'b11111;
+	
 	// Instantiate the ALU, RegFile and flags register
-	flags FlagsRegUnit(Clock, Reset, ALUFlags, Flags);
+	flags FlagsRegUnit(Clock, Reset, FlagsEnable, ALUFlags, Flags);
 	ALU ALUUnit(InputDST, InputSRC, Instruction[7:0], ALUBus, Flags[3], Opcode, ALUFlags);
 	RegFile RegFileUnit(ALUBus, RegWire[0], RegWire[1], RegWire[2], RegWire[3],
 										 RegWire[4], RegWire[5], RegWire[6], RegWire[7],

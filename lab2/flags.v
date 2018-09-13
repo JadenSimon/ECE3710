@@ -7,9 +7,10 @@
 // Design Name:    
 // Module Name:    flags
 // Project Name:   Lab 2
-module flags(clk, reset, flags_in, flags_out);
+module flags(clk, reset, flags_enable, flags_in, flags_out);
 	input clk, reset;
 	input [4:0] flags_in;
+	input [4:0] flags_enable;
 	output reg [4:0] flags_out; 
 
 	always@(posedge clk)
@@ -17,6 +18,6 @@ module flags(clk, reset, flags_in, flags_out);
 		if (reset == 1'b1)
 			flags_out <= 5'b0;
 		else
-			flags_out <= flags_in;	
+			flags_out <= (flags_enable & flags_in) | (~flags_enable & flags_out);	
 	end
 endmodule
