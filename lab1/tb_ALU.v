@@ -255,14 +255,17 @@ module tb_ALU;
 	Opcode = 8'b10000100; 
 	
 	// Shift zero left
-	SRC = 16'b0000000000000000; DST = 16'b0000000000000000;
+	Immediate = 8'b00000001; DST = 16'b0000000000000000; 
 	test_instruction("Left Shift Zero", 16'b0000000000000000, 5'b10000);
 	// Shift -1 left
-	SRC = 16'b0000000000000000; DST = 16'b1111111111111111;
+	Immediate = 8'b00000001; DST = 16'b1111111111111111;
 	test_instruction("Left Shift -1", 16'b1111111111111110, 5'b00000);
 	// Shift MAX left
-	SRC = 16'b0000000000000000; DST = 16'b0111111111111111;
-	test_instruction("Left Shift Max", 16'b1111111111111110, 5'b00000);
+	Immediate = 8'b00000111; DST = 16'b0111111111111111;
+	test_instruction("Left Shift Max", 16'b1111111110000000, 5'b00000);
+	// Shift MAX right
+	Immediate = 8'b00001000; DST = 16'b0111111111111111;
+	test_instruction("Right Shift Max", 16'b0000000001111111, 5'b00000);
 	
 	/* LSHI Tests */
 	Opcode = 8'b10000000; 

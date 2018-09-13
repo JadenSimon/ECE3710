@@ -113,9 +113,10 @@ begin
 	Shift: // Shift group, may be moved into a separate module eventually
 		begin
 		case(Opcode[3:0])
-		LSH: // Currently only does 1 bit logical shifts to the left
+		LSH: // Shifts by an amount provided by Immediate[3:0]
 			begin
-				C = DST << 1;
+				if (Immediate[3]) C = DST >> (~Immediate[3:0] + 1'b1);
+				else C = DST << Immediate[3:0];
 			end
 		{LSHI, 1'b0}: C = Immediate[3:0] << 1; // Left shift immediate by 1 
 		{LSHI, 1'b1}: C = Immediate[3:0] >> 1; // Right shift immediate by 1
