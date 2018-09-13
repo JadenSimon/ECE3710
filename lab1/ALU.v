@@ -81,37 +81,33 @@ begin
 		begin
 		case(Opcode[3:0]) // Check the lower 4-bits in the Register group
 		// Logical operations are simple, just do the operation
-		AND: 	C = SRC & DST;
-		OR: 	C = SRC | DST;
-		XOR:	C = SRC ^ DST;
+		AND: 	C = DST & SRC;
+		OR: 	C = DST | SRC;
+		XOR:	C = DST ^ SRC;
 		ADD: // Signed addition
 			begin
-				C = SRC + DST;
+				C = DST + SRC;
 				Flags[2] = (~SRC[15] & ~DST[15] & C[15]) | (SRC[15] & DST[15] & ~C[15]); // Check for signed overflow here
 			end
-		ADDU: {Flags[3], C} = SRC + DST; // Set the carry flag
+		ADDU: {Flags[3], C} = DST + SRC; // Set the carry flag
 		ADDC: // Signed addition with a carry in
 			begin
-				C = SRC + DST + c_in; // Same as ADD but use c_in
+				C = DST + SRC + c_in; // Same as ADD but use c_in
 				Flags[2] = (~SRC[15] & ~DST[15] & C[15]) | (SRC[15] & DST[15] & ~C[15]); // Check for signed overflow here
 			end
 		SUB: // Signed subtraction, could add unsigned subtraction later, though it doesn't make much sense
 			begin
-				C = SRC - DST;
-				Flags[2] = (~SRC[15] & DST[15] & C[15]) | (SRC[15] & ~DST[15] & ~C[15]); // Subtraction overflow
+				C = DST - SRC;
+				Flags[2] = (SRC[15] & ~DST[15] & C[15]) | (~SRC[15] & DST[15] & ~C[15]); // Subtraction overflow
 			end
-		CMP: // Comparison (does SRC < DST)
+		CMP: // Comparison (does DST < SRC)
 			begin
-				// Verilog was not returning the borrow, so we had to use $unsigned to force it
-				C = SRC - DST;
-				// We know that if C is positive then Imm < DST if overflow occurred, likewise, we know that if C is negative then Imm < DST 
-				// if overflow did not occur. This only applies to signed integers. Check if DST is equal to zero as well.
-				Flags[0] = C[15] ^ ((~SRC[15] & DST[15] & C[15]) | (SRC[15] & ~DST[15] & ~C[15]));
-				Flags[1] = $unsigned(SRC) < $unsigned(DST);
+				{Flags[1], C} = DST - SRC;
+				Flags[0] = Flags[1] ^ (DST[15] ^ SRC[15]);
 			end
 		MOV: C = SRC; // Just moves SRC to the output
 		 
-		default: C = 0;
+		default: C = DST;
 		endcase
 		end
 	Shift: // Shift group, may be moved into a separate module eventually
@@ -121,10 +117,10 @@ begin
 			begin
 				C = DST << 1;
 			end
-		{LSHI, 1'b0}: C = Immediate << 1; // Left shift immediate by 1 
-		{LSHI, 1'b1}: C = Immediate >> 1; // Right shift immediate by 1
+		{LSHI, 1'b0}: C = Immediate[3:0] << 1; // Left shift immediate by 1 
+		{LSHI, 1'b1}: C = Immediate[3:0] >> 1; // Right shift immediate by 1
 		
-		default: C = 0;
+		default: C = DST;
 		endcase
 		end
 	Special:
@@ -132,22 +128,22 @@ begin
 		case(Opcode[3:0])
 			LOAD: C = SRC; // Basically just MOV, may change later
 			
-		default: C = 0;
+		default: C = DST;
 		endcase
 		end
 	// Start the immediate case handling
-	ANDI: C = Immediate & DST;
-	ORI:	C = Immediate | DST;
-	XORI: C = Immediate ^ DST;
+	ANDI: C = DST & Immediate;
+	ORI:	C = DST | Immediate;
+	XORI: C = DST ^ Immediate;
 	ADDI: // Signed addition with immediate
 		begin
-			C = {{8{Immediate[7]}}, Immediate[7:0]} + DST; // Sign extend the immediate and add to DST
+			C = DST + {{8{Immediate[7]}}, Immediate[7:0]}; // Sign extend the immediate and add to DST
 			Flags[2] = (~Immediate[7] & ~DST[15] & C[15]) | (Immediate[7] & DST[15] & ~C[15]); // Check for signed overflow here
 		end
-	ADDUI: {Flags[3], C} = Immediate + DST; // Set the carry flag, no need to sign extend
+	ADDUI: {Flags[3], C} = DST + Immediate; // Set the carry flag, no need to sign extend
 	ADDCI: // Signed addition with a carry in
 		begin
-			C = {{8{Immediate[7]}}, Immediate[7:0]} + DST + c_in; // Same as ADD but use c_in
+			C = DST + {{8{Immediate[7]}}, Immediate[7:0]} + c_in; // Same as ADD but use c_in
 			Flags[2] = (~Immediate[7] & ~DST[15] & C[15]) | (Immediate[7] & DST[15] & ~C[15]); // Check for signed overflow here
 		end
 	SUBI: // Signed subtraction, could add unsigned subtraction later, though it doesn't make much sense
@@ -155,18 +151,15 @@ begin
 			C = DST - {{8{Immediate[7]}}, Immediate[7:0]};
 			Flags[2] = (Immediate[7] & ~DST[15] & C[15]) | (~Immediate[7] & DST[15] & ~C[15]);
 		end
-	CMPI: // Comparison with immediate (does Imm < DST)
+	CMPI: // Comparison with immediate (does DST < Imm)
 		begin
-			C = {{8{Immediate[7]}}, Immediate[7:0]} - DST;	
-			// We know that if C is positive then Imm < DST if overflow occurred, likewise, we know that if C is negative then Imm < DST 
-			// if overflow did not occur. This only applies to signed integers.
-			Flags[0] = C[15] ^ ((~Immediate[7] & DST[15] & C[15]) | (Immediate[7] & ~DST[15] & ~C[15]));
-			// Easier to just extend and compare than use flags for this comparison
-			Flags[1] = {8'b00000000, Immediate[7:0]} < DST;
+			{Flags[1], C} = DST - {{8{Immediate[7]}}, Immediate[7:0]};
+			Flags[0] = Flags[1] ^ (DST[15] ^ Immediate[7]);
+			{Flags[1], C} = DST - {8'b0, Immediate[7:0]};
 		end
 	MOVI: C = Immediate; // Moves immediate directly to output
 	
-	default: C = 0;
+	default: C = DST;
 	endcase
 			
 	// Always set the zero flag if C == 0

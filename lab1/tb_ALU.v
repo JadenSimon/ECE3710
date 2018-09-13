@@ -156,16 +156,16 @@ module tb_ALU;
 	Opcode = 8'b00001001; 
 	
 	// MAX_NEGATIVE - 1 should overflow
-	SRC = 16'b1000000000000000; DST = 16'b0000000000000001;
+	DST = 16'b1000000000000000; SRC = 16'b0000000000000001;
 	test_instruction("SUB Negative Overflow", 16'b0111111111111111, 5'b00100);
 	// MAX_NEGATIVE + 1 should not overflow
-	SRC = 16'b1000000000000000; DST = 16'b1111111111111111;
+	DST = 16'b1000000000000000; SRC = 16'b1111111111111111;
 	test_instruction("SUB Negative", 16'b1000000000000001, 5'b00000);
 	// MAX + 1 should overflow
-	SRC = 16'b0111111111111111; DST = 16'b1111111111111111;
+	DST = 16'b0111111111111111; SRC = 16'b1111111111111111;
 	test_instruction("SUB Positive Overflow", 16'b1000000000000000, 5'b00100);
 	// MAX - 1 should not overflow
-	SRC = 16'b0111111111111111; DST = 16'b0000000000000001;
+	DST = 16'b0111111111111111; SRC = 16'b0000000000000001;
 	test_instruction("SUB Positive", 16'b0111111111111110, 5'b00000);
 	// SUBI Zero
 	Opcode = 8'b1001xxxx;
@@ -222,35 +222,32 @@ module tb_ALU;
 	
 	/* CMP Tests */
 	Opcode = 8'b00001011; 
-	// CMP SRC less than DST
-	SRC = 16'b1111111111111111; DST = 16'b0000000000000000;
-	test_instruction("CMP SRC < DST 1", 16'b1111111111111111, 5'b00001);
-	// CMP SRC less than DST unsigned
-	SRC = 16'b0111111111111111; DST = 16'b1111111111111111;
-	test_instruction("CMP SRC < DST 2", 16'b1000000000000000, 5'b00010);
-	// CMP SRC greater than DST
+	// CMP DST less than SRC
 	SRC = 16'b1111111111111111; DST = 16'b1111111111111110;
-	test_instruction("CMP SRC > DST Both", 16'b0000000000000001, 5'b00000);
-	// CMP SRC less than DST both
+	test_instruction("CMP DST < SRC 1", 16'b1111111111111111, 5'b00011);
+	// CMP DST less than SRC unsigned
+	SRC = 16'b1111111111111111; DST = 16'b0111111111111111;
+	test_instruction("CMP DST < SRC 2", 16'b1000000000000000, 5'b00010);
+	// CMP DST greater than SRC both
 	SRC = 16'b0000000000001111; DST = 16'b0000000000010000;
-	test_instruction("CMP SRC < DST Both", 16'b1111111111111111, 5'b00011);
+	test_instruction("CMP DST > SRC Both", 16'b0000000000000001, 5'b00000);
 	// CMP SRC equals DST
 	SRC = 16'b0000000000000001; DST = 16'b0000000000000001;
 	test_instruction("CMP SRC == DST", 16'b0000000000000000, 5'b10000);
-	// CMPI IMM less than DST
+	// CMPI DST less than IMM
 	Opcode = 8'b1011xxxx;
 	Immediate = 8'b11111111; DST = 16'b0000000000000000; 
-	test_instruction("CMPI IMM < DST", 16'b1111111111111111, 5'b00001);
-	// CMPI IMM greater than DST
+	test_instruction("CMPI DST < IMM", 16'b1111111100000001, 5'b00010);
+	// CMPI DST greater than IMM
 	Immediate = 8'b01111111; DST = 16'b1111111111111111; 
-	test_instruction("CMPI IMM > DST", 16'b0000000010000000, 5'b00010);
-	// CMPI IMM greater than DST Unsigned
+	test_instruction("CMPI DST > IMM", 16'b1111111110000000, 5'b00001);
+	// CMPI DST greater than IMM Unsigned
 	Immediate = 8'b11111111; DST = 16'b0000000000001111; 
-	test_instruction("CMPI IMM > DST Unsigned", 16'b1111111111110000, 5'b00001);
-	// CMPI IMM greater than DST Signed
+	test_instruction("CMPI DST > IMM Unsigned", 16'b1111111100010000, 5'b00010);
+	// CMPI DST greater than IMM Signed
 	Immediate = 8'b00000000; DST = 16'b1000000000000000; 
-	test_instruction("CMPI IMM > DST Signed", 16'b1000000000000000, 5'b00010);
-	// CMPI IMM equals DST
+	test_instruction("CMPI DST > IMM Signed", 16'b1000000000000000, 5'b00001);
+	// CMPI DST equals IMM
 	Immediate = 8'b00001111; DST = 16'b0000000000001111; 
 	test_instruction("CMPI IMM == DST", 16'b0000000000000000, 5'b10000);
 	
@@ -273,8 +270,8 @@ module tb_ALU;
 	Immediate = 8'b00000001; DST = 16'b0000000000000000;
 	test_instruction("Shift Immediate Left", 16'b0000000000000010, 5'b00000);
 	// Shift MAX left
-	Immediate = 8'b11111111; DST = 16'b0000000000000000;
-	test_instruction("Shift Immediate MAX Left", 16'b0000000111111110, 5'b00000);
+	Immediate = 8'b00001111; DST = 16'b0000000000000000;
+	test_instruction("Shift Immediate MAX Left", 16'b0000000000011110, 5'b00000);
 	
 	Opcode = 8'b10000001; // Do right shifts now
 	
@@ -282,8 +279,8 @@ module tb_ALU;
 	Immediate = 8'b00000001; DST = 16'b0000000000000000;
 	test_instruction("Shift Immediate Right", 16'b0000000000000000, 5'b10000);
 	// Shift MAX right
-	Immediate = 8'b11111111; DST = 16'b0000000000000000;
-	test_instruction("Shift Immediate MAX Right", 16'b000000001111111, 5'b00000);
+	Immediate = 8'b00001111; DST = 16'b0000000000000000;
+	test_instruction("Shift Immediate MAX Right", 16'b000000000000111, 5'b00000);
 
 	
 	$display("***Corner case tests done!****");
@@ -336,9 +333,9 @@ module tb_ALU;
 			
 			// Compute the expected output
 			temp_flags = 5'b00000;
-			temp_out = $signed(SRC) - $signed(DST);
+			temp_out = $signed(DST) - $signed(SRC);
 			if (temp_out == 0) temp_flags[4] = 1;
-			if( (~SRC[15] & DST[15] & temp_out[15]) | (SRC[15] & ~DST[15] & ~temp_out[15]) ) temp_flags[2] = 1'b1;
+			if( (SRC[15] & ~DST[15] & temp_out[15]) | (~SRC[15] & DST[15] & ~temp_out[15]) ) temp_flags[2] = 1'b1;
 			
 			// Check the result
 			test_instruction("Random SUB", temp_out, temp_flags);
@@ -401,9 +398,9 @@ module tb_ALU;
 			
 			// Compute the expected output
 			temp_flags = 5'b00000;
-			temp_out = $signed(SRC) - $signed(DST);
-			if	($signed(SRC) < $signed(DST)) temp_flags[0] = 1'b1;
-			if ($unsigned(SRC) < $unsigned(DST)) temp_flags[1] = 1'b1;
+			temp_out = $signed(DST) - $signed(SRC);
+			if	($signed(DST) < $signed(SRC)) temp_flags[0] = 1'b1;
+			if ($unsigned(DST) < $unsigned(SRC)) temp_flags[1] = 1'b1;
 			temp_flags[4] = SRC == DST;
 			
 			// Check the result
@@ -462,6 +459,7 @@ module tb_ALU;
 			test_instruction("Random ADDCI", temp_out, temp_flags);
 		end
 		
+		
 		// Random cmpi
 		Opcode = 8'b1011xxxx;
 		for( i = 0; i< 25000; i = i+ 1)
@@ -471,9 +469,9 @@ module tb_ALU;
 			
 			// Compute the expected output
 			temp_flags = 5'b00000;
-			temp_out = $signed({{8{Immediate[7]}}, Immediate[7:0]}) - $signed(DST);
-			if	($signed({{8{Immediate[7]}}, Immediate[7:0]}) < $signed(DST)) temp_flags[0] = 1'b1;
-			if ($unsigned({8'b00000000, Immediate[7:0]}) < $unsigned(DST)) temp_flags[1] = 1'b1;
+			temp_out = $signed(DST) - $signed({8'b0, Immediate[7:0]});
+			if	($signed(DST) < $signed({{8{Immediate[7]}}, Immediate[7:0]})) temp_flags[0] = 1'b1;
+			if ($unsigned(DST) < $unsigned({8'b00000000, Immediate[7:0]})) temp_flags[1] = 1'b1;
 			temp_flags[4] = $signed(Immediate) == $signed(DST);
 			
 			// Check the result
