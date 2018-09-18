@@ -34,7 +34,7 @@ module fib_fsm(clk, reset, display);
 	// Increase the state by 1 each positive clock edge
 	always@(posedge clk)
 	begin
-		if(reset || state == S29) 	state <= S0;
+		if(reset || state == S30) 	state <= S0;
 		else								state <= state + 1'b1;
 	end
 	
