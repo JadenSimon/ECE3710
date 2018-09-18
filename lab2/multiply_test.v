@@ -11,6 +11,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module multiply_test;
+	`include "instructionset.v"
+
 	// Inputs
 	reg [15:0] Instruction;
 	reg Clock, Reset;
@@ -34,6 +36,14 @@ module multiply_test;
 		.Flags(Flags),
 		.ALUBus(ALUBus)
 	);
+	
+	// Performs an instruction
+	task PerformInstruction(input [3:0] DST, input [3:0] Group, input [3:0] SRC, input [3:0] Opcode);		
+	begin	
+		Instruction = {DST, Group, SRC, Opcode};
+		#10; Clock = 1; #10; Clock = 0;
+	end
+	endtask
 	
 	// Helper task to display all the register values
 	task DisplayRegs();
@@ -62,11 +72,9 @@ module multiply_test;
 	B = 8'b11100011;
 
 	// Initialize reg0 to A
-	Instruction = {8'b11010000, A};
-	#10; Clock = 1; #10; Clock = 0;
+	PerformInstruction(MOVI, REG0, A[7:4], A[3:0]);
 	// Initialize reg1 to B
-	Instruction = {8'b11010001, B};
-	#10; Clock = 1; #10; Clock = 0;
+	PerformInstruction(MOVI, REG1, B[7:4], B[3:0]);
 	
 	// We're multiplying 8-bit numbers so we will need to shift and compare 8 times.
 	// reg2 will be a temporary register
@@ -74,29 +82,20 @@ module multiply_test;
 	begin
 		// To multiply we check the LSB of the multiplier, if 1 add the multiplicand to our product register (reg3)
 		// Checking the LSB is as simple as reg1 AND 0x1, but we move it to a temp register first
-		Instruction = 16'b0000001011010001; // MOV reg2 reg1
-		#10; Clock = 1; #10; Clock = 0;
-		Instruction = 16'b0001001000000001; // ANDI reg2 0x1
-		#10; Clock = 1; #10; Clock = 0;
-		Instruction = 16'b0000001011010010; // MOV reg2 reg2
-		#10; Clock = 1; #10; Clock = 0;
+		PerformInstruction(Register, REG2, MOV, REG1);
+		PerformInstruction(ANDI, REG2, 4'b0000, 4'b0001);
+		PerformInstruction(Register, REG2, MOV, REG2);
 		
 		// Now check the zero flag
 		if (Flags[4] != 1)
-		begin
-			Instruction = 16'b0000001101010000; // ADD reg3 reg0
-			#10; Clock = 1; #10; Clock = 0;
-		end
+			PerformInstruction(Register, REG3, ADD, REG0);
 		
 		// Now shift the multiplicand to the left 1 and the multiplier to the right 1
-		Instruction = 16'b1000000001000001;
-		#10; Clock = 1; #10; Clock = 0;
-		Instruction = 16'b1000000101001111;
-		#10; Clock = 1; #10; Clock = 0;		
+		PerformInstruction(Shift, REG0, LSH, 4'b0001);
+		PerformInstruction(Shift, REG1, LSH, 4'b1111);
 	end
 
-	Instruction = 16'b0000001111010011; // MOV reg3 reg3
-	#10; Clock = 1; #10; Clock = 0;
+	PerformInstruction(Register, REG3, MOV, REG3);
 	$display("%0d * %0d = %0d", A, B, ALUBus);
 	
 	$finish(2);

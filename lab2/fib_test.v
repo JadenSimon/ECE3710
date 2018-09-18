@@ -11,6 +11,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module fib_test;
+	`include "instructionset.v"
+
 	// Inputs
 	reg [15:0] Instruction;
 	reg Clock, Reset;
@@ -30,6 +32,14 @@ module fib_test;
 		.Flags(Flags),
 		.ALUBus(ALUBus)
 	);
+	
+	// Performs an instruction
+	task PerformInstruction(input [3:0] DST, input [3:0] Group, input [3:0] SRC, input [3:0] Opcode);		
+	begin	
+		Instruction = {DST, Group, SRC, Opcode};
+		#10; Clock = 1; #10; Clock = 0;
+	end
+	endtask
 	
 	// Helper task to display all the register values
 	task DisplayRegs();
@@ -53,21 +63,17 @@ module fib_test;
 	Instruction = 0;
 	Reset = 1; Clock = 1; #10; Clock = 0; Reset = 0;
 	
-	// Initialize the 2nd register to 1
-	Instruction = 16'b1101000100000001;
-	#10; Clock = 1; #10; Clock = 0;
+	// Initialize REG1 to 1
+	PerformInstruction(MOVI, REG1, 4'b0000, 4'b0001);
 	
 	// Loop through every register starting from 2, adding the previous two registers
 	for (i = 2; i < 16; i = i + 1)
 	begin
-		Instruction = {4'b0000, i[3:0], 4'b0101, i[3:0] - 4'b0001}; // First instruction
-		#10; Clock = 1; #10; Clock = 0;
-		Instruction = {4'b0000, i[3:0], 4'b0101, i[3:0] - 4'b0010}; // Second instruction
-		#10; Clock = 1; #10; Clock = 0;
+		PerformInstruction(Register, i[3:0], ADD, i[3:0] - 4'b0001); // REGi = REGi + REGi-1
+		PerformInstruction(Register, i[3:0], ADD, i[3:0] - 4'b0010); // REGi = REGi + REGi-2
 	end
 	
 	DisplayRegs();
-
 	
 	$finish(2);
 	end

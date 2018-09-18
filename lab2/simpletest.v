@@ -11,6 +11,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module simpletest;
+	`include "instructionset.v"
+	
 	// Inputs
 	reg [15:0] Instruction;
 	reg Clock, Reset;
@@ -30,6 +32,14 @@ module simpletest;
 		.Flags(Flags),
 		.ALUBus(ALUBus)
 	);
+	
+	// Performs an instruction
+	task PerformInstruction(input [3:0] DST, input [3:0] Group, input [3:0] SRC, input [3:0] Opcode);		
+	begin	
+		Instruction = {DST, Group, SRC, Opcode};
+		#10; Clock = 1; #10; Clock = 0;
+	end
+	endtask
 	
 	// Helper task to initialize registers to 0
 	task InitializeRegs();
@@ -67,32 +77,30 @@ module simpletest;
 	InitializeRegs();
 	
 	// Set reg0 and reg1 to 5 and 2 respectively using MOVI
-	Instruction = 16'b1101000000000101;
-	#10; Clock = 1; #10; Clock = 0;
+	PerformInstruction(MOVI, REG0, 4'b0000, 4'b0101);
 	$display("Set reg0 to %0h", ALUBus);
-	Instruction = 16'b1101000100000010;
-	#10; Clock = 1; #10; Clock = 0;
+	PerformInstruction(MOVI, REG1, 4'b0000, 4'b0010);
 	$display("Set reg1 to %0h", ALUBus);
 	
 	// Add reg0 and reg1
-	Instruction = 16'b0000000001010001;
-	#10; Clock = 1; #10; Clock = 0;
+	PerformInstruction(Register, REG0, ADD, REG1);
 	$display("Performed reg0 = reg0 + reg1");
 	
 	// Shift reg1 to the left
-	Instruction = 16'b1000000101000000;
-	#10; Clock = 1; #10; Clock = 0;
+	PerformInstruction(Shift, REG1, LSH, 4'b0001);
 	$display("Performed reg1 = reg1 << 1");
 	
 	// Compare and display flags
-	Instruction = 16'b0000000010110001;
-	#10; Clock = 1; #10; Clock = 0;
+	PerformInstruction(Register, REG0, CMP, REG1);
 	$display("Performed CMP reg0 reg1, flags: %b", Flags);
 	
 	// Compare and display flags
-	Instruction = 16'b1011000000001011;
-	#10; Clock = 1; #10; Clock = 0;
-	$display("Performed CMP reg0 11, flags: %b", Flags);
+	PerformInstruction(CMPI, REG0, 4'b0000, 4'b1011);
+	$display("Performed CMPI reg0 0xb, flags: %b", Flags);
+	
+	// Subtract -1 from reg1
+	PerformInstruction(SUBI, REG1, 4'b0000, 4'b0001);
+	$display("Performed SUBI reg1 0x1, flags: %b", Flags);
 	
 	DisplayRegs();
 
