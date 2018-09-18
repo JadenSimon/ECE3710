@@ -23,6 +23,7 @@ module Decoder(Instruction, Clock, Reset, Flags, ALUBus);
 	wire [15:0] RegEnable;
 	wire [7:0] Opcode;
 	wire [4:0] ALUFlags;
+	wire [4:0] FlagsEnable;
 	
 	// ALU DST/SRC Muxes
 	assign InputDST = RegWire[Instruction[11:8]];
@@ -34,8 +35,11 @@ module Decoder(Instruction, Clock, Reset, Flags, ALUBus);
 	// Set the opcode
 	assign Opcode = {Instruction[15:12], Instruction[7:4]};
 	
+	// Set the flags enable
+	assign FlagsEnable = 5'b11111;
+	
 	// Instantiate the ALU, RegFile and flags register
-	flags FlagsRegUnit(Clock, Reset, ALUFlags, Flags);
+	flags FlagsRegUnit(Clock, Reset, FlagsEnable, ALUFlags, Flags);
 	ALU ALUUnit(InputDST, InputSRC, Instruction[7:0], ALUBus, Flags[3], Opcode, ALUFlags);
 	RegFile RegFileUnit(ALUBus, RegWire[0], RegWire[1], RegWire[2], RegWire[3],
 										 RegWire[4], RegWire[5], RegWire[6], RegWire[7],
