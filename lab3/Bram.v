@@ -1,8 +1,8 @@
 // Quartus Prime Verilog Template
 // True Dual Port RAM with single clock
 
-module true_dual_port_ram_single_clock
-#(parameter DATA_WIDTH=8, parameter ADDR_WIDTH=6)
+module Bram
+#(parameter DATA_WIDTH=16, parameter ADDR_WIDTH=9)
 (
 	input [(DATA_WIDTH-1):0] data_a, data_b,
 	input [(ADDR_WIDTH-1):0] addr_a, addr_b,
@@ -12,6 +12,12 @@ module true_dual_port_ram_single_clock
 
 	// Declare the RAM variable
 	reg [DATA_WIDTH-1:0] ram[2**ADDR_WIDTH-1:0];
+	
+
+initial begin
+	$readmemh("memory.list", ram);
+end
+
 
 	// Port A 
 	always @ (posedge clk)
@@ -32,7 +38,7 @@ module true_dual_port_ram_single_clock
 	begin
 		if (we_b) 
 		begin
-			ram[addr_b] <= data_b;
+			if (addr_a != addr_b) ram[addr_b] <= data_b;
 			q_b <= data_b;
 		end
 		else 
