@@ -12,39 +12,39 @@ module Bram
 
 	// Declare the RAM variable
 	reg [DATA_WIDTH-1:0] ram[2**ADDR_WIDTH-1:0];
-	
+
 
 initial begin
-	$readmemh("memory.list", ram);
+	$readmemb("memory.list", ram);
 end
 
 
-	// Port A 
+	// Port A
 	always @ (posedge clk)
 	begin
-		if (we_a) 
+		if (we_a)
 		begin
 			ram[addr_a] <= data_a;
 			q_a <= data_a;
 		end
-		else 
+		else
 		begin
 			q_a <= ram[addr_a];
-		end 
-	end 
+		end
+	end
 
-	// Port B 
+	// Port B
 	always @ (posedge clk)
 	begin
-		if (we_b) 
+		if (we_b)
 		begin
 			if (addr_a != addr_b) ram[addr_b] <= data_b;
 			q_b <= data_b;
 		end
-		else 
+		else
 		begin
 			q_b <= ram[addr_b];
-		end 
+		end
 	end
 
 endmodule
