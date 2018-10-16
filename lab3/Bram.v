@@ -36,7 +36,7 @@ module Bram
 	// Port B
 	always @ (posedge clk)
 	begin
-		if (we_b && addr_b != addr_a)
+		if (we_b && (addr_b != addr_a || !we_a)) 
 		begin
 			ram[addr_b] <= data_b;
 			q_b <= data_b;
