@@ -1,0 +1,16 @@
+// Does a bunch of loads and stores with computations
+
+5010 // ADDI REG0 0x10
+5120 // ADDI REG1 0x20
+4140 // STOR REG1 REG0
+4041 // STOR REG0 REG1 
+4200 // LOAD REG2 REG0 (reg2 == 0x20)
+4301 // LOAD REG3 REG1 (reg3 == 0x10)
+0352 // ADD REG3 REG2 (reg3 == 0x30)
+0053 // ADD REG0 REG3 (reg0 == 0x40)
+4401 // LOAD REG4 REG1 (reg4 == 0x10)
+5001 // ADDI REG0 0x01
+B005 // CMPI REG0 0x05
+5001 // ADDI REG0 0x01 (reg0 == 0x42)
+4601 // LOAD REG6 REG1 (reg6 == 0x10)
+5601 // ADDI REG6 0x01 (reg6 == 0x11)
