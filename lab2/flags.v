@@ -17,7 +17,9 @@ module flags(clk, reset, flags_enable, flags_in, flags_out);
 	begin
 		if (reset == 1'b1)
 			flags_out <= 5'b0;
+		else if (flags_enable)
+			flags_out <= flags_in;
 		else
-			flags_out <= (flags_enable & flags_in) | (~flags_enable & flags_out);	
+			flags_out <= flags_out;
 	end
 endmodule
