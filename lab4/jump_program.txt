@@ -1,0 +1,10 @@
+// Does some jumps
+
+5004 // ADDI REG0 0x04 
+5105 // ADDI REG1 0x05
+4280 // JAL REG2 REG0 (jmp to 0x04)
+5101 // ADDI REG1 0x01 (REG1 == 0x06)
+0351 // ADD REG3 REG1 
+4282 // JAL REG2 REG2 (return to 0x03)
+// Final value of REG3 == 0x05 + 0x06 = 0x0B
+
