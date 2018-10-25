@@ -4,7 +4,6 @@
 parameter Register	= 4'b0000;
 parameter Shift  		= 4'b1000;
 parameter Special 	= 4'b0100;
-parameter Bcond 		= 4'b1100;
 
 // Register group
 parameter AND  		= 4'b0001;
@@ -28,6 +27,7 @@ parameter LSH 			= 4'b0100;
 parameter LSHI 		= 3'b000;
 
 // Immediate instructions located outside any group
+parameter BCND 		= 4'b1100;
 parameter ANDI  		= 4'b0001;
 parameter ORI   		= 4'b0010;
 parameter XORI  		= 4'b0011;
