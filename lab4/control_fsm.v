@@ -11,7 +11,7 @@
 
 // Control unit for the entire CPU datapath
 // Logic is implemented as a Mealy machine since output is dependent on the previous instruction.
-module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load, mux_A, mux_B, Opcode, RegEnable, FlagsEnable, PCEnable, we_a, imm);
+module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load, branch_mux, mux_A, mux_B, Opcode, RegEnable, FlagsEnable, PCEnable, we_a, imm);
 	`include "instructionset.v"
 	input clk, reset;
 	input [15:0] mem_data;
@@ -21,6 +21,7 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 	output reg pc_mux = 1'b0;
 	output reg jal_mux = 1'b0;
 	output reg pc_load = 1'b0;
+	output reg branch_mux = 1'b0;
 	output reg [7:0] Opcode = 8'b0;
 	output reg [15:0] RegEnable = 16'b0;
 	output reg [4:0] FlagsEnable = 5'b0;
@@ -33,7 +34,30 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 	// Allows us to keep track of the instruction across states
 	reg [15:0] instr = 16'b0; 
 	
-	reg fsm_state = 1'b0;
+	reg fsm_state = 3'b0;
+	
+	always@(posedge clk)
+	begin
+		if (reset)
+			fsm_state <= 3'b000;
+		else
+		begin
+			case (fsm_state)
+			
+				3'b000 :
+				begin
+					if (mem_data[15:12] == Special && (mem_data[7:4] == LOAD || mem_data[7:4] == STOR))
+						fsm_state <= 3'b001;
+					else if (mem_data[15:12] == BCND)
+						fsm_state <= 3'b111;
+					else
+						fsm_state <= 3'b000;
+				end
+				
+				default: fsm_state <= 3'b000;
+			endcase
+		end
+	end
 	
 	/*
 	The control logic works as follows:
@@ -49,9 +73,27 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 			Set all other control lines to 0
 			Set instruction to mem_data
 			Go to State 0.		
-	The FSM is updated whenever mem_data is changed.		
+	The FSM is updated whenever fsm_state or mem_data is changed	
 	*/
-	always@(mem_data)
+	
+	// TODO: Add conditional to JCND/BCND
+	/*
+		EQ Equal Z flag  is  1
+		NE Not  Equal Z flag  is  0
+		CS Carry  Set C flag  is  1
+		CC Carry  Clear C flag  is  0
+		HI Higher L flag  is  1
+		LS Lower  or  Same L flag  is  0
+		GT Greater  Than N flag  is  1
+		LE Less  Than  or  Equal N flag  is  0
+		FS Flag  Set F flag  is  1
+		FC Flag  Clear F flag  is  0
+		LO Lower Z  and  L flags  are  0
+		HS Higher  or  Same Z  or  L flag  is  1
+		LT Less  Than Z  and  N flags  are  0
+		GE Greater  Than  or  Equal Z  or  N flag  is  1
+	*/
+	always@(fsm_state, mem_data)
 	begin
 		if (reset == 1'b1)
 		begin
@@ -59,6 +101,7 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 			pc_mux = 1'b0;
 			jal_mux = 1'b0;
 			pc_load = 1'b0;
+			branch_mux = 1'b0;
 			Opcode = 8'b0;
 			RegEnable = 16'b0;
 			FlagsEnable = 5'b0;
@@ -66,14 +109,13 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 			we_a = 1'b0;
 			mux_A = 4'b0;
 			mux_B = 4'b0;
-			fsm_state = 2'b00;
 			imm = 8'b0;
 			instr = 16'b0;
 		end
 		else
 		begin 
 			case (fsm_state)
-			1'b0:
+			3'b000:
 			begin
 				instr = mem_data;
 			
@@ -83,12 +125,13 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 				// Set the write enable
 				we_a = instr[15:12] == Special && instr[7:4] == STOR;			
 			
-				// Set the pc/ld mux
+				// Set our mux signal lines
 				// If we are loading or storing we must set the correct address to the memory block
 				pc_mux = instr[15:12] == Special && (instr[7:4] == LOAD || instr[7:4] == STOR);
 				ld_mux = 0;
 				jal_mux = instr[15:12] == Special && instr[7:4] == JAL;
 				pc_load = instr[15:12] == Special && (instr[7:4] == JAL || instr[7:4] == JCND);
+				branch_mux = instr[15:12] == BCND; 
 
 				// ALU DST/SRC Muxes
 				mux_A = instr[11:8];
@@ -109,11 +152,9 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 				imm = instr[7:0];
 		
 				// Set the flags enable
-				FlagsEnable = 5'b11111;
-											
-				fsm_state = ~PCEnable;
+				FlagsEnable = 5'b11111;											
 			end
-			1'b1:
+			3'b001:
 			begin
 				// Set the PC enable, second stage always increments
 				PCEnable = 1'b1;
@@ -126,6 +167,7 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 				ld_mux = (instr[15:12] == Special && instr[7:4] == LOAD);
 				jal_mux = 0;
 				pc_load = 0;
+				branch_mux = 0;
 				
 				// ALU DST/SRC Muxes
 				// For loads, it does not matter what the ALU sees
@@ -139,9 +181,24 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 				imm = 8'b0;
 		
 				FlagsEnable = 5'b0;
-	
-				// Go back to normal state
-				fsm_state = 1'b0;
+				instr = 16'b0;
+			end
+			default:
+			begin
+				ld_mux = 1'b0;
+				pc_mux = 1'b0;
+				jal_mux = 1'b0;
+				pc_load = 1'b0;
+				branch_mux = 1'b0;
+				Opcode = 8'b0;
+				RegEnable = 16'b0;
+				FlagsEnable = 5'b0;
+				PCEnable = 1'b0;
+				we_a = 1'b0;
+				mux_A = 4'b0;
+				mux_B = 4'b0;
+				imm = 8'b0;
+				instr = 16'b0;
 			end
 			endcase
 		end
