@@ -94,9 +94,10 @@ module ALU( DST, SRC, Immediate, C, c_in, Opcode, Flags);
 		Special:
 			begin
 			case(Opcode[3:0])
-				LOAD: C = SRC; // Basically just MOV, may change later
+				LOAD: C = SRC;
+				STOR: C = SRC;
 				JAL: C = SRC;
-				JCND: C = DST[4:0] != Immediate[4:0];
+				JCND: C = SRC;
 			default: C = DST;
 			endcase
 			end
