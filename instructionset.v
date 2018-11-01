@@ -37,6 +37,7 @@ parameter ADDCI 		= 4'b0111;
 parameter SUBI  		= 4'b1001;
 parameter CMPI  		= 4'b1011;
 parameter MOVI  		= 4'b1101;
+parameter LUI 			= 4'b1111;
 
 // Register names for testing
 parameter REG0			= 4'b0000;
