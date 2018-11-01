@@ -55,3 +55,21 @@ parameter REG12		= 4'b1100;
 parameter REG13		= 4'b1101;
 parameter REG14		= 4'b1110;
 parameter REG15		= 4'b1111;
+
+// Condition codes		
+parameter NC			= 4'b0000;
+parameter EQ			= 4'b0001;
+parameter NE			= 4'b0010;
+parameter CS			= 4'b0011;
+parameter CC			= 4'b0100;
+parameter HI			= 4'b0101;
+parameter LS			= 4'b0110;
+parameter GT			= 4'b0111;
+parameter LE			= 4'b1000;
+parameter FS			= 4'b1001;
+parameter FC			= 4'b1010;
+parameter LO			= 4'b1011;
+parameter HS			= 4'b1100;
+parameter LT			= 4'b1101;
+parameter GE			= 4'b1110;
+parameter NJ			= 4'b1111;

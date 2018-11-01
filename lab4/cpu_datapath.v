@@ -47,10 +47,11 @@ module cpu_datapath(clk, reset);
 	// Generate muxes and assign values to wires
 	assign DST = RegWire[mux_A];
 	assign SRC = RegWire[mux_B];
-	assign PCMuxOut = reset ? 16'bz : (pc_mux ? SRC : (pc_load ? ALUOutput : PCOut));
+	assign PCMuxOut = pc_mux ? (branch_mux ? (PCMuxIn - 16'b1) : ALUOutput) : PCOut;
 	assign LoadMuxOut = jal_mux ? PCOut : (ld_mux ? q_a : ALUOutput);
-	assign PCAdder = branch_mux ? Immediate : 16'b1;
-	assign PCMuxIn = pc_load ? (ALUOutput + 1'b1) : (PCOut + PCAdder);
+	// Immediate must be sign extended for branching
+	assign PCAdder = branch_mux ? {{8{Immediate[7]}}, Immediate[7:0]} : 16'b1;
+	assign PCMuxIn = (pc_load ? ALUOutput : PCOut) + PCAdder;
 
 	// Connect DST to data_a
 	assign data_a = DST;
