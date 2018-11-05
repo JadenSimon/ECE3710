@@ -41,9 +41,19 @@ cond_to_bin = { "NC": "0000",
                "GE": "1110",
                "NJ": "1111" }
 
+# this will be used for 4 bit immediates e.g. LSH Rdest Ramount
+# TODO: This doesn't handle negative 2's compliment yet
+def dec_to_4bin(num):
+    if num < 16:
+        return '{:04b}'.format(str(num))
+    else:
+        print(num + " is to big for 4 bit binary representation.")
+        exit()
+
 def decode_instruction(line):
-    # split the line so we can deal with the instruction in tokens
+    # this just takes off the trailing newline character
     line = line.rstrip()
+    # split the line so we can deal with the instruction in tokens
     instruction = line.split(' ')
     output_line = ""
 
@@ -73,9 +83,13 @@ def decode_instruction(line):
         output_line = "0100" + reg_to_bin[instruction[1]] + "1000" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'JCND':
         output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + reg_to_bin[instruction[2]]
+    elif instruction[0] == 'LSH': # Shift Instructions
+        output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + dec_to_4bin[instruction[2]]
+    elif instruction[0] == 'JCND':
+        output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + reg_to_bin[instruction[2]]
 
     if output_line != "":
-        output_file.write(output_line + "\n")
+        output_file.write(output_line + " //" + line + "\n")
     else:
         print("Instruction not implemented: " + line)
 
