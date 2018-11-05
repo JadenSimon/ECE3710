@@ -3,7 +3,7 @@
 # is the best way to do it in our situation but it can be easily changed
 import sys
 
-output_file = open("machine_code.bin", "w")
+output_file = open("machine_code.txt", "w")
 
 # dictionary mapping reg to binary
 reg_to_bin = { "REG0": "0000",
