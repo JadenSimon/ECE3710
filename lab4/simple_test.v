@@ -15,9 +15,10 @@ module simple_test();
 
 	// Create clock and reset
 	reg clock, reset;
+	wire [15:0] d_out;
 	
 	// Create the CPU
-	cpu_datapath CPU(clock, reset);	
+	cpu_datapath CPU(clock, reset, d_out);	
 		
 	// Do some stuff
 	initial begin
@@ -26,7 +27,14 @@ module simple_test();
 		#40
 		reset = 0;
 			
-		#1000
+		#20000
+		
+		reset = 1;
+		#40
+		reset = 0;
+		
+		#20000
+		
 		$finish;
 	end
 	

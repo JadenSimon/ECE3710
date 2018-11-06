@@ -11,10 +11,10 @@
 
 // Control unit for the entire CPU datapath
 // Logic is implemented as a Mealy machine since output is dependent on the previous instruction.
-module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load, branch_mux, mux_A, mux_B, Opcode, RegEnable, FlagsEnable, PCEnable, we_a, imm);
+module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, branch_mux, mux_A, mux_B, Opcode, RegEnable, FlagsEnable, PCEnable, we_a, imm);
 	`include "instructionset.v"
 	input clk, reset;
-	input [15:0] mem_data;
+	input [15:0] instr;
 	input [4:0] flags;
 	
 	output reg ld_mux = 1'b0;
@@ -32,23 +32,53 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 	output reg [7:0] imm = 8'b0;
 	
 	// Allows us to keep track of the instruction across states
-	reg [15:0] instr = 16'b0; 
+	reg [15:0] last_instr = 16'b0; 
 	reg [2:0] fsm_state = 3'b000;
-	reg cond_flag = 1'b0; // Whether the condition matches the flags
+	
+	// Decodes condition and sets our condition flag
+	function check_condition;
+	input [3:0] opcode;
+	begin
+		case (opcode)
+			NC: check_condition = 1'b1;
+			EQ: check_condition = flags[4];
+			NE: check_condition = !flags[4];
+			CS: check_condition = flags[3];
+			CC: check_condition = !flags[3];
+			HI: check_condition = !flags[1];
+			LS: check_condition = flags[1] || flags[4];
+			GT: check_condition = !flags[0];
+			LE: check_condition = flags[0] || flags[4];
+			FS: check_condition = flags[2];
+			FC: check_condition = !flags[2];
+			LO: check_condition = flags[1];
+			HS: check_condition = !flags[1];
+			LT: check_condition = flags[0];
+			GE: check_condition = !flags[0];
+			NJ: check_condition = 1'b0;
+			default: check_condition = 1'b0;
+		endcase
+	end
+	endfunction
 	
 	always@(posedge clk)
 	begin
 		if (reset)
+		begin
 			fsm_state <= 3'b111;
+			last_instr <= 16'b0;
+		end
 		else
 		begin
+			last_instr <= instr; // Only used for loads currently
+		
 			case (fsm_state)
 			
 				3'b000 :
-				begin
-					if (mem_data[15:12] == Special && mem_data[7:4] == LOAD)
+				begin					
+					if (instr[15:12] == Special && instr[7:4] == LOAD)
 						fsm_state <= 3'b001; // LOAD can only move data into the register on the next cycle
-					else if (mem_data[15:12] == Special && mem_data[7:4] == STOR)
+					else if (instr[15:12] == Special && instr[7:4] == STOR)
 						fsm_state <= 3'b010; // STOR must wait a cycle for the next instruction
 					else
 						fsm_state <= 3'b000;
@@ -112,41 +142,11 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 		NJ No jump
 	*/
 	
-	// Decodes condition and sets our condition flag
-	task check_condition;
-	begin
-		case (instr[11:8])
-			NC: cond_flag = 1'b1;
-			EQ: cond_flag = flags[4];
-			NE: cond_flag = !flags[4];
-			CS: cond_flag = flags[3];
-			CC: cond_flag = !flags[3];
-			HI: cond_flag = !flags[1];
-			LS: cond_flag = flags[1] || flags[4];
-			GT: cond_flag = !flags[0];
-			LE: cond_flag = flags[0] || flags[4];
-			FS: cond_flag = flags[2];
-			FC: cond_flag = !flags[2];
-			LO: cond_flag = flags[1];
-			HS: cond_flag = !flags[1];
-			LT: cond_flag = flags[0];
-			GE: cond_flag = !flags[0];
-			NJ: cond_flag = 1'b0;
-			default: cond_flag = 1'b0;
-		endcase
-	end
-	endtask
-	
 	always@(*)
-	begin	
+	begin		
 		case (fsm_state)
 		3'b000:
-		begin
-			instr = mem_data;
-			
-			// Sets cond_flag to 1 if the condition is met.
-			check_condition(); 
-		
+		begin					
 			// Set the PC enable, if it's a load/store don't set it
 			PCEnable = !(instr[15:12] == Special && (instr[7:4] == LOAD || instr[7:4] == STOR));
 			
@@ -159,21 +159,21 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 			if (instr[15:12] == Special)
 			begin
 				pc_mux = instr[7:4] == JAL || instr[7:4] == LOAD || instr[7:4] == STOR || 
-						(instr[7:4] == JCND && cond_flag);
+						(instr[7:4] == JCND && check_condition(instr[11:8]));
 				ld_mux = 0;
 				jal_mux = instr[7:4] == JAL;
-				pc_load = instr[7:4] == JAL || (cond_flag && instr[7:4] == JCND);
+				pc_load = instr[7:4] == JAL || (check_condition(instr[11:8]) && instr[7:4] == JCND);
 			end
 			else
 			begin
-				pc_mux = cond_flag && instr[15:12] == BCND;
+				pc_mux = check_condition(instr[11:8]) && instr[15:12] == BCND;
 				ld_mux = 0;
 				jal_mux = 0;
 				pc_load = 0;
 			end
 			
 			// Set the branch mux control line
-			branch_mux = cond_flag && instr[15:12] == BCND; 
+			branch_mux = check_condition(instr[11:8]) && instr[15:12] == BCND; 
 
 			// ALU DST/SRC Muxes
 			mux_A = instr[11:8];
@@ -210,7 +210,6 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 			jal_mux = 0;
 			pc_load = 0;
 			branch_mux = 0;
-			cond_flag = 0;
 			
 			// ALU DST/SRC Muxes
 			// For loads, it does not matter what the ALU sees
@@ -218,14 +217,13 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 			mux_B = 4'b0;
 			
 			// Sets the regfile to load the mem_data
-			RegEnable = 1'b1 << instr[11:8];
+			RegEnable = 1'b1 << last_instr[11:8];
 			
 			// Opcode does not matter here
 			Opcode = 8'b0;
 			imm = 8'b0;
 	
 			FlagsEnable = 5'b0;
-			instr = 16'b0;
 		end
 		3'b010:
 		begin
@@ -239,14 +237,12 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 			jal_mux = 0;
 			pc_load = 0;
 			branch_mux = 0;
-			cond_flag = 0;
 			mux_A = 4'b0;
 			mux_B = 4'b0;
 			RegEnable = 16'b0;			
 			Opcode = 8'b0;
 			imm = 8'b0;
 			FlagsEnable = 5'b0;
-			instr = 16'b0;
 		end
 		default: // Do nothing
 		begin
@@ -263,8 +259,6 @@ module control_fsm(clk, reset, mem_data, flags, ld_mux, pc_mux, jal_mux, pc_load
 			mux_A = 4'b0;
 			mux_B = 4'b0;
 			imm = 8'b0;
-			instr = 16'b0;
-			cond_flag = 1'b0;
 		end
 		endcase
 	end

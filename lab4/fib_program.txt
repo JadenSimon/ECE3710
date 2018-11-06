@@ -36,5 +36,7 @@ D200 // MOVI REG2 0x00
 B100 // CMPI REG1 0x00
 C2FC // BCND NE 0xFC (go up 4 addresses if REG1 != 0)
 4F00 // LOAD REG15 REG0 (dump last number to REG15)
+DA00 // MOVI REG10 0x00
+40CA // JCND NC REG10 (return to start of program)
 
 
