@@ -42,9 +42,17 @@ cond_to_bin = { "NC": "0000",
                "GE": "1110",
                "NJ": "1111" }
 
+# dictionary that maps the labels to the addresses in the assembly file
+label_addr = { }
+
 def decode_instruction(line):
     # this just takes off the trailing newline character
     line = line.rstrip()
+
+    # if its an empty line we can just skip it
+    if line == "":
+        return
+
     # split the line so we can deal with the instruction in tokens
     instruction = line.split(' ')
     output_line = ""
@@ -107,12 +115,26 @@ def decode_instruction(line):
     else:
         print("Instruction not implemented: " + line)
 
+def first_pass(input_file):
+    # this will be the address of the line
+    line_counter = 0
+    for line in input_file:
+        line = line.rstrip()
+        # the labels will start with a period e.g. .main
+        if line[0] == ".":
+            label_addr[line] = line_counter + 1
+    line_counter += 1
+
 def main():
     # open the file thats given as the first argument
     try:
         input_file = open(str(sys.argv[1]), "r")
     except:
         print("File does not exist.")
+
+    # Do the first pass to store all of the addresses for labels
+    first_pass(input_file)
+
     # just loop through each line and decode the assembly and write it to the output file
     for line in input_file:
         decode_instruction(line)
