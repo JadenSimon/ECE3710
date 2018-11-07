@@ -2,6 +2,7 @@
 # the corresponding machine code into another file. I don't know if this
 # is the best way to do it in our situation but it can be easily changed
 import sys
+import numpy
 
 output_file = open("machine_code.txt", "w")
 
@@ -41,15 +42,6 @@ cond_to_bin = { "NC": "0000",
                "GE": "1110",
                "NJ": "1111" }
 
-# this will be used for 4 bit immediates e.g. LSH Rdest Ramount
-# TODO: This doesn't handle negative 2's compliment yet
-def dec_to_4bin(num):
-    if num < 16:
-        return '{:04b}'.format(str(num))
-    else:
-        print(num + " is to big for 4 bit binary representation.")
-        exit()
-
 def decode_instruction(line):
     # this just takes off the trailing newline character
     line = line.rstrip()
@@ -84,9 +76,31 @@ def decode_instruction(line):
     elif instruction[0] == 'JCND':
         output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'LSH': # Shift Instructions
-        output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + dec_to_4bin[instruction[2]]
+        output_line = "0100" + reg_to_bin[instruction[1]] + "1100" + numpy.binary_repr(int(instruction[2]), 4)
     elif instruction[0] == 'JCND':
         output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + reg_to_bin[instruction[2]]
+    elif instruction[0] == 'BCND': # Immediate Instructions
+        output_line = "1100" + cond_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+    elif instruction[0] == 'ANDI':
+        output_line = "0001" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2], 16), 8)
+    elif instruction[0] == 'ORI':
+        output_line = "0010" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2], 16), 8)
+    elif instruction[0] == 'XORI':
+        output_line = "0011" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2], 16), 8)
+    elif instruction[0] == 'ADDI':
+        output_line = "0101" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+    elif instruction[0] == 'ADDUI':
+        output_line = "0110" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+    elif instruction[0] == 'ADDCI':
+        output_line = "0111" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+    elif instruction[0] == 'SUBI':
+        output_line = "1001" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+    elif instruction[0] == 'CMPI':
+        output_line = "1011" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+    elif instruction[0] == 'MOVI':
+        output_line = "1101" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+    elif instruction[0] == 'LUI':
+        output_line = "1111" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
 
     if output_line != "":
         output_file.write(output_line + " //" + line + "\n")
