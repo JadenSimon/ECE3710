@@ -129,6 +129,7 @@ def main():
     # open the file thats given as the first argument
     try:
         input_file = open(str(sys.argv[1]), "r")
+        second_input_file = open(str(sys.argv[1]), "r")
     except:
         print("File does not exist.")
 
@@ -136,9 +137,10 @@ def main():
     first_pass(input_file)
 
     # just loop through each line and decode the assembly and write it to the output file
-    for line in input_file:
+    for line in second_input_file:
         decode_instruction(line)
 
+    second_input_file.close()
     input_file.close()
     output_file.close()
 
