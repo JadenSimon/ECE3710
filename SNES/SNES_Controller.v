@@ -60,7 +60,7 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out);
 	end
 
 
-	always@(state)
+	always@(state, data_in)
 	begin
 		case (state)
 			waiting:
@@ -77,7 +77,7 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out);
 			begin
 				latch =1'b0;
 				ready = 1'b0;
-				data_out[counter] = data_in;
+				data_out = (data_out << 1) | data_in;
 			end
 			done_reading:
 			begin
