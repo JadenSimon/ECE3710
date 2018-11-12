@@ -17,22 +17,11 @@ module cpu_demo(clk, reset, seven_seg_out1, seven_seg_out2, seven_seg_out3, seve
 	output wire [6:0] seven_seg_out1, seven_seg_out2, seven_seg_out3, seven_seg_out4;
 	
 	wire [15:0] data_out;
+	wire new_reset = ~reset;
 	reg [6:0] seven_seg [3:0]; // Used to convert data_out > display
 	
-	reg [1:0] clk_counter = 1'b0;
-	reg slw_clk = 1'b0;
-	
-	// Make a slower clock
-	always@(posedge clk)
-	begin
-		if (clk_counter == 2'b11)
-			slw_clk = ~slw_clk;
-			
-		clk_counter = clk_counter + 2'b01;
-	end
-	
 	// Create the CPU
-	cpu_datapath CPU(slw_clk, reset, data_out);
+	cpu_datapath CPU(clk, new_reset, data_out);
 	
 	// Display on the FPGA
 	genvar i;
@@ -42,7 +31,7 @@ module cpu_demo(clk, reset, seven_seg_out1, seven_seg_out2, seven_seg_out3, seve
 	begin:display_seg
 		always@(*)
 		begin
-			if (reset == 1'b1)
+			if (new_reset == 1'b1)
 				seven_seg[i] <= 7'b1000000;
 			else
 			begin

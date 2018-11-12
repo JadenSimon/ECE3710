@@ -63,7 +63,8 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 	
 	always@(posedge clk)
 	begin
-		if (reset)
+		// Reset should only occur during the waiting state
+		if (reset == 1'b1 && fsm_state == 3'b010)
 		begin
 			fsm_state <= 3'b111;
 			last_instr <= 16'b0;
@@ -169,7 +170,7 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 				pc_mux = check_condition(instr[11:8]) && instr[15:12] == BCND;
 				ld_mux = 0;
 				jal_mux = 0;
-				pc_load = 0;
+				pc_load = check_condition(instr[11:8]) && instr[15:12] == BCND;
 			end
 			
 			// Set the branch mux control line
