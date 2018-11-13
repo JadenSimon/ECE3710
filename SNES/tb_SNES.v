@@ -22,7 +22,7 @@ module tb_SNES;
 	wire ready;
 	
 	// counter variable
-	integer i;
+	integer i, failed;
 	
 	
 	// Instantiate the DE1 Soc(de1soc)
@@ -43,14 +43,20 @@ module tb_SNES;
 		
 		// wait 1 cycle so latch can be set
 		clk = 1; #10; clk = 0; #10;
-		$display("button_vector: %b", button_vector);
 	
 		for (i = 15; i >= 0; i = i - 1)
 		begin
 			data_in = button_vector[i];
 			clk = 1; #10; clk = 0; #10; 
 
-		end		
+		end	
+		
+		if (data_out != button_vector)
+		begin
+		failed = 1;
+		$display("button_vector: %b, data_out incorrect: %b", button_vector, data_out);
+		end
+		
 		clk = 1; #10; clk = 0; 
 	end
 	endtask
@@ -58,21 +64,39 @@ module tb_SNES;
 	initial begin
 	
 		//init inputs
-		clk = 0; active = 0; data_in = 0; 
+		clk = 0; active = 0; data_in = 0; failed = 0; 
 	
-		// alternating
-		simulate_SNES_input(16'b1010101010101010);
-		$display("data_out: %b", data_out);
-		
 		// first and last 
-		#10; clk = 1; #10; clk = 0; #10;
 		simulate_SNES_input(16'b1000000000000001); 
-		$display("data_out: %b", data_out);
+		
+		// alternating		
+		#10; clk = 1; #10; clk = 0; #10;
+		simulate_SNES_input(16'b1010101010101010);
+		
+		// alternating	2	
+		#10; clk = 1; #10; clk = 0; #10;
+		simulate_SNES_input(16'b0101010101010101);
 		
 		// blocks of 4
 		#10; clk = 1; #10; clk = 0; #10;
 		simulate_SNES_input(16'b1111000011110000);
-		$display("data_out: %b", data_out);
+		
+		// blocks of 4 (2)
+		#10; clk = 1; #10; clk = 0; #10;
+		simulate_SNES_input(16'b0000111100001111);
+		
+		// all 1s
+		#10; clk = 1; #10; clk = 0; #10;
+		simulate_SNES_input(16'b1111111111111111);
+		
+		// all 0s
+		#10; clk = 1; #10; clk = 0; #10;
+		simulate_SNES_input(16'b0000000000000000);
+		
+		if (!failed)
+		begin
+		$display("%s", "All tests passed.");
+		end
 		
 	$finish(2);
 	end

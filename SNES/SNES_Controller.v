@@ -19,6 +19,7 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out);
 	reg [1:0] state = 2'b00;
 	reg [3:0] counter = 4'b0000;
 
+	// 4 states
 	parameter waiting = 2'b00, latch_set = 2'b01, reading = 2'b10, done_reading = 2'b11;
 
 	// output registers
@@ -30,6 +31,8 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out);
 		case (state)
 			waiting:
 			begin
+			
+				// cpu lets module know it's ready for snes input
 				if (active)
 				begin
 					state <= latch_set;
@@ -41,7 +44,13 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out);
 			end
 			reading:
 			begin
-				counter <= counter + 1;
+			
+			   // count to 15 go to next state
+				counter <= counter + 1'b1;
+				
+				// shift in data_in
+				data_out = (data_out << 1'b1) | data_in;
+				
 				if (counter == 4'b1111)
 				begin
 					state <= done_reading;
@@ -49,6 +58,8 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out);
 			end
 			done_reading:
 			begin
+			
+				// reset counter
 				counter <= 4'b0000;
 				state <= waiting;
 			end
@@ -60,28 +71,36 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out);
 	end
 
 
-	always@(state, data_in)
+	always@(*)
 	begin
 		case (state)
 			waiting:
 			begin
+			
+				// reset everything
 				ready = 1'b0;
 				latch = 1'b0;
 			end
 			latch_set:
 			begin
 				ready = 1'b0;
+				
+				// tell SNES we're ready for values
 				latch = 1'b1;
 			end
 			reading:
 			begin
+			
+				// bring latch back down
 				latch =1'b0;
 				ready = 1'b0;
-				data_out = (data_out << 1) | data_in;
+
 			end
 			done_reading:
 			begin
 				latch = 1'b0;
+				
+				// data is ready to read
 				ready = 1'b1;
 			end
 			default:
@@ -90,6 +109,5 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out);
 				ready = 1'b0;
 			end
 		endcase
-	end
-
+		end
 endmodule
