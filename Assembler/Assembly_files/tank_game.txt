@@ -1,0 +1,35 @@
+.main
+      // load the start menu to vga
+      // get snes input
+      // if a button is pressed jump and link to game_setup
+      // else jump to line 3
+
+.game_setup
+      // set the initial tank location for player 1
+      // set the initial tank location for player 2
+      // set the initial tank orientation for player 1
+      // set the initial tank orientation for player 2
+      // jump and link to game_loop
+      // return
+
+.game_loop
+      // load snes input
+      // if its a move: jump and link to update_tank_location
+      // if its a shoot: jump and link to spawn_projectile
+      // jump and link to update_projectile locations
+      // check projectile collisions
+      // if hit on opposing player: update health of player
+      // check health of players and if either is zero: return
+      // else jump to line 16
+
+.update_tank_location
+      // check if current location plus the movement offset will collide with any walls
+      // if collision: return
+      // else update the current location to current location plus movement offset
+      // return
+
+.spawn_projectile
+      // check to see if all of the projectiles are in use if so: return
+      // change the valid bit to high in memory
+      // set the location to tanks location and direction to tank orientation
+      // return

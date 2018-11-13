@@ -7,7 +7,6 @@
 *.rpt
 *.bak
 *.json
-*.txt
 transcript
 hls/
 ip/
@@ -22,4 +21,3 @@ hex_7seg_test/
 incremental_db/
 output_files/
 simulation/
-
