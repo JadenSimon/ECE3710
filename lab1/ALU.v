@@ -129,7 +129,7 @@ module ALU( DST, SRC, Immediate, C, c_in, Opcode, Flags);
 			end
 		MOVI: C = Immediate; // Moves immediate directly to output
 		LUI: C = {Immediate[7:0], 8'b0}; // Load upper immediate
-		
+		BCND: C = DST + {{8{Immediate[7]}}, Immediate[7:0]}; 
 		default: C = DST;
 		endcase
 				
