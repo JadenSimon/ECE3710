@@ -21,6 +21,7 @@ parameter LOAD			= 4'b0000;
 parameter STOR			= 4'b0100;
 parameter JAL			= 4'b1000;
 parameter JCND			= 4'b1100;
+parameter LCI			= 4'b1111;
 
 // Shift group
 parameter LSH 			= 4'b0100;
