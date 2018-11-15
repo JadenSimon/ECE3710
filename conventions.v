@@ -18,11 +18,15 @@ game_state = 0000 1111 0000 0111
 health1 = 0000 1111 0000 0110
 health2 = 0000 1111 0000 0101
 
+// Stack region of memory
+top_of_stack = 0000 1111 0000 0100
+bottom_of_stack = 0000 1110 1111 0000
+
 // Register conventions
 REG0 - REG4 // temporary register
 REG5 - REG10 // saved register
 REG11 // Return register
-REG12 // Open for anything
+REG12 // Stack pointer
 REG13 // Jump target register
 REG14 // arg1
 REG15 // arg2

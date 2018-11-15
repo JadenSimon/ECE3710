@@ -80,9 +80,21 @@ def decode_instruction(line):
     elif instruction[0] == 'STOR':
         output_line = "0100" + reg_to_bin[instruction[1]] + "0100" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'JAL':
-        output_line = "0100" + reg_to_bin[instruction[1]] + "1000" + reg_to_bin[instruction[2]]
+        # if the Rdest starts with a '.' then we know we're jumping to a label
+        if instruction[2][0] == ".":
+            # load the label address to a register
+        else:
+            output_line = "0100" + reg_to_bin[instruction[1]] + "1000" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'JCND':
         output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + reg_to_bin[instruction[2]]
+    elif instruction[0] == 'PUSH':
+        # subtract one from the stack pointer and then store at stack pointer
+        output_line = "0100" + reg_to_bin[instruction[1]] + "0100" + reg_to_bin["REG12"] + "\n"
+        output_line += "1001" + reg_to_bin["REG12"] + "00000001"
+    elif instruction[0] == 'POP':
+        # load the value at stack pointer and then add one to the stack pointer
+        output_line = "0101" + reg_to_bin["REG12"] + "00000001\n"
+        output_line += "0100" + reg_to_bin[instruction[1]] + "0000" + reg_to_bin["REG12"]
     elif instruction[0] == 'LSH': # Shift Instructions
         output_line = "0100" + reg_to_bin[instruction[1]] + "1100" + numpy.binary_repr(int(instruction[2]), 4)
     elif instruction[0] == 'JCND':

@@ -21,7 +21,7 @@ parameter LOAD			= 4'b0000;
 parameter STOR			= 4'b0100;
 parameter JAL			= 4'b1000;
 parameter JCND			= 4'b1100;
-parameter LCI			= 4'b1111;
+parameter LCI			= 4'b1111; // opcodeHI Rdest opcodeLO whichPlayer (player1 = 0000, player2 = 0001)
 
 // Shift group
 parameter LSH 			= 4'b0100;
@@ -58,7 +58,7 @@ parameter REG13		= 4'b1101;
 parameter REG14		= 4'b1110;
 parameter REG15		= 4'b1111;
 
-// Condition codes		
+// Condition codes
 parameter NC			= 4'b0000;
 parameter EQ			= 4'b0001;
 parameter NE			= 4'b0010;

@@ -1,4 +1,5 @@
 .main
+      // initialize the addresses to the respective register values
       // load the start menu to vga
       // get snes input
       // if a button is pressed jump and link to game_setup
