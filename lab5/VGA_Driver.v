@@ -9,4 +9,18 @@ output reg slowPulse = 1'b0;
 output reg [9:0] xLocation = 10'b0; 
 output reg [9:0] yLocation = 10'b0;
 
+always@(posedge clock)
+begin
+	if(clear)
+	begin
+		xLocation = 10'b0;
+		yLocation = 10'b0;
+		slowPulse = 1'b0;
+	end
+	else
+	begin
+		xLocation = xLocation + 1'b1;
+		if(xLocation < )
+	end
+	
 endmodule
