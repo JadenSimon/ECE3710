@@ -42,6 +42,9 @@ cond_to_bin = { "NC": "0000",
                "GE": "1110",
                "NJ": "1111" }
 
+# dictionary mapping player to binary
+player_to_bin = {"player1" : "0000", "player2" : "0001"}
+
 # dictionary that maps the labels to the addresses in the assembly file
 label_addr = { }
 
@@ -80,62 +83,85 @@ def decode_instruction(line):
     elif instruction[0] == 'STOR':
         output_line = "0100" + reg_to_bin[instruction[1]] + "0100" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'JAL':
-        # if the Rdest starts with a '.' then we know we're jumping to a label
-        if instruction[2][0] == ".":
-            # load the label address to a register
-        else:
-            output_line = "0100" + reg_to_bin[instruction[1]] + "1000" + reg_to_bin[instruction[2]]
+        output_line = "0100" + reg_to_bin[instruction[1]] + "1000" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'JCND':
         output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + reg_to_bin[instruction[2]]
+    elif instruction[0] == 'JCI':
+        output_line = "0100" + reg_to_bin[instruction[1]] + "1111" + player_to_bin[instruction[2]]
     elif instruction[0] == 'PUSH':
         # subtract one from the stack pointer and then store at stack pointer
         output_line = "0100" + reg_to_bin[instruction[1]] + "0100" + reg_to_bin["REG12"] + "\n"
         output_line += "1001" + reg_to_bin["REG12"] + "00000001"
     elif instruction[0] == 'POP':
-        # load the value at stack pointer and then add one to the stack pointer
+        # add one to the stack pointer then load the value at stack pointer
         output_line = "0101" + reg_to_bin["REG12"] + "00000001\n"
         output_line += "0100" + reg_to_bin[instruction[1]] + "0000" + reg_to_bin["REG12"]
     elif instruction[0] == 'LSH': # Shift Instructions
-        output_line = "0100" + reg_to_bin[instruction[1]] + "1100" + numpy.binary_repr(int(instruction[2]), 4)
+        output_line = "0100" + reg_to_bin[instruction[1]] + "1100" + instruction[2]
     elif instruction[0] == 'JCND':
         output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'BCND': # Immediate Instructions
-        output_line = "1100" + cond_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+        output_line = "1100" + cond_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'ANDI':
-        output_line = "0001" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2], 16), 8)
+        output_line = "0001" + reg_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'ORI':
-        output_line = "0010" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2], 16), 8)
+        output_line = "0010" + reg_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'XORI':
-        output_line = "0011" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2], 16), 8)
+        output_line = "0011" + reg_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'ADDI':
-        output_line = "0101" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+        output_line = "0101" + reg_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'ADDUI':
-        output_line = "0110" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+        output_line = "0110" + reg_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'ADDCI':
-        output_line = "0111" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+        output_line = "0111" + reg_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'SUBI':
-        output_line = "1001" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+        output_line = "1001" + reg_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'CMPI':
-        output_line = "1011" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+        output_line = "1011" + reg_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'MOVI':
-        output_line = "1101" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
+        # if the Rdest starts with a '.' then we know we're jumping to a label
+        if instruction[2][0] == ".":
+            immediate_str = numpy.binary_repr(label_addr[instruction[2]], 16)
+            output_line = "1111" + reg_to_bin[instruction[1]] + immediate_str[:8] + "\n"
+            output_line += "0010" + reg_to_bin[instruction[1]] + immediate_str[8:]
+        else:
+            if len(instruction[2]) > 8:
+                immediate_str = instruction[2]
+                output_line = "1111" + reg_to_bin[instruction[1]] + immediate_str[:8] + "\n"
+                output_line += "0010" + reg_to_bin[instruction[1]] + immediate_str[8:]
+            else:
+                output_line = "1101" + reg_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'LUI':
-        output_line = "1111" + reg_to_bin[instruction[1]] + numpy.binary_repr(int(instruction[2]), 8)
-
+        output_line = "1111" + reg_to_bin[instruction[1]] + instruction[2]
     if output_line != "":
         output_file.write(output_line + " //" + line + "\n")
     else:
-        print("Instruction not implemented: " + line)
+        if line[0] != '.':
+            print("Instruction not implemented: " + line)
 
 def first_pass(input_file):
     # this will be the address of the line
     line_counter = 0
     for line in input_file:
         line = line.rstrip()
+        line = line.split(" ")
+        # we don't want to count the newlines
+        if line[0] == "":
+            line_counter += 0
         # the labels will start with a period e.g. .main
-        if line[0] == ".":
-            label_addr[line] = line_counter + 1
-    line_counter += 1
+        elif line[0][0] == ".":
+            label_addr[line[0]] = line_counter
+        elif line[0] == "PUSH" or line[0] == "POP":
+            line_counter += 2
+        elif line[0] == "MOVI":
+            if line[2][0] == ".":
+                line_counter += 2
+            elif len(line[2]) > 8:
+                line_counter += 2
+            else:
+                line_counter += 1
+        else:
+            line_counter += 1
 
 def main():
     # open the file thats given as the first argument

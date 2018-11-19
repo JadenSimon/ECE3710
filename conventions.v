@@ -22,6 +22,11 @@ health2 = 0000 1111 0000 0101
 top_of_stack = 0000 1111 0000 0100
 bottom_of_stack = 0000 1110 1111 0000
 
+// this will hold the coordinates of the walls in the map so we can do collision detection
+// since the coordinates don't need to be too big we will pack x coord and y coord in 16 bits
+end_of_wall_coordinates = 0000 1110 1110 1111
+start_of_wall_coordinates = 0000 1110 1101 1100
+
 // Register conventions
 REG0 - REG4 // temporary register
 REG5 - REG10 // saved register
