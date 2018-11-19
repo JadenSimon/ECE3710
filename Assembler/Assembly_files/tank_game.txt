@@ -1,12 +1,28 @@
 .main
       // initialize the addresses to the respective register values
       // initialize the wall coordinates in memory
-      // load the start menu to vga
-      // get snes input
-      // if a button is pressed jump and link to game_setup
-      // else jump to line 3
+
+.menu_loop // this checks if the 'A' button is pressed then jumps to .game_setup if so, loops back if not
+      MOVI REG0 0000111100000111
+      MOVI REG1 00000000
+      STOR REG1 REG0
+      MOVI REG3 0000000010000000
+      LCI REG0 player1
+      LCI REG1 player2
+      AND REG1 REG3
+      AND REG0 REG3
+      MOVI REG4 .game_setup
+      CMPI REG0 00000000
+      JCND EQ REG4
+      CMPI REG1 00000000
+      JCND EQ REG4
+      MOVI REG5 .menu_loop
+      JCND NC REG5
 
 .game_setup
+      MOVI REG0 0000111100000111
+      MOVI REG1 00000001
+      STOR REG1 REG0
       // set the initial tank location for player 1
       // set the initial tank location for player 2
       // set the initial tank orientation for player 1

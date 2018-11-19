@@ -4,8 +4,8 @@
 import sys
 import numpy
 
+# the file that will hold the machine code
 output_file = open("machine_code.txt", "w")
-
 # dictionary mapping reg to binary
 reg_to_bin = { "REG0": "0000",
                "REG1": "0001",
@@ -23,7 +23,6 @@ reg_to_bin = { "REG0": "0000",
                "REG13": "1101",
                "REG14": "1110",
                "REG15": "1111" }
-
 # dictionary mapping condition codes to binary
 cond_to_bin = { "NC": "0000",
                "EQ": "0001",
@@ -41,25 +40,20 @@ cond_to_bin = { "NC": "0000",
                "LT": "1101",
                "GE": "1110",
                "NJ": "1111" }
-
 # dictionary mapping player to binary
 player_to_bin = {"player1" : "0000", "player2" : "0001"}
-
 # dictionary that maps the labels to the addresses in the assembly file
 label_addr = { }
 
 def decode_instruction(line):
     # this just takes off the trailing newline character
     line = line.rstrip()
-
     # if its an empty line we can just skip it
     if line == "":
         return
-
     # split the line so we can deal with the instruction in tokens
     instruction = line.split(' ')
     output_line = ""
-
     if instruction[0] == 'AND': # Basic register instructions
         output_line = "0000" + reg_to_bin[instruction[1]] + "0001" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'OR':
@@ -170,18 +164,14 @@ def main():
         second_input_file = open(str(sys.argv[1]), "r")
     except:
         print("File does not exist.")
-
     # Do the first pass to store all of the addresses for labels
     first_pass(input_file)
-
     # just loop through each line and decode the assembly and write it to the output file
     for line in second_input_file:
         decode_instruction(line)
-
     second_input_file.close()
     input_file.close()
     output_file.close()
-
 
 if __name__ == '__main__':
     main()
