@@ -4,6 +4,8 @@ loc1y = 0000 1111 0000 1110 // Location for player one y coordinate
 loc2x = 0000 1111 0000 1101 // Location for player one x coordinate
 loc2y = 0000 1111 0000 1100 // Location for player one y coordinate
 
+// Orientation: 00 = UP, 01 = RIGHT, 10 = DOWN, 11 = LEFT 
+
 // Memory addresses for projectiles 15 is the valid bit, 13-14 is orientation/direction and 0-12 is position
 proj1x = 0000 1111 0000 1011 // Location for projectile one x coordinate
 proj1y = 0000 1111 0000 1010 // Location for projectile one y coordinate

@@ -15,7 +15,7 @@
       JCND EQ REG4
       CMPI REG1 00000000
       JCND EQ REG4
-      MOVI REG5 .menu_loop
+      MOVI REG4 .menu_loop
       JCND NC REG5
 
 .game_setup
@@ -23,11 +23,13 @@
       // set the initial tank location for player 2
       // set the initial tank orientation for player 1
       // set the initial tank orientation for player 2
+      // set the initial health for player 1
+      // set the initial health for player 2
       // set the game state to one to tell the vga to draw the map
       MOVI REG0 0000111100000111
       MOVI REG1 00000001
       STOR REG1 REG0
-      MOVI REG5 .game_loop
+      MOVI REG4 .game_loop
       JCND NC REG5
 
 .game_loop_player1
@@ -40,31 +42,38 @@
       // if its a move UP: jump to update_tank_location_up
       MOVI REG1 0000000000010000
       AND REG2 REG1
-      CMP REG2 REG1
       MOVI REG3 .update_tank_location_up
+      CMP REG2 REG1
       JCND EQ REG3
       // if its a move DOWN: jump to update_tank_location_down
       MOV REG2 REG0
       MOVI REG1 0000000000100000
       AND REG2 REG1
-      CMP REG2 REG1
       MOVI REG3 .update_tank_location_down
+      CMP REG2 REG1
       JCND EQ REG3
       // if its a move LEFT: jump to update_tank_location_left
       MOV REG2 REG0
       MOVI REG1 0000000001000000
       AND REG2 REG1
-      CMP REG2 REG1
       MOVI REG3 .update_tank_location_left
+      CMP REG2 REG1
       JCND EQ REG3
       // if its a move RIGHT: jump to update_tank_location_right
       MOV REG2 REG0
-      MOVI REG1 0000000001000000
+      MOVI REG1 0000000010000000
       AND REG2 REG1
-      CMP REG2 REG1
       MOVI REG3 .update_tank_location_right
+      CMP REG2 REG1
       JCND EQ REG3
+.check_shoot
       // if its a shoot: jump to spawn_projectile
+      MOV REG2 REG0
+      MOVI REG1 0000000100000000
+      AND REG2 REG1
+      MOVI REG3 .spawn_projectile_player1
+      CMP REG2 REG1
+      JCND EQ REG3
 .update_variables
       // jump to update_projectile locations
       // check projectile collisions
@@ -89,7 +98,7 @@
       // if collision jump to
       // else update the current location to current location plus movement offset
 
-.spawn_projectile
+.spawn_projectile_player1
       // check to see if all of the projectiles are in use if so: return
       // change the valid bit to high in memory
       // set the location to tanks location and direction to tank orientation
