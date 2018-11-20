@@ -1,7 +1,6 @@
-.main // initialize the addresses to the respective register values. Initialize the wall coordinates in memory
 
-
-.menu_loop // this checks if the 'A' button is pressed then jumps to .game_setup if so, loops back if not
+.menu_loop
+      // this checks if the 'A' button is pressed then jumps to .game_setup if so, loops back if not
       MOVI REG0 0000111100000111
       MOVI REG1 00000000
       STOR REG1 REG0
@@ -16,21 +15,39 @@
       CMPI REG1 00000000
       JCND EQ REG4
       MOVI REG4 .menu_loop
-      JCND NC REG5
+      JCND NC REG4
 
 .game_setup
       // set the initial tank location for player 1
+      MOVI REG0 0000111100001111
+      MOVI REG1 0000111100001110
+      MOVI REG2 0000000001000000
+      MOVI REG3 0000000001000000
+      STOR REG2 REG0
+      STOR REG3 REG1
       // set the initial tank location for player 2
-      // set the initial tank orientation for player 1
-      // set the initial tank orientation for player 2
-      // set the initial health for player 1
-      // set the initial health for player 2
+      MOVI REG0 0000111100001101
+      MOVI REG1 0000111100001100
+      MOVI REG2 0000001000111111
+      MOVI REG3 0000000110011111
+      STOR REG2 REG0
+      STOR REG3 REG1
+      // set the initial tank health for player 1
+      MOVI REG0 0000111001110100
+      MOVI REG1 00000011
+      STOR REG1 REG0
+      // set the initial tank health for player 2
+      MOVI REG0 0000111001110011
+      MOVI REG1 00000011
+      STOR REG1 REG0
+      // set the initial orientation for player 1
+      // set the initial orientation for player 2
       // set the game state to one to tell the vga to draw the map
       MOVI REG0 0000111100000111
       MOVI REG1 00000001
       STOR REG1 REG0
       MOVI REG4 .game_loop
-      JCND NC REG5
+      JCND NC REG4
 
 .game_loop_player1
       // move the address of the player1 loc to saved register to inform the update_loc* subroutines
@@ -85,18 +102,26 @@
       // check if current location plus the movement right offset will collide with any walls
       // if collision jump to
       // else update the current location to current location plus movement offset
+      MOVI REG4 .check_shoot
+      JCND NC REG4
 .update_tank_location_left
       // check if current location plus the movement left offset will collide with any walls
       // if collision jump to
       // else update the current location to current location plus movement offset
+      MOVI REG4 .check_shoot
+      JCND NC REG4
 .update_tank_location_up
       // check if current location plus the movement up offset will collide with any walls
       // if collision jump to
       // else update the current location to current location plus movement offset
+      MOVI REG4 .check_shoot
+      JCND NC REG4
 .update_tank_location_down
       // check if current location plus the movement down offset will collide with any walls
       // if collision jump to
       // else update the current location to current location plus movement offset
+      MOVI REG4 .check_shoot
+      JCND NC REG4
 
 .spawn_projectile_player1
       // check to see if all of the projectiles are in use if so: return
