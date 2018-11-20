@@ -1,6 +1,5 @@
-.main
-      // initialize the addresses to the respective register values
-      // initialize the wall coordinates in memory
+.main // initialize the addresses to the respective register values. Initialize the wall coordinates in memory
+
 
 .menu_loop // this checks if the 'A' button is pressed then jumps to .game_setup if so, loops back if not
       MOVI REG0 0000111100000111
@@ -20,31 +19,75 @@
       JCND NC REG5
 
 .game_setup
-      MOVI REG0 0000111100000111
-      MOVI REG1 00000001
-      STOR REG1 REG0
       // set the initial tank location for player 1
       // set the initial tank location for player 2
       // set the initial tank orientation for player 1
       // set the initial tank orientation for player 2
-      // jump and link to game_loop
-      // return
+      // set the game state to one to tell the vga to draw the map
+      MOVI REG0 0000111100000111
+      MOVI REG1 00000001
+      STOR REG1 REG0
+      MOVI REG5 .game_loop
+      JCND NC REG5
 
-.game_loop
+.game_loop_player1
+      // move the address of the player1 loc to saved register to inform the update_loc* subroutines
+      MOVI REG9 0000111100001111
+      MOVI REG10 0000111100001110
       // load snes input
-      // if its a move: jump and link to update_tank_location
-      // if its a shoot: jump and link to spawn_projectile
-      // jump and link to update_projectile locations
+      LCI REG0 player1
+      MOV REG2 REG0
+      // if its a move UP: jump to update_tank_location_up
+      MOVI REG1 0000000000010000
+      AND REG2 REG1
+      CMP REG2 REG1
+      MOVI REG3 .update_tank_location_up
+      JCND EQ REG3
+      // if its a move DOWN: jump to update_tank_location_down
+      MOV REG2 REG0
+      MOVI REG1 0000000000100000
+      AND REG2 REG1
+      CMP REG2 REG1
+      MOVI REG3 .update_tank_location_down
+      JCND EQ REG3
+      // if its a move LEFT: jump to update_tank_location_left
+      MOV REG2 REG0
+      MOVI REG1 0000000001000000
+      AND REG2 REG1
+      CMP REG2 REG1
+      MOVI REG3 .update_tank_location_left
+      JCND EQ REG3
+      // if its a move RIGHT: jump to update_tank_location_right
+      MOV REG2 REG0
+      MOVI REG1 0000000001000000
+      AND REG2 REG1
+      CMP REG2 REG1
+      MOVI REG3 .update_tank_location_right
+      JCND EQ REG3
+      // if its a shoot: jump to spawn_projectile
+.update_variables
+      // jump to update_projectile locations
       // check projectile collisions
       // if hit on opposing player: update health of player
       // check health of players and if either is zero: return
       // else jump to line 16
 
-.update_tank_location
-      // check if current location plus the movement offset will collide with any walls
-      // if collision: return
+.update_tank_location_right
+      // check if current location plus the movement right offset will collide with any walls
+      // if collision jump to
       // else update the current location to current location plus movement offset
-      // return
+.update_tank_location_left
+      // check if current location plus the movement left offset will collide with any walls
+      // if collision jump to
+      // else update the current location to current location plus movement offset
+.update_tank_location_up
+      // check if current location plus the movement up offset will collide with any walls
+      // if collision jump to
+      // else update the current location to current location plus movement offset
+.update_tank_location_down
+      // check if current location plus the movement down offset will collide with any walls
+      // if collision jump to
+      // else update the current location to current location plus movement offset
 
 .spawn_projectile
       // check to see if all of the projectiles are in use if so: return
