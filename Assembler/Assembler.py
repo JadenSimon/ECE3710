@@ -130,7 +130,7 @@ def decode_instruction(line):
     if output_line != "":
         output_file.write(output_line + " //" + line + "\n")
     else:
-        if line[0] != '.':
+        if line[0] != '.' or line[0] != '/':
             print("Instruction not implemented: " + line)
 
 def first_pass(input_file):
@@ -141,6 +141,8 @@ def first_pass(input_file):
         line = line.split(" ")
         # we don't want to count the newlines
         if line[0] == "":
+            line_counter += 0
+        elif line[0][0] == "/":
             line_counter += 0
         # the labels will start with a period e.g. .main
         elif line[0][0] == ".":

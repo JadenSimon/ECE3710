@@ -20,8 +20,9 @@ projectile 1 y-coordinate = 0000 1111 0000 1010
 projectile 2 x-coordinate = 0000 1111 0000 1001
 projectile 2 y-coordinate = 0000 1111 0000 1000
 
-// Game state address, will tell the vga fsm whether to draw the start screen or the game screen
-// if the value at this address is 0 then draw the start menu if its anything else draw the game screen
+// Game state address, will tell the vga fsm whether to draw the start screen, game screen, or game over screen
+// if the value at this address is 00 then draw the start menu if its 01 then draw the game screen, if its 10
+// then draw game over player 1 wins, if its 11 the draw game over player 2 wins.
 game state = 0000 1111 0000 0111
 
 // Stack region of memory
