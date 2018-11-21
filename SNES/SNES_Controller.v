@@ -74,9 +74,6 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out, slow_clk);
 			   // count to 15 go to next state
 				counter <= counter + 1'b1;
 				
-				// shift in data_in
-//				data_out <= (data_out << 1'b1) | data_in;
-				
 				if (counter == 4'b1111)
 				begin
 					state <= done_reading;
