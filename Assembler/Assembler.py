@@ -48,6 +48,7 @@ label_addr = { }
 def decode_instruction(line):
     # this just takes off the trailing newline character
     line = line.rstrip()
+    line = line.lstrip()
     # if its an empty line we can just skip it
     if line == "":
         return
@@ -138,6 +139,7 @@ def first_pass(input_file):
     line_counter = 0
     for line in input_file:
         line = line.rstrip()
+        line = line.lstrip()
         line = line.split(" ")
         # we don't want to count the newlines
         if line[0] == "":

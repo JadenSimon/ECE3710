@@ -15,6 +15,7 @@
       JCND EQ REG4
       MOVI REG4 .menu_loop
       JCND NC REG4
+
 .game_setup
       // set the initial tank location for player 1
       MOVI REG0 0000111100001111
@@ -52,10 +53,13 @@
       STOR REG1 REG0
       MOVI REG4 .game_loop_player1
       JCND NC REG4
+
 .game_loop_player1
       // move the address of the player1 loc to saved register to inform the update_loc* subroutines
       MOVI REG6 0000111100001111
+      LOAD REG6 REG6
       MOVI REG7 0000111100001110
+      LOAD REG7 REG7
       // load snes input
       LCI REG0 player1
       MOV REG2 REG0
@@ -94,10 +98,15 @@
       MOVI REG3 .spawn_projectile_player1
       CMP REG2 REG1
       JCND EQ REG3
+      MOVI REG3 .update_projectiles_player1
+      JCND NC REG3
+
 .game_loop_player2
       // move the address of the player2 loc to saved register
       MOVI REG8 0000111100001101
+      LOAD REG8 REG8
       MOVI REG9 0000111100001100
+      LOAD REG9 REG9
       // load snes input
       LCI REG0 player2
       MOV REG2 REG0
@@ -136,9 +145,103 @@
       MOVI REG3 .spawn_projectile_player2
       CMP REG2 REG1
       JCND EQ REG3
+      MOVI REG3 .update_projectiles_player2
+      JCND NC REG3
+
 .update_projectiles_player1
+      // load projectile x coord, y coord, and orientation
+      MOVI REG6 0000111100001011
+      LOAD REG0 REG6
+      MOVI REG7 0000111100001010
+      LOAD REG1 REG7
+      MOVI REG8 0000111001110000
+      LOAD REG2 REG8
+      // if they are not active then just jump to next game loop
+      CMPI REG0 00000000
+      JCND EQ .game_loop_player2
+      // calculate the offset
+      MOVI REG3 .move_proj1_up
+      CMPI REG2 00000000
+      JCND EQ REG3
+      MOVI REG3 .move_proj1_down
+      CMPI REG2 00000010
+      JCND EQ REG3
+      MOVI REG3 .move_proj1_left
+      CMPI REG2 00000011
+      JCND EQ REG3
+      MOVI REG3 .move_proj1_right
+      CMPI REG2 00000001
+      JCND EQ REG3
+.move_proj1_up
+      SUBI REG1 00000001
+      MOVI REG3 .check_proj1_collision
+      JCND NC REG3
+.move_proj1_down
+      ADDI REG1 00000001
+      MOVI REG3 .check_proj1_collision
+      JCND NC REG3
+.move_proj1_left
+      SUBI REG0 00000001
+      MOVI REG3 .check_proj1_collision
+      JCND NC REG3
+.move_proj1_right
+      ADDI REG0 00000001
+      MOVI REG3 .check_proj1_collision
+      JCND NC REG3
+.check_proj1_collision
+      // check the collision of the projectiles. If there is a no collision, store
+      // the new position in memory. If there is a collision with a wall,
+      // then don't store the updated position in memory, just mark it invalid. If there
+      // is a collision with a tank then don't store the updated position in memory,
+      // just mark it invalid then jump to update health of tank.
 
 .update_projectiles_player2
+      // load projectile x coord, y coord, and orientation
+      MOVI REG6 0000111100001001
+      LOAD REG0 REG6
+      MOVI REG7 0000111100001000
+      LOAD REG1 REG7
+      MOVI REG8 0000111001101111
+      LOAD REG2 REG8
+      // if they are not active then just jump to next game loop
+      CMPI REG0 00000000
+      JCND EQ .game_loop_player1
+      // calculate the offset
+      MOVI REG3 .move_proj2_up
+      CMPI REG2 00000000
+      JCND EQ REG3
+      MOVI REG3 .move_proj2_down
+      CMPI REG2 00000010
+      JCND EQ REG3
+      MOVI REG3 .move_proj2_left
+      CMPI REG2 00000011
+      JCND EQ REG3
+      MOVI REG3 .move_proj2_right
+      CMPI REG2 00000001
+      JCND EQ REG3
+.move_proj2_up
+      SUBI REG1 00000001
+      MOVI REG3 .check_proj2_collision
+      JCND NC REG3
+.move_proj2_down
+      ADDI REG1 00000001
+      MOVI REG3 .check_proj2_collision
+      JCND NC REG3
+.move_proj2_left
+      SUBI REG0 00000001
+      MOVI REG3 .check_proj2_collision
+      JCND NC REG3
+.move_proj2_right
+      ADDI REG0 00000001
+      MOVI REG3 .check_proj2_collision
+      JCND NC REG3
+.check_proj2_collision
+      // check the collision of the projectiles. If there is a no collision, store
+      // the new position in memory. If there is a collision with a wall,
+      // then don't store the updated position in memory, just mark it invalid. If there
+      // is a collision with a tank then don't store the updated position in memory,
+      // just mark it invalid then jump to update health of tank.
+
 
 .update_tank_location_right_player1
 
@@ -157,5 +260,105 @@
 .update_tank_location_down_player2
 
 .spawn_projectile_player1
+      MOVI REG0 0000111100001011
+      MOVI REG1 0000111100001010
+      MOVI REG5 0000111001110010
+      MOVI REG2 0000111100001111
+      MOVI REG3 0000111100001110
+      MOVI REG6 0000111001110000
+      LOAD REG0 REG0
+      LOAD REG1 REG1
+      LOAD REG5 REG5
+      // calculate the offset
+      MOVI REG7 .spawn_proj1_up
+      CMPI REG5 00000000
+      JCND EQ REG7
+      MOVI REG7 .spawn_proj1_down
+      CMPI REG5 00000010
+      JCND EQ REG7
+      MOVI REG7 .spawn_proj1_left
+      CMPI REG5 00000011
+      JCND EQ REG7
+      MOVI REG7 .spawn_proj1_right
+      CMPI REG5 00000001
+      JCND EQ REG7
+.spawn_proj1_up
+      SUBI REG1 00010000
+      STOR REG0 REG2
+      STOR REG1 REG3
+      STOR REG5 REG6
+      MOVI REG4 .update_projectiles_player1
+      JCND NC REG3
+.spawn_proj1_down
+      ADDI REG1 00010000
+      STOR REG0 REG2
+      STOR REG1 REG3
+      STOR REG5 REG6
+      MOVI REG4 .update_projectiles_player1
+      JCND NC REG3
+.spawn_proj1_left
+      SUBI REG0 00010000
+      STOR REG0 REG2
+      STOR REG1 REG3
+      STOR REG5 REG6
+      MOVI REG4 .update_projectiles_player1
+      JCND NC REG3
+.spawn_proj1_right
+      ADDI REG0 00010000
+      STOR REG0 REG2
+      STOR REG1 REG3
+      STOR REG5 REG6
+      MOVI REG4 .update_projectiles_player1
+      JCND NC REG3
 
 .spawn_projectile_player2
+      MOVI REG0 0000111100001001
+      MOVI REG1 0000111100001000
+      MOVI REG5 0000111001110001
+      MOVI REG2 0000111100001101
+      MOVI REG3 0000111100001100
+      MOVI REG6 0000111001101111
+      LOAD REG0 REG0
+      LOAD REG1 REG1
+      LOAD REG5 REG5
+      // calculate the offset
+      MOVI REG7 .spawn_proj2_up
+      CMPI REG5 00000000
+      JCND EQ REG7
+      MOVI REG7 .spawn_proj2_down
+      CMPI REG5 00000010
+      JCND EQ REG7
+      MOVI REG7 .spawn_proj2_left
+      CMPI REG5 00000011
+      JCND EQ REG7
+      MOVI REG7 .spawn_proj2_right
+      CMPI REG5 00000001
+      JCND EQ REG7
+.spawn_proj2_up
+      SUBI REG1 00010000
+      STOR REG0 REG2
+      STOR REG1 REG3
+      STOR REG5 REG6
+      MOVI REG4 .update_projectiles_player2
+      JCND NC REG3
+.spawn_proj2_down
+      ADDI REG1 00010000
+      STOR REG0 REG2
+      STOR REG1 REG3
+      STOR REG5 REG6
+      MOVI REG4 .update_projectiles_player2
+      JCND NC REG3
+.spawn_proj2_left
+      SUBI REG0 00010000
+      STOR REG0 REG2
+      STOR REG1 REG3
+      STOR REG5 REG6
+      MOVI REG4 .update_projectiles_player2
+      JCND NC REG3
+.spawn_proj2_right
+      ADDI REG0 00010000
+      STOR REG0 REG2
+      STOR REG1 REG3
+      STOR REG5 REG6
+      MOVI REG4 .update_projectiles_player2
+      JCND NC REG3
