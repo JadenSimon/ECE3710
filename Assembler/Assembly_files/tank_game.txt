@@ -55,11 +55,6 @@
       JCND NC REG4
 
 .game_loop_player1
-      // move the address of the player1 loc to saved register to inform the update_loc* subroutines
-      MOVI REG6 0000111100001111
-      LOAD REG6 REG6
-      MOVI REG7 0000111100001110
-      LOAD REG7 REG7
       // load snes input
       LCI REG0 player1
       MOV REG2 REG0
@@ -102,11 +97,6 @@
       JCND NC REG3
 
 .game_loop_player2
-      // move the address of the player2 loc to saved register
-      MOVI REG8 0000111100001101
-      LOAD REG8 REG8
-      MOVI REG9 0000111100001100
-      LOAD REG9 REG9
       // load snes input
       LCI REG0 player2
       MOV REG2 REG0
@@ -242,22 +232,101 @@
       // is a collision with a tank then don't store the updated position in memory,
       // just mark it invalid then jump to update health of tank.
 
-
 .update_tank_location_right_player1
+      // move the address of the player1 loc to saved register
+      MOVI REG6 0000111100001111
+      LOAD REG8 REG6
+      MOVI REG7 0000111100001110
+      LOAD REG9 REG7
+      ADDI REG8 00000001
+      // TODO: Check for collision with new coordinates
+      STOR REG8 REG6
+      MOVI REG4 .check_shoot_player1
+      JCND NC REG4
 
 .update_tank_location_left_player1
+      // move the address of the player1 loc to saved register
+      MOVI REG6 0000111100001111
+      LOAD REG8 REG6
+      MOVI REG7 0000111100001110
+      LOAD REG9 REG7
+      SUBI REG8 00000001
+      // TODO: Check for collision with new coordinates
+      STOR REG8 REG6
+      MOVI REG4 .check_shoot_player1
+      JCND NC REG4
 
 .update_tank_location_up_player1
+      // move the address of the player1 loc to saved register
+      MOVI REG6 0000111100001111
+      LOAD REG8 REG6
+      MOVI REG7 0000111100001110
+      LOAD REG9 REG7
+      ADDI REG9 00000001
+      // TODO: Check for collision with new coordinates
+      STOR REG9 REG7
+      MOVI REG4 .check_shoot_player1
+      JCND NC REG4
 
 .update_tank_location_down_player1
+      // move the address of the player1 loc to saved register
+      MOVI REG6 0000111100001111
+      LOAD REG8 REG6
+      MOVI REG7 0000111100001110
+      LOAD REG9 REG7
+      SUBI REG9 00000001
+      // TODO: Check for collision with new coordinates
+      STOR REG9 REG7
+      MOVI REG4 .check_shoot_player1
+      JCND NC REG4
 
 .update_tank_location_right_player2
+      // move the address of the player2 loc to saved register
+      MOVI REG6 0000111100001101
+      LOAD REG8 REG6
+      MOVI REG7 0000111100001100
+      LOAD REG9 REG7
+      ADDI REG8 00000001
+      // TODO: Check for collision with new coordinates
+      STOR REG8 REG6
+      MOVI REG4 .check_shoot_player2
+      JCND NC REG4
 
 .update_tank_location_left_player2
+      // move the address of the player2 loc to saved register
+      MOVI REG6 0000111100001101
+      LOAD REG8 REG6
+      MOVI REG7 0000111100001100
+      LOAD REG9 REG7
+      SUBI REG8 00000001
+      // TODO: Check for collision with new coordinates
+      STOR REG8 REG6
+      MOVI REG4 .check_shoot_player2
+      JCND NC REG4
 
 .update_tank_location_up_player2
+      // move the address of the player2 loc to saved register
+      MOVI REG6 0000111100001101
+      LOAD REG8 REG6
+      MOVI REG7 0000111100001100
+      LOAD REG9 REG7
+      ADDI REG9 00000001
+      // TODO: Check for collision with new coordinates
+      STOR REG9 REG7
+      MOVI REG4 .check_shoot_player2
+      JCND NC REG4
 
 .update_tank_location_down_player2
+      // move the address of the player2 loc to saved register
+      MOVI REG6 0000111100001101
+      LOAD REG8 REG6
+      MOVI REG7 0000111100001100
+      LOAD REG9 REG7
+      SUBI REG9 00000001
+      // TODO: Check for collision with new coordinates
+      STOR REG9 REG7
+      MOVI REG4 .check_shoot_player2
+      JCND NC REG4
 
 .spawn_projectile_player1
       MOVI REG0 0000111100001011
