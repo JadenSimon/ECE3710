@@ -13,14 +13,10 @@ always@(posedge clock)
 begin
 	if(clear)
 	begin
-		xLocation = 10'b0;
-		yLocation = 10'b0;
-		slowPulse = 1'b0;
+		xLocation <= 10'b0;
+		yLocation <= 10'b0;
+		slowPulse <= 1'b0;
 	end
-	else
-	begin
-		xLocation = xLocation + 1'b1;
-		if(xLocation < )
-	end
+end
 	
-endmodule
+endmodule 
