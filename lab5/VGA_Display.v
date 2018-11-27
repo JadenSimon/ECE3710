@@ -34,18 +34,18 @@ begin
 		if (h_count == LINE) // end of line
 		begin
 			h_count <= 0;
-			hSync <= (h_count >= HS_STA && h_count <= HS_END);
+			hSync <= ~(h_count >= HS_STA && h_count <= HS_END);
 		end
 		else	// keeps on down the line
 		begin
 			h_count <= h_count + 1;
-			hSync <= (h_count >= HS_STA && h_count <= HS_END);
+			hSync <= ~(h_count >= HS_STA && h_count <= HS_END);
 		end
 	end
 	else
 	begin
 		h_count <= h_count;
-		hSync <= (h_count >= HS_STA && h_count <= HS_END);
+		hSync <= ~(h_count >= HS_STA && h_count <= HS_END);
 	end
 end
 
@@ -63,31 +63,31 @@ begin
 			if(v_count == SCREEN) //At bottom of screen
 			begin
 				v_count <= 10'b0;
-				vSync <= (v_count >= VS_STA && v_count <= VS_END);
+				vSync <= ~(v_count >= VS_STA && v_count <= VS_END);
 			end
 			else if(h_count == LINE) //New line
 			begin
 				v_count <= v_count + 1;
-				vSync <= (v_count >= VS_STA && v_count <= VS_END);
+				vSync <= ~(v_count >= VS_STA && v_count <= VS_END);
 			end
 			else //No new line
 			begin
 				v_count <= v_count;
-				vSync <= v_count >= VS_STA && v_count <= VS_END;
+				vSync <= ~(v_count >= VS_STA && v_count <= VS_END);
 			end
 
 		end
 		else
 		begin
 			v_count <= v_count;
-			vSync <= (v_count >= VS_STA && v_count <= VS_END);
+			vSync <= ~(v_count >= VS_STA && v_count <= VS_END);
 		end
 end
 
 //Sets bright signal when h_count is in the range and v_count is in range
 always@(posedge clock)
 begin
-	bright <= (h_count >= HA_STA && v_count >= VA_STA);
+	bright <= (h_count >= HA_STA && v_count <= VA_END);
 end
 
 always@(posedge clock)
