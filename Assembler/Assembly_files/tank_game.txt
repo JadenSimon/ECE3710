@@ -238,9 +238,12 @@
       LOAD REG8 REG6
       MOVI REG7 0000111100001110
       LOAD REG9 REG7
+      MOVI REG10 0000111001110010
+      MOVI REG11 00000001
       ADDI REG8 00000001
       // TODO: Check for collision with new coordinates
       STOR REG8 REG6
+      STOR REG11 REG10
       MOVI REG4 .check_shoot_player1
       JCND NC REG4
 
@@ -250,9 +253,12 @@
       LOAD REG8 REG6
       MOVI REG7 0000111100001110
       LOAD REG9 REG7
+      MOVI REG10 0000111001110010
+      MOVI REG11 00000011
       SUBI REG8 00000001
       // TODO: Check for collision with new coordinates
       STOR REG8 REG6
+      STOR REG11 REG10
       MOVI REG4 .check_shoot_player1
       JCND NC REG4
 
@@ -262,9 +268,12 @@
       LOAD REG8 REG6
       MOVI REG7 0000111100001110
       LOAD REG9 REG7
+      MOVI REG10 0000111001110010
+      MOVI REG11 00000000
       ADDI REG9 00000001
       // TODO: Check for collision with new coordinates
       STOR REG9 REG7
+      STOR REG11 REG10
       MOVI REG4 .check_shoot_player1
       JCND NC REG4
 
@@ -274,9 +283,12 @@
       LOAD REG8 REG6
       MOVI REG7 0000111100001110
       LOAD REG9 REG7
+      MOVI REG10 0000111001110010
+      MOVI REG11 00000010
       SUBI REG9 00000001
       // TODO: Check for collision with new coordinates
       STOR REG9 REG7
+      STOR REG11 REG10
       MOVI REG4 .check_shoot_player1
       JCND NC REG4
 
@@ -286,9 +298,12 @@
       LOAD REG8 REG6
       MOVI REG7 0000111100001100
       LOAD REG9 REG7
+      MOVI REG10 0000111001110001
+      MOVI REG11 00000001
       ADDI REG8 00000001
       // TODO: Check for collision with new coordinates
       STOR REG8 REG6
+      STOR REG11 REG10
       MOVI REG4 .check_shoot_player2
       JCND NC REG4
 
@@ -298,9 +313,12 @@
       LOAD REG8 REG6
       MOVI REG7 0000111100001100
       LOAD REG9 REG7
+      MOVI REG10 0000111001110001
+      MOVI REG11 00000011
       SUBI REG8 00000001
       // TODO: Check for collision with new coordinates
       STOR REG8 REG6
+      STOR REG11 REG10
       MOVI REG4 .check_shoot_player2
       JCND NC REG4
 
@@ -310,9 +328,12 @@
       LOAD REG8 REG6
       MOVI REG7 0000111100001100
       LOAD REG9 REG7
+      MOVI REG10 0000111001110001
+      MOVI REG11 00000000
       ADDI REG9 00000001
       // TODO: Check for collision with new coordinates
       STOR REG9 REG7
+      STOR REG11 REG10
       MOVI REG4 .check_shoot_player2
       JCND NC REG4
 
@@ -322,9 +343,12 @@
       LOAD REG8 REG6
       MOVI REG7 0000111100001100
       LOAD REG9 REG7
+      MOVI REG10 0000111001110001
+      MOVI REG11 00000010
       SUBI REG9 00000001
       // TODO: Check for collision with new coordinates
       STOR REG9 REG7
+      STOR REG11 REG10
       MOVI REG4 .check_shoot_player2
       JCND NC REG4
 
