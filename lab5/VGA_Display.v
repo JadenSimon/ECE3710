@@ -1,107 +1,90 @@
-module VGA_Display(clock, clear, hSync, vSync, bright, hCount, vCount);
+module VGA_Display(clock, clear, hSync, vSync, hCount, vCount, bright);
 
 input clock;
 input clear;
 
-reg enable = 1'b0;
-reg slowclock = 1'b0;
+reg [1:0] hState = 2'b0;
+reg [1:0] vState = 2'b0;
 
-output reg hSync = 1'b0;
-output reg vSync = 1'b0;
-output reg bright = 1'b0;
+// Assigns the sync wires, they're low in the sync state
+output wire hSync, vSync;
+assign hSync = hState != 2'b00;
+assign vSync = vState != 2'b00;
+
+// Assign the bright wire, it is active when both states are in the active state (10)
+output wire bright;
+assign bright = (hState == 2'b10) && (vState == 2'b10);
+
 output reg [9:0] hCount = 10'b0;
 output reg [9:0] vCount = 10'b0;
 
-localparam HS_STA = 16;              // horizontal sync start
-localparam HS_END = 16 + 96;         // horizontal sync end
-localparam HA_STA = 16 + 96 + 48;    // horizontal active pixel start
-localparam VS_STA = 480 + 11;        // vertical sync start
-localparam VS_END = 480 + 11 + 2;    // vertical sync end
-localparam VA_END = 480;             // vertical active pixel end
-localparam LINE   = 800;             // complete line (pixels)
-localparam SCREEN = 524;             // complete screen (lines)
+localparam HSYNC = 95;					 // Horizontal sync time
+localparam HBACK = 47;					 // Horizontal backporch
+localparam HFRONT = 15;					 // Horizontal frontporch
+localparam VSYNC = 1;					 // Vertical sync time
+localparam VBACK = 32; 					 // Vertical backporch
+localparam VFRONT = 9;					 // Vertical frontporch
+localparam LINE   = 640;             // complete line (pixels)
+localparam SCREEN = 480;             // complete screen (lines)
 
-//HANDLES h_count
+// True when a new line is starting to draw
+wire horizontalStart;
+assign horizontalStart = (hState == 2'b01) && (hCount == (HSYNC + HBACK));
+
+
+//Handles hCount
 always@(posedge clock)
 begin
-	if(clear)
+	if (clear)
 	begin
 		hCount <= 10'b0;
-		hSync  <= 1'b0;
+		hState <= 2'b00;
 	end
-	else if(enable)
+	else
 	begin 
-		if (h_count == LINE) // end of line
-		begin
-			h_count <= 0;
-			hSync <= ~(h_count >= HS_STA && h_count <= HS_END);
-		end
-		else	// keeps on down the line
-		begin
-			h_count <= h_count + 1;
-			hSync <= ~(h_count >= HS_STA && h_count <= HS_END);
-		end
+		hCount <= hCount + 1'b1;
+	
+		case (hState)
+			2'b00 : hState <= hCount == HSYNC ? 2'b01 : 2'b00; 									// Horizontal sync pulse state
+			2'b01 : hState <= hCount == (HSYNC + HBACK) ? 2'b10 : 2'b01;   					// Horizontal back porch state
+			2'b10 : hState <= hCount == (HSYNC + HBACK + LINE) ? 2'b11 : 2'b10;  			// Horizontal active state
+			2'b11 : hState <= hCount == (HSYNC + HBACK + LINE + HFRONT) ? 2'b00 : 2'b11;  // Horizontal front porch state
+		endcase
+			
+		if (hCount == HSYNC + HBACK + LINE + HFRONT)
+			hCount <= 10'b0;
+	end
+end
+
+//Handles vCount
+// Note that vcount is incremented using blocking assignments due to the fact that
+// vertical increments only occur when the horizontal line ends, thus we need to immediately increment vcount
+always@(posedge clock)
+begin
+	if (clear)
+	begin
+		vCount <= 10'b0;
+		vState <= 2'b00;
+	end
+	else if (horizontalStart)
+	begin 
+		vCount = vCount + 1'b1;
+	
+		case (vState)
+			2'b00 : vState <= vCount == VSYNC ? 2'b01 : 2'b00; 									  // Vertical sync pulse state
+			2'b01 : vState <= vCount == (VSYNC + VBACK) ? 2'b10 : 2'b01;   					  // Vertical back porch state
+			2'b10 : vState <= vCount == (VSYNC + VBACK + SCREEN) ? 2'b11 : 2'b10;  		  	  // Vertical active state
+			2'b11 : vState <= vCount == (VSYNC + VBACK + SCREEN + VFRONT) ? 2'b00 : 2'b11;  // Vertical front porch state
+		endcase
+			
+		if (vCount == VSYNC + VBACK + SCREEN + VFRONT)
+			vCount = 10'b0;
 	end
 	else
 	begin
-		h_count <= h_count;
-		hSync <= ~(h_count >= HS_STA && h_count <= HS_END);
+		vCount <= vCount;
+		vState <= vState;
 	end
 end
 
-//Handles v_count
-always@(posedge clock)
-begin
-	if(clear)
-	begin
-		v_count <= 0;
-		vSync <= 0;
-	end
-	else
-		if(enable)
-		begin
-			if(v_count == SCREEN) //At bottom of screen
-			begin
-				v_count <= 10'b0;
-				vSync <= ~(v_count >= VS_STA && v_count <= VS_END);
-			end
-			else if(h_count == LINE) //New line
-			begin
-				v_count <= v_count + 1;
-				vSync <= ~(v_count >= VS_STA && v_count <= VS_END);
-			end
-			else //No new line
-			begin
-				v_count <= v_count;
-				vSync <= ~(v_count >= VS_STA && v_count <= VS_END);
-			end
-
-		end
-		else
-		begin
-			v_count <= v_count;
-			vSync <= ~(v_count >= VS_STA && v_count <= VS_END);
-		end
-end
-
-//Sets bright signal when h_count is in the range and v_count is in range
-always@(posedge clock)
-begin
-	bright <= (h_count >= HA_STA && v_count <= VA_END);
-end
-
-always@(posedge clock)
-begin
-	if(slowclock)
-	begin
-		enable = 1'b1;
-		slowclock = ~slowclock;
-	end
-	else
-	begin
-		enable = 1'b0;
-		slowclock = ~slowclock;
-	end
-end
-
-endmodule 
+endmodule

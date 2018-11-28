@@ -1,7 +1,7 @@
 // Sprite Module
 // 1 bit of the pixel is reserved for transparency (either opaque or transparent)
 // x and y position define the upper left corner of the sprite
-module HardwareSprite(clk, x_in, y_in, x_pos, y_pos, d_en, pixel);
+module HardwareSprite(clk, x_in, y_in, x_pos, y_pos, angle, d_en, pixel);
 	parameter INPUT_WIDTH = 10;
 	parameter PIXEL_SIZE = 16;
 	parameter SPRITE_SIZE = 32;
@@ -9,6 +9,7 @@ module HardwareSprite(clk, x_in, y_in, x_pos, y_pos, d_en, pixel);
 	
 	input clk;
 	input [(INPUT_WIDTH-1):0] x_in, y_in, x_pos, y_pos;
+	input [1:0] angle; // 2-bit angle so 90 degree increments
 	output reg [(PIXEL_SIZE-1):0] pixel;
 	output reg d_en; // d_en is whether or not this sprite's pixel is visible
 	
@@ -27,7 +28,15 @@ module HardwareSprite(clk, x_in, y_in, x_pos, y_pos, d_en, pixel);
 		if (x_in >= x_pos && y_in >= y_pos && x_in < x_pos + SPRITE_SIZE && y_in < y_pos + SPRITE_SIZE)
 		begin
 			d_en <= 1;
-			pixel <= sprite_buffer[((y_in - y_pos) * SPRITE_SIZE) + (x_in - x_pos)];
+			
+			// Do some rotation
+			case (angle)
+				2'b00: pixel <= sprite_buffer[((y_in - y_pos) * SPRITE_SIZE) + (x_in - x_pos)]; // Normal orientation
+				2'b01: pixel <= sprite_buffer[((x_in - x_pos) * SPRITE_SIZE) + (SPRITE_SIZE - (y_in - y_pos))]; // 90 deg: (x, y) -> (-y, x)
+				2'b10: pixel <= sprite_buffer[((SPRITE_SIZE - (y_in - y_pos)) * SPRITE_SIZE) + (SPRITE_SIZE - (x_in - x_pos))]; // 180 deg: (x, y) -> (-x, -y)
+				2'b11: pixel <= sprite_buffer[((SPRITE_SIZE - (x_in - x_pos)) * SPRITE_SIZE) + (y_in - y_pos)]; // 270 deg: (x, y) -> (y, -x)
+			endcase
+
 		end
 		else
 		begin
