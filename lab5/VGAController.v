@@ -1,35 +1,65 @@
-module VGAController(clk, h_count, v_count, pixel);
+module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 	parameter INPUT_WIDTH = 10;
 	parameter PIXEL_SIZE = 16;
 	
-	// Static memory locations
+	/* STATIC MEMORY LOCATIONS */
+	localparam PLAYER1_X = 					16'b0000_1111_0000_1111;
+	localparam PLAYER1_Y = 					16'b0000_1111_0000_1110;
+	localparam PLAYER2_X = 					16'b0000_1111_0000_1101;
+	localparam PLAYER2_Y = 					16'b0000_1111_0000_1100;
+	localparam PLAYER1_HEALTH = 			16'b0000_1110_0111_0100;
+	localparam PLAYER2_HEALTH = 			16'b0000_1110_0111_0011;
+	localparam PLAYER1_ANGLE =				16'b0000_1110_0111_0010;
+	localparam PLAYER2_ANGLE =				16'b0000_1110_0111_0001;
+	localparam PROJ1_ANGLE =				16'b0000_1110_0111_0000;
+	localparam PROJ2_ANGLE =				16'b0000_1110_0110_1111;
+	localparam PROJ1_X =						16'b0000_1111_0000_1011;
+	localparam PROJ1_Y =						16'b0000_1111_0000_1010;
+	localparam PROJ2_X =						16'b0000_1111_0000_1001;
+	localparam PROJ2_Y =						16'b0000_1111_0000_1000;
+	localparam GAME_STATE = 				16'b0000_1111_0000_0111;
+	localparam MAPPING = 					16'b0000_1111_1111_0000;
+	/***************************/
 	
 	
 	input clk;
 	input wire [(INPUT_WIDTH-1):0] h_count, v_count;
+	input wire [15:0] mem_out; // Used to read from main memory
+	output reg [15:0] mem_addr;
 	output reg [(PIXEL_SIZE-1):0] pixel;
 	
 	// Create wires for the sprite modules
 	wire [(INPUT_WIDTH-1):0] x_in, y_in;
 	wire [(PIXEL_SIZE-1):0] player1_pixel, player2_pixel, proj1_pixel, proj2_pixel;
-	wire [(PIXEL_SIZE-1):0] background_pixel;
+	wire [(PIXEL_SIZE-1):0] background_pixel, font_pixel;
 	
 	// Create registers to store memory data
 	reg [(INPUT_WIDTH-1):0] player1_x, player1_y, player2_x, player2_y;
 	reg [(INPUT_WIDTH-1):0] proj1_x, proj1_y, proj2_x, proj2_y;
 	reg [1:0] player1_angle, player2_angle, proj1_angle, proj2_angle;
-	reg [1:0] game_state;
+	reg [1:0] game_state; // 4 game states
+	reg [3:0] player1_health, player2_health;
 	
 	// Background module inputs
-	reg [8:0] glyph_addr = 9'd42;
-	reg [3:0] glyph_id;
-	reg write_glyph;
+	reg [8:0] background_addr;
+	reg [3:0] background_id;
+	reg write_background;
+	
+	// Font module inputs
+	reg [15:0] font_color_mask;
+	reg [12:0] font_addr;
+	reg [6:0] font_id;
+	reg [1:0] font_scale;
+	reg write_font;
 	
 	// Create module active wires
 	wire player1_draw, player2_draw, proj1_draw, proj2_draw;
 	
 	// Create the background module
-	BackgroundController background(clk, x_in, y_in, write_glyph, glyph_addr, glyph_id, background_pixel); 
+	BackgroundController background(clk, x_in, y_in, write_background, background_addr, background_id, background_pixel);
+	
+	// Create the font module
+	FontController font(clk, x_in, y_in, write_font, font_addr, font_id, font_color_mask, font_scale, font_pixel);
 	
 	// Instantiate all hardware sprite modules
 	HardwareSprite #(10, 16, 32, "eagle_up.data") player1(clk, x_in, y_in, player1_x, player1_y, player1_angle, player1_draw, player1_pixel);
@@ -41,81 +71,141 @@ module VGAController(clk, h_count, v_count, pixel);
 	assign x_in = h_count - 10'd143;
 	assign y_in = v_count - 10'd33;
 	
-	// test stuff
-	reg [9:0] temp_x, temp_y;
-	reg [1:0] temp_angle;
-	reg [3:0] temp_id;
-	
-	// Handles vertical blanking loading
-	always@(posedge clk)
-	begin
-		// If we are in the vertical blanking phase
-		if (v_count >= 10'd518) 
-		begin
-			// Load stuff
-			player1_x = temp_x;
-			player1_y = temp_y;
-			player1_angle = temp_angle;
-			player2_x = 10'd10;
-			player2_y = 10'd10;
-			player2_angle = 2'b0;
-			proj1_x = 10'd42;
-			proj1_y = 10'd10;
-			proj1_angle = 2'b10;
-			proj2_x = 10'd42;
-			proj2_y = 10'd42;
-			proj2_angle = 2'b0;
-			game_state = 2'b0;
-			glyph_id = temp_id;
-			write_glyph = 1'b1;
-		end
-		else
-			write_glyph = 1'b0;
-	end
-	
 	// Handles sprite overlap stuff
 	always@(posedge clk)
 	begin
-		if (player1_draw && player1_pixel[0] == 1)
+		if (font_pixel[0] == 1)
+			pixel <= font_pixel;
+		else if (proj1_draw && proj1_pixel[0] == 1 && proj1_x != 10'b0)
+			pixel <= proj1_pixel;
+		else if (proj2_draw && proj2_pixel[0] == 1 && proj2_x != 10'b0)
+			pixel <= proj2_pixel;
+		else if (player1_draw && player1_pixel[0] == 1)
 			pixel <= player1_pixel;
 		else if (player2_draw && player2_pixel[0] == 1)
 			pixel <= player2_pixel;
-		else if (proj1_draw && proj1_pixel[0] == 1)
-			pixel <= proj1_pixel;
-		else if (proj2_draw && proj2_pixel[0] == 1)
-			pixel <= proj2_pixel;
 		else if (background_pixel[0] == 1)
 			pixel <= background_pixel;
 		else
 			pixel <= 16'b0;
 	end
 	
-	// Some test stuff
-	reg [19:0] test_counter = 20'b0;
-	reg swap = 1'b0;
-	always@(posedge clk) test_counter <= test_counter + 1'b1;
 	
-	always@(posedge test_counter[19])
+	// This block handles loading from memory during the vertical front porch.
+	// Uses its own state variable to determine what to load and when.
+	reg [7:0] load_state = 8'b0;
+	
+	always@(posedge clk)
 	begin
-		if (temp_x == 10'd10 && swap)
-			swap <= 1'b0;
-		else if (temp_x == 10'd598 && !swap)
-			swap <= 1'b1;
-		
-		if (swap)
+		// If we are in the vertical blanking phase
+		if (v_count >= 10'd514) 
 		begin
-			temp_x <= temp_x - 10'b1;
-			temp_angle <= 2'b01;
-			temp_id = 4'b10;
+			// Increase the load state every cycle
+			if (load_state != 8'b11111111)
+				load_state <= load_state + 1'b1;
+		
+			// Sets the correct addresses
+			case (load_state)
+				8'b00000000: mem_addr <= PLAYER1_X;
+				8'b00000001: mem_addr <= PLAYER1_Y;
+				8'b00000010: mem_addr <= PLAYER2_X;
+				8'b00000011: mem_addr <= PLAYER2_Y;
+				8'b00000100: mem_addr <= PLAYER1_HEALTH;
+				8'b00000101: mem_addr <= PLAYER2_HEALTH;
+				8'b00000110: mem_addr <= PLAYER1_ANGLE;
+				8'b00000111: mem_addr <= PLAYER2_ANGLE;
+				8'b00001000: mem_addr <= PROJ1_ANGLE;
+				8'b00001001: mem_addr <= PROJ2_ANGLE;
+				8'b00001010: mem_addr <= PROJ1_X;
+				8'b00001011: mem_addr <= PROJ1_Y;
+				8'b00001100: mem_addr <= PROJ2_X;
+				8'b00001101: mem_addr <= PROJ2_Y;
+				8'b00001110: mem_addr <= GAME_STATE;
+				8'b00001111: mem_addr <= MAPPING;
+				8'b00010000: // Game mapping load state
+					begin
+						if (background_addr < 9'd300)
+						begin
+							load_state <= load_state; // Stay on this state until we go through the whole map.
+							mem_addr <= mem_addr + 1'b1;
+						end
+					end
+				
+				default: load_state <= 8'b11111111; // End
+			endcase
+			
+			// Sets the corresponding memory register
+			case (load_state)
+				8'b00000000: player1_x <= player1_x; // Do nothing
+				8'b00000001: player1_x <= mem_out[9:0];
+				8'b00000010: player1_y <= mem_out[9:0];
+				8'b00000011: player2_x <= mem_out[9:0];
+				8'b00000100: player2_y <= mem_out[9:0];
+				8'b00000101: player1_health <= mem_out[3:0];
+				8'b00000110: player2_health <= mem_out[3:0];
+				8'b00000111: player1_angle <= mem_out[1:0];
+				8'b00001000: player2_angle <= mem_out[1:0];
+				8'b00001001: proj1_angle <= mem_out[1:0];
+				8'b00001010: proj2_angle <= mem_out[1:0];
+				8'b00001011: proj1_x <= mem_out[9:0];
+				8'b00001100: proj1_y <= mem_out[9:0];
+				8'b00001101: proj2_x <= mem_out[9:0];
+				8'b00001110: proj2_y <= mem_out[9:0];
+				8'b00001111: game_state <= mem_out[1:0];
+				8'b00010000: // Game mapping load state
+					begin
+						write_background <= 1'b1;
+						background_id <= mem_out[3:0];
+						
+						// Don't increment it on the first iteration
+						if (write_background == 1'b1)
+							background_addr <= background_addr + 1'b1;
+					end
+			
+				default: load_state <= 8'b11111111; // End
+			endcase
 		end
-		else
+		else 
 		begin
-			temp_x <= temp_x + 10'b1;
-			temp_angle <= 2'b11;
-			temp_id = 4'b01;
+			background_addr <= 9'b0;
+			load_state <= 8'b0;
+			background_id <= 4'b0;
+			write_background <= 1'b0;
+		end
+	end
+	
+	
+	// font test stuff 
+	reg [3:0] font_state = 4'b0;
+	
+	always@(posedge clk)
+	begin
+		write_font <= 1'b1;
+		font_addr <= font_addr + 1'b1;
+		font_state <= font_state + 1'b1;
+		font_color_mask <= 16'b1111100000111110;
+		font_scale <= 2'b11;
+		
+		if (font_state == 4'b1111)
+		begin
+			font_state <= font_state;
+			write_font <= 1'b0;
 		end
 		
-		temp_y <= 10'd10;
+		case (font_state)
+			4'b0000:	font_addr <= 13'd2559;
+			4'b0001: font_id <= 7'd65;
+			4'b0010: font_id <= 7'd66;
+			4'b0011: font_id <= 7'd67;
+			4'b0100: font_id <= 7'd68;
+			4'b0101: font_id <= 7'd69;
+			4'b0110: font_id <= 7'd70;
+			4'b0111: font_id <= 7'd71;
+			4'b1000: font_id <= 7'd72;
+			4'b1001: font_id <= 7'd73;
+			
+			default: font_id <= 7'd0;
+		endcase
 	end
 	
 endmodule
