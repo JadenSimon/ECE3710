@@ -1,0 +1,63 @@
+X wall
+
+current x - 1 >= 48
+current x + 1 <= 591
+
+Y wall
+
+current y - 1 >= 48
+current y + 1 <= 431
+
+Wall Coords
+
+	CENTER STRIP DETECTION (320, 240)
+
+Move up
+
+(x >= 320 - 112 || x <= 320 + 112) && (y - 1 >= 240 + 16 || y <= 240 - 16)
+
+Move down
+
+(x >= 320 - 112 || x <= 320 + 112) && (y + 1 <= 240 - 16 || y >= 240 + 16)
+
+Move left
+
+(y >= 240 + 16 || y <= 240 - 16) && (x - 1 <= 320 + 112)
+
+Move right
+
+(y >= 240 + 16 || y <= 240 - 16) && (x + 1 <= 320 - 112)
+
+	TOP LEFT DETECTION VERTICAL BAR (112, 144) 
+
+[]
+[]
+[]
+
+Move up
+
+(x <= 112 + 16 || x >= 112 - 16) && (y - 1 <= 144 + 48 || y - 1 >= 144 - 48)
+
+Move down
+
+(x >= 112 + 16 || x <= 112 - 16) && (y - 1 <= 144 + 48 || y - 1 >= 144 - 48)
+
+Move left
+
+(y <= 144 + 48 || y >= 144 - 48) && (x - 1 >= 112 + 16 || x - 1 <= 112 - 16)
+
+Move right
+
+(y <= 144 + 48 || y >= 144 - 48) && (x + 1 >= 112 + 16 || x + 1 <= 112 - 16)
+
+	TOP LEFT DETECTION HORIZONTAL BAR (112, 144)
+
+[][][]
+
+Move up
+
+Move down
+
+Move left
+
+Move right
