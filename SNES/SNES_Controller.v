@@ -12,7 +12,8 @@
 // Instantiates all modules and creates muxes
 // Modified to use an additional register to act as a buffer for user input.
 // In this way we can be sure that the output of the module is always valid.
-module SNES_Controller(clk, data_in, latch, data_out, slow_clk);
+// Input clock should be a slow clock
+module SNES_Controller(clk, data_in, latch, data_out);
 
 	// Global wires
 	input wire clk, data_in;
@@ -22,7 +23,6 @@ module SNES_Controller(clk, data_in, latch, data_out, slow_clk);
 	
 	// data counter and slow clock counter
 	reg [3:0] counter = 4'b0000;
-	reg [2:0] slow_clk_counter = 3'b0;
 	reg [15:0] temp_data = 16'b0;
 
 	// 4 states
@@ -31,28 +31,15 @@ module SNES_Controller(clk, data_in, latch, data_out, slow_clk);
 	// output registers
 	output reg latch;
 	output reg [15:0] data_out = 16'b0;
-	output reg slow_clk = 1'b0;
-	
-	
-	// generate 5 Mhz clock
-	always@(posedge clk)
-	begin
-		slow_clk_counter <= slow_clk_counter + 1'b1;
-		if (slow_clk_counter == 3'b100)
-		begin
-			slow_clk <= !slow_clk;
-			slow_clk_counter <= 3'b0;
-		end
-	end
 	
 	// capture serial data on serial line on negedge clk
-	always@(negedge slow_clk)
+	always@(negedge clk)
 	begin
 		temp_data <= (temp_data << 1'b1) | data_in;
 	end
 		
 	// state logic
-	always@(posedge slow_clk)
+	always@(posedge clk)
 	begin
 		case (state)
 			start:
