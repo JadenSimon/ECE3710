@@ -31,10 +31,10 @@ game state = 0000 1111 0000 0111
 top of stack = 0000 1111 0000 0100
 bottom of stack = 0000 1110 1111 0000
 
-// this will hold the coordinates of the walls in the map so we can do collision detection
-// since the coordinates don't need to be too big we will pack x coord and y coord in 16 bits
-end of wall coordinates = 0000 1110 1110 1111
+// this will hold the bitmap of the walls in the map so we can do collision detection
+end of wall coordinates = 0001 0000 0000 0111
 start of wall coordinates = 0000 1110 1101 1100
+
 
 // Register conventions
 REG0 - REG4 // temporary register
