@@ -35,7 +35,8 @@ module SNES_Controller(clk, data_in, latch, data_out);
 	// capture serial data on serial line on negedge clk
 	always@(negedge clk)
 	begin
-		temp_data <= (temp_data << 1'b1) | data_in;
+		if (state == reading)
+			temp_data <= (temp_data << 1'b1) | data_in;
 	end
 		
 	// state logic
@@ -45,19 +46,13 @@ module SNES_Controller(clk, data_in, latch, data_out);
 			start:
 			begin
 				state <= latch_set;
-				latch <= 1'b0;
-				data_out <= 16'b0;
-			end
+ 			end
 			latch_set:
 			begin
 				state <= reading;
-				latch <= 1'b1;
 			end
 			reading:
 			begin
-				// bring latch back down
-				latch = 1'b0;
-			
 			   // count to 15 go to next state
 				counter <= counter + 1'b1;
 				
@@ -70,8 +65,7 @@ module SNES_Controller(clk, data_in, latch, data_out);
 			begin
 				// reset counter
 				counter <= 4'b0000;
-				latch <= 1'b0;
-				state <= latch_set;
+				state <= start;
 				
 				// set the data_out to our temp data
 				data_out <= temp_data;
@@ -79,10 +73,19 @@ module SNES_Controller(clk, data_in, latch, data_out);
 			default:
 			begin
 				counter <= 4'b0000;
-				latch <= 1'b0;
 				state <= start;
 			end
 		endcase
 	end
 	
+	always@(*)
+	begin
+		case (state)
+			start: latch <= 1'b0;
+			latch_set: latch <= 1'b1;
+			reading: latch <= 1'b0;
+			done_reading: latch <= 1'b0;
+			default: latch <= 1'b0;	
+		endcase
+	end
 endmodule
