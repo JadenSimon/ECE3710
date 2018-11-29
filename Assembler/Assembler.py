@@ -114,7 +114,7 @@ def decode_instruction(line):
     elif instruction[0] == 'CMPI':
         output_line = "1011" + reg_to_bin[instruction[1]] + instruction[2]
     elif instruction[0] == 'MOVI':
-        # if the Rdest starts with a '.' then we know we're jumping to a label
+        # if the immediate starts with a '.' then we know we're jumping to a label
         if instruction[2][0] == ".":
             immediate_str = numpy.binary_repr(label_addr[instruction[2]], 16)
             output_line = "1111" + reg_to_bin[instruction[1]] + immediate_str[:8] + "\n"
