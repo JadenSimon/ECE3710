@@ -11,7 +11,7 @@
 
 // Control unit for the entire CPU datapath
 // Logic is implemented as a Mealy machine since output is dependent on the previous instruction.
-module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, branch_mux, mux_A, mux_B, Opcode, RegEnable, FlagsEnable, PCEnable, we_a, imm);
+module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, branch_mux, snes_mux, mux_A, mux_B, Opcode, RegEnable, FlagsEnable, PCEnable, we_a, imm);
 	`include "instructionset.v"
 	input clk, reset;
 	input [15:0] instr;
@@ -22,6 +22,7 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 	output reg jal_mux = 1'b0;
 	output reg pc_load = 1'b0;
 	output reg branch_mux = 1'b0;
+	output reg [1:0] snes_mux = 2'b0;
 	output reg [7:0] Opcode = 8'b0;
 	output reg [15:0] RegEnable = 16'b0;
 	output reg [4:0] FlagsEnable = 5'b0;
@@ -64,23 +65,28 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 	always@(posedge clk)
 	begin
 		// Reset should only occur during the waiting state
-		if (reset == 1'b1 && fsm_state == 3'b010)
+		if (reset == 1'b1)
 		begin
 			fsm_state <= 3'b111;
-			last_instr <= 16'b0;
+			last_instr <= last_instr;
 		end
 		else
 		begin
-			last_instr <= instr; // Only used for loads currently
+			// Used for loads/SNES loading
+			last_instr <= last_instr;
 		
 			case (fsm_state)
 			
 				3'b000 :
 				begin					
+					last_instr <= instr;
+				
 					if (instr[15:12] == Special && instr[7:4] == LOAD)
 						fsm_state <= 3'b001; // LOAD can only move data into the register on the next cycle
 					else if (instr[15:12] == Special && instr[7:4] == STOR)
 						fsm_state <= 3'b010; // STOR must wait a cycle for the next instruction
+					else if (instr[15:12] == Special && instr[7:4] == LCI)
+						fsm_state <= 3'b011;
 					else
 						fsm_state <= 3'b000;
 				end
@@ -104,10 +110,10 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 			Always set PCEnable to 1
 			Set RegEnable and ld_mux
 			Set all other control lines to 0
-		State 2: (Wait state)
+		State 2: (NOP state)
 			Set PCEnable to 1
 			Everything else to 0
-		State 7: (Reset state)
+		State 7: (Reset state/Idle state)
 			Just waits a clock cycle without incrementing PC
 			
 	The FSM is updated whenever fsm_state or mem_data is changed	
@@ -173,6 +179,12 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 				pc_load = check_condition(instr[11:8]) && instr[15:12] == BCND;
 			end
 			
+			// SNES controller load into register
+			if (instr[15:12] == Special && instr[7:4] == LCI)
+				snes_mux = {instr[0], 1'b1};
+			else
+				snes_mux = 2'b0;
+			
 			// Set the branch mux control line
 			branch_mux = check_condition(instr[11:8]) && instr[15:12] == BCND; 
 
@@ -185,9 +197,9 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 				RegEnable = instr[7:4] == CMP ? 16'b0 : 1'b1 << instr[11:8]; // Check for CMP
 			else if (instr[15:12] != Special && instr[15:12] != BCND) // Handle immediates
 				RegEnable = instr[15:12] == CMPI ? 16'b0 : 1'b1 << instr[11:8]; // Check for CMPI
-			else if (instr[15:12] == Special && instr[7:4] == JAL)
+			else if (instr[15:12] == Special && (instr[7:4] == JAL || instr[7:4] == LCI)) // Load if JAL or LCI
 				RegEnable = 1'b1 << instr[11:8];
-			else 
+			else
 				RegEnable = 16'b0; // Don't write to the regfile
 			
 			// Set the opcode and immediate
@@ -211,6 +223,7 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 			jal_mux = 0;
 			pc_load = 0;
 			branch_mux = 0;
+			snes_mux = 2'b0;
 			
 			// ALU DST/SRC Muxes
 			// For loads, it does not matter what the ALU sees
@@ -238,6 +251,7 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 			jal_mux = 0;
 			pc_load = 0;
 			branch_mux = 0;
+			snes_mux = 2'b0;
 			mux_A = 4'b0;
 			mux_B = 4'b0;
 			RegEnable = 16'b0;			
@@ -252,6 +266,7 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 			jal_mux = 1'b0;
 			pc_load = 1'b0;
 			branch_mux = 1'b0;
+			snes_mux = 2'b0;
 			Opcode = 8'b0;
 			RegEnable = 16'b0;
 			FlagsEnable = 5'b0;
