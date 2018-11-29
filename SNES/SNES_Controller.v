@@ -10,24 +10,27 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 // Instantiates all modules and creates muxes
-module SNES_Controller(clk, data_in, active, latch, ready, data_out, slow_clk);
+// Modified to use an additional register to act as a buffer for user input.
+// In this way we can be sure that the output of the module is always valid.
+module SNES_Controller(clk, data_in, latch, data_out, slow_clk);
 
 	// Global wires
-	input wire clk, data_in, active;
+	input wire clk, data_in;
 
 	// state variable
 	reg [1:0] state = 2'b00;
 	
 	// data counter and slow clock counter
 	reg [3:0] counter = 4'b0000;
-	reg [2:0] slow_clk_counter = 3'd0;
+	reg [2:0] slow_clk_counter = 3'b0;
+	reg [15:0] temp_data = 16'b0;
 
 	// 4 states
-	parameter waiting = 2'b00, latch_set = 2'b01, reading = 2'b10, done_reading = 2'b11;
+	parameter start = 2'b00, latch_set = 2'b01, reading = 2'b10, done_reading = 2'b11;
 
 	// output registers
-	output reg latch, ready;
-	output reg [15:0] data_out = 16'b0000000000000000;
+	output reg latch;
+	output reg [15:0] data_out = 16'b0;
 	output reg slow_clk = 1'b0;
 	
 	
@@ -35,41 +38,38 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out, slow_clk);
 	always@(posedge clk)
 	begin
 		slow_clk_counter <= slow_clk_counter + 1'b1;
-		if (slow_clk_counter == 3'd5)
+		if (slow_clk_counter == 3'b100)
 		begin
-			slow_clk_counter <= 3'd0;
 			slow_clk <= !slow_clk;
+			slow_clk_counter <= 3'b0;
 		end
 	end
 	
 	// capture serial data on serial line on negedge clk
 	always@(negedge slow_clk)
 	begin
-		if (state == reading)
-		begin
-			data_out <= (data_out << 1'b1) | data_in;
-		end
+		temp_data <= (temp_data << 1'b1) | data_in;
 	end
 		
 	// state logic
 	always@(posedge slow_clk)
 	begin
 		case (state)
-			waiting:
+			start:
 			begin
-			
-				// cpu lets module know it's ready for snes input
-				if (active)
-				begin
-					state <= latch_set;
-				end
+				state <= latch_set;
+				latch <= 1'b0;
+				data_out <= 16'b0;
 			end
 			latch_set:
 			begin
 				state <= reading;
+				latch <= 1'b1;
 			end
 			reading:
 			begin
+				// bring latch back down
+				latch = 1'b0;
 			
 			   // count to 15 go to next state
 				counter <= counter + 1'b1;
@@ -81,56 +81,21 @@ module SNES_Controller(clk, data_in, active, latch, ready, data_out, slow_clk);
 			end
 			done_reading:
 			begin
-			
 				// reset counter
 				counter <= 4'b0000;
-				state <= waiting;
+				latch <= 1'b0;
+				state <= latch_set;
+				
+				// set the data_out to our temp data
+				data_out <= temp_data;
 			end
 			default:
 			begin
-				state <= waiting;
+				counter <= 4'b0000;
+				latch <= 1'b0;
+				state <= start;
 			end
 		endcase
 	end
-
-	// combinational logic
-	always@(*)
-	begin
-		case (state)
-			waiting:
-			begin
-			
-				// reset everything
-				ready = 1'b0;
-				latch = 1'b0;
-			end
-			latch_set:
-			begin
-				ready = 1'b0;
-				
-				// tell SNES we're ready for values
-				latch = 1'b1;
-			end
-			reading:
-			begin
-			
-				// bring latch back down
-				latch =1'b0;
-				ready = 1'b0;
-
-			end
-			done_reading:
-			begin
-				latch = 1'b0;
-				
-				// data is ready to read
-				ready = 1'b1;
-			end
-			default:
-			begin
-				latch = 1'b0;
-				ready = 1'b0;
-			end
-		endcase
-		end
+	
 endmodule
