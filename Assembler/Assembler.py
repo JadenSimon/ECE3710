@@ -81,7 +81,7 @@ def decode_instruction(line):
         output_line = "0100" + reg_to_bin[instruction[1]] + "1000" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'JCND':
         output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + reg_to_bin[instruction[2]]
-    elif instruction[0] == 'JCI':
+    elif instruction[0] == 'LCI':
         output_line = "0100" + reg_to_bin[instruction[1]] + "1111" + player_to_bin[instruction[2]]
     elif instruction[0] == 'PUSH':
         # subtract one from the stack pointer and then store at stack pointer
@@ -131,7 +131,7 @@ def decode_instruction(line):
     if output_line != "":
         output_file.write(output_line + " //" + line + "\n")
     else:
-        if line[0] != '.' or line[0] != '/':
+        if line[0] != '.' and line[0] != '/':
             print("Instruction not implemented: " + line)
 
 def first_pass(input_file):

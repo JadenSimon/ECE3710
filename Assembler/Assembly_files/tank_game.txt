@@ -147,8 +147,9 @@
       MOVI REG8 0000111001110000
       LOAD REG2 REG8
       // if they are not active then just jump to next game loop
+      MOVI REG3 .game_loop_player2
       CMPI REG0 00000000
-      JCND EQ .game_loop_player2
+      JCND EQ REG3
       // calculate the offset
       MOVI REG3 .move_proj1_up
       CMPI REG2 00000000
@@ -179,6 +180,11 @@
       MOVI REG3 .check_proj1_collision
       JCND NC REG3
 .check_proj1_collision
+      STOR REG0 REG6
+      STOR REG1 REG7
+      STOR REG2 REG8
+      MOVI REG3 .game_loop_player2
+      JCND NC REG3
       // check the collision of the projectiles. If there is a no collision, store
       // the new position in memory. If there is a collision with a wall,
       // then don't store the updated position in memory, just mark it invalid. If there
@@ -194,8 +200,9 @@
       MOVI REG8 0000111001101111
       LOAD REG2 REG8
       // if they are not active then just jump to next game loop
+      MOVI REG3 .game_loop_player1
       CMPI REG0 00000000
-      JCND EQ .game_loop_player1
+      JCND EQ REG3
       // calculate the offset
       MOVI REG3 .move_proj2_up
       CMPI REG2 00000000
@@ -226,6 +233,11 @@
       MOVI REG3 .check_proj2_collision
       JCND NC REG3
 .check_proj2_collision
+      STOR REG0 REG6
+      STOR REG1 REG7
+      STOR REG2 REG8
+      MOVI REG3 .game_loop_player1
+      JCND NC REG3
       // check the collision of the projectiles. If there is a no collision, store
       // the new position in memory. If there is a collision with a wall,
       // then don't store the updated position in memory, just mark it invalid. If there
