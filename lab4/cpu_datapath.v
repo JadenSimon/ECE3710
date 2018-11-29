@@ -50,7 +50,7 @@ module cpu_datapath(clk, reset, controller1_data, controller2_data, data_out);
 	assign DST = branch_mux ? PCOut : RegWire[mux_A];
 	assign SRC = RegWire[mux_B];
 	assign PCMuxOut = pc_mux ? ALUOutput : PCOut;
-	assign LoadMuxOut = snes_mux[0] ? (jal_mux ? PCOut : (ld_mux ? q_a : ALUOutput)) : (snes_mux[1] ? controller1_data : controller2_data);
+	assign LoadMuxOut = snes_mux[0] ? (snes_mux[1] ? controller2_data : controller1_data) : (jal_mux ? PCOut : (ld_mux ? q_a : ALUOutput));
 	assign PCMuxIn = (pc_load ? ALUOutput : PCOut) + 1'b1;
 
 	// Connect DST to data_a
@@ -58,7 +58,7 @@ module cpu_datapath(clk, reset, controller1_data, controller2_data, data_out);
 	assign we_a = reset ? 1'b0 : fsm_we;
 	assign PCEnable = reset ? 1'b0 : fsm_pc;
 	
-	// Assign dummy values for unhooked up components (will be used by VGA later)
+	// Assign dummy values for unhooked up components (will be used by VGA later) 
 	assign addr_b = 16'b0;
 	assign data_b = 16'b0;
 	assign we_b = 1'b0;

@@ -1,42 +1,7 @@
-// Fibbonacci sequence starting from memory address 0x00A0
-// Set REG1 to the desired n
-
-// Starting address, n, and subroutine address (REG11)
-D0A0 // MOVI REG0 0xA0
-D114 // MOVI REG1 0x14 (n == 20)
-DB04 // MOVI REG11 0x04
-
-// Go to initialize section first
-C009 // BCND NC 0x09
-
-// fib subroutine
-// computes fib value at address in REG0
-// 11 cycles to complete
-02D0 // MOV REG2 REG0 (0x04)
-9201 // SUBI REG2 0x01
-4302 // LOAD REG3 REG2
-9201 // SUBI REG2 0x01
-4402 // LOAD REG4 REG2
-0453 // ADD REG4 REG3
-4440 // STOR REG4 REG0
-40CA // JCND NC REG10 (return using REG10)
-
-// Initialize first two mem addresses
-D200 // MOVI REG2 0x00
-4240 // STOR REG2 REG0
 5001 // ADDI REG0 0x01
-5201 // ADDI REG2 0x01
-4240 // STOR REG2 REG0
-9101 // SUBI REG1 0x01 // Reduce n by 1
-
-// Count REG1 down to 0, incrementing REG0 and calling the fib subroutine
-5001 // ADDI REG0 0x01 (0x12)
-9101 // SUBI REG1 0x01
-4A8B // JAL REG10 REG11
-B100 // CMPI REG1 0x00
-C2FC // BCND NE 0xFC (go up 4 addresses if REG1 != 0)
-4F00 // LOAD REG15 REG0 (dump last number to REG15)
-DA00 // MOVI REG10 0x00
-40CA // JCND NC REG10 (return to start of program)
+5A01 // ADDI REG10 0x01
+4FF0 // LCI REG15 CONTROLLER0
+5101 // ADDI REG1 0x01
+40C0 // JCND NC REG0
 
 
