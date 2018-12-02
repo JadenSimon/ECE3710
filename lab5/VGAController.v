@@ -62,9 +62,9 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 	FontController font(clk, x_in, y_in, write_font, font_addr, font_id, font_color_mask, font_scale, font_pixel);
 	
 	// Instantiate all hardware sprite modules
-	HardwareSprite #(10, 16, 32, "eagle_up.data") player1(clk, x_in, y_in, player1_x, player1_y, player1_angle, player1_draw, player1_pixel);
-	HardwareSprite #(10, 16, 32, "murica_tank_up.data") player2(clk, x_in, y_in, player2_x, player2_y, player2_angle, player2_draw, player2_pixel);
-	HardwareSprite #(10, 16, 32, "ussr_tank_up.data") proj1(clk, x_in, y_in, proj1_x, proj1_y, proj1_angle, proj1_draw, proj1_pixel);
+	HardwareSprite #(10, 16, 32, "murica_tank_up.data") player1(clk, x_in, y_in, player1_x, player1_y, player1_angle, player1_draw, player1_pixel);
+	HardwareSprite #(10, 16, 32, "ussr_tank_up.data") player2(clk, x_in, y_in, player2_x, player2_y, player2_angle, player2_draw, player2_pixel);
+	HardwareSprite #(10, 16, 32, "eagle_up.data") proj1(clk, x_in, y_in, proj1_x, proj1_y, proj1_angle, proj1_draw, proj1_pixel);
 	HardwareSprite #(10, 16, 32, "bear_up.data") proj2(clk, x_in, y_in, proj2_x, proj2_y, proj2_angle, proj2_draw, proj2_pixel);
 	
 	// Logic to account for counters being able to go off screen plus one to account for delay
@@ -136,23 +136,24 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 			
 			// Sets the corresponding memory register
 			case (load_state)
-				8'b00000000: player1_x <= player1_x; // Do nothing
-				8'b00000001: player1_x <= mem_out[9:0];
-				8'b00000010: player1_y <= mem_out[9:0];
-				8'b00000011: player2_x <= mem_out[9:0];
-				8'b00000100: player2_y <= mem_out[9:0];
-				8'b00000101: player1_health <= mem_out[3:0];
-				8'b00000110: player2_health <= mem_out[3:0];
-				8'b00000111: player1_angle <= mem_out[1:0];
-				8'b00001000: player2_angle <= mem_out[1:0];
-				8'b00001001: proj1_angle <= mem_out[1:0];
-				8'b00001010: proj2_angle <= mem_out[1:0];
-				8'b00001011: proj1_x <= mem_out[9:0];
-				8'b00001100: proj1_y <= mem_out[9:0];
-				8'b00001101: proj2_x <= mem_out[9:0];
-				8'b00001110: proj2_y <= mem_out[9:0];
-				8'b00001111: game_state <= mem_out[1:0];
-				8'b00010000: // Game mapping load state
+				8'b00000000: player1_x <= player1_x;
+				8'b00000001: player1_x <= player1_x;
+				8'b00000010: player1_x <= mem_out[9:0];
+				8'b00000011: player1_y <= mem_out[9:0];
+				8'b00000100: player2_x <= mem_out[9:0];
+				8'b00000101: player2_y <= mem_out[9:0];
+				8'b00000110: player1_health <= mem_out[3:0];
+				8'b00000111: player2_health <= mem_out[3:0];
+				8'b00001000: player1_angle <= mem_out[1:0];
+				8'b00001001: player2_angle <= mem_out[1:0];
+				8'b00001010: proj1_angle <= mem_out[1:0];
+				8'b00001011: proj2_angle <= mem_out[1:0];
+				8'b00001100: proj1_x <= mem_out[9:0];
+				8'b00001101: proj1_y <= mem_out[9:0];
+				8'b00001110: proj2_x <= mem_out[9:0];
+				8'b00001111: proj2_y <= mem_out[9:0];
+				8'b00010000: game_state <= mem_out[1:0];
+				8'b00010001: // Game mapping load state
 					begin
 						write_background <= 1'b1;
 						background_id <= mem_out[3:0];
@@ -176,7 +177,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 	
 	
 	// font test stuff 
-	reg [3:0] font_state = 4'b0;
+	reg [4:0] font_state = 5'b0;
 	
 	always@(posedge clk)
 	begin
@@ -186,23 +187,33 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 		font_color_mask <= 16'b1111100000111110;
 		font_scale <= 2'b11;
 		
-		if (font_state == 4'b1111)
+		if (font_state == 5'b11111)
 		begin
 			font_state <= font_state;
 			write_font <= 1'b0;
 		end
 		
 		case (font_state)
-			4'b0000:	font_addr <= 13'd2559;
-			4'b0001: font_id <= 7'd65;
-			4'b0010: font_id <= 7'd66;
-			4'b0011: font_id <= 7'd67;
-			4'b0100: font_id <= 7'd68;
-			4'b0101: font_id <= 7'd69;
-			4'b0110: font_id <= 7'd70;
-			4'b0111: font_id <= 7'd71;
-			4'b1000: font_id <= 7'd72;
-			4'b1001: font_id <= 7'd73;
+			5'b00000:	font_addr <= 13'd2559;
+			5'b00001: font_id <= 7'd65;
+			5'b00010: font_id <= 7'd66;
+			5'b00011: font_id <= 7'd67;
+			5'b00100: font_id <= 7'd68;
+			5'b00101: font_id <= 7'd69;
+			5'b00110: font_id <= 7'd70;
+			5'b00111: font_id <= 7'd71;
+			5'b01000: font_id <= 7'd72;
+			5'b01001: font_id <= 7'd73;
+			5'b01010: font_id <= 7'd74;
+			5'b01011: font_id <= 7'd75;
+			5'b01100: font_id <= 7'd76;
+			5'b01101: font_id <= 7'd77;
+			5'b01110: font_id <= 7'd78;
+			5'b01111: font_id <= 7'd79;
+			5'b10000: font_id <= 7'd80;
+			5'b10001: font_id <= 7'd81;
+			5'b10010: font_id <= 7'd82;
+			5'b10011: font_id <= 7'd83;
 			
 			default: font_id <= 7'd0;
 		endcase
