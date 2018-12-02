@@ -1,0 +1,46 @@
+# Copyright (C) 2017  Intel Corporation. All rights reserved.
+# Your use of Intel Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Intel Program License 
+# Subscription Agreement, the Intel Quartus Prime License Agreement,
+# the Intel FPGA IP License Agreement, or other applicable license
+# agreement, including, without limitation, that your use is for
+# the sole purpose of programming logic devices manufactured by
+# Intel and sold by Intel or its authorized distributors.  Please
+# refer to the applicable agreement for further details.
+
+# Quartus Prime Version 17.1.0 Build 590 10/25/2017 SJ Lite Edition
+# File: C:\intelFPGA_lite\17.1\FINAL\Game.csv
+# Generated on: Sun Dec 02 16:56:55 2018
+
+# Note: The column header names should not be changed if you wish to import this .csv file into the Quartus Prime software.
+
+To,Direction,Location,I/O Bank,VREF Group,Fitter Location,I/O Standard,Reserved,Current Strength,Slew Rate,Differential Pair,Transceiver Analog Settings Protocol,VCCR_GXB/VCCT_GXB Voltage,Transceiver I/O Pin Termination,Transceiver Dedicated Refclk Pin Termination,Transmitter Common Mode Driver Voltage,Transmitter Slew Rate Control,Transmitter Differential Output Voltage,Receiver Buffer Common Mode Voltage,Strict Preservation
+blue[4],Output,PIN_J14,8A,B8A_N0,PIN_J14,2.5 V,,,,,,,,,,,,,
+blue[3],Output,PIN_G15,8A,B8A_N0,PIN_G15,2.5 V,,,,,,,,,,,,,
+blue[2],Output,PIN_F15,8A,B8A_N0,PIN_F15,2.5 V,,,,,,,,,,,,,
+blue[1],Output,PIN_H14,8A,B8A_N0,PIN_H14,2.5 V,,,,,,,,,,,,,
+blue[0],Output,PIN_F14,8A,B8A_N0,PIN_F14,2.5 V,,,,,,,,,,,,,
+clk,Input,PIN_AF14,3B,B3B_N0,PIN_AF14,2.5 V,,,,,,,,,,,,,
+green[4],Output,PIN_E11,8A,B8A_N0,PIN_E11,2.5 V,,,,,,,,,,,,,
+green[3],Output,PIN_F11,8A,B8A_N0,PIN_F11,2.5 V,,,,,,,,,,,,,
+green[2],Output,PIN_G12,8A,B8A_N0,PIN_G12,2.5 V,,,,,,,,,,,,,
+green[1],Output,PIN_G11,8A,B8A_N0,PIN_G11,2.5 V,,,,,,,,,,,,,
+green[0],Output,PIN_G10,8A,B8A_N0,PIN_G10,2.5 V,,,,,,,,,,,,,
+hSync,Output,PIN_B11,8A,B8A_N0,PIN_B11,2.5 V,,,,,,,,,,,,,
+red[4],Output,PIN_F13,8A,B8A_N0,PIN_F13,2.5 V,,,,,,,,,,,,,
+red[3],Output,PIN_E12,8A,B8A_N0,PIN_E12,2.5 V,,,,,,,,,,,,,
+red[2],Output,PIN_D12,8A,B8A_N0,PIN_D12,2.5 V,,,,,,,,,,,,,
+red[1],Output,PIN_C12,8A,B8A_N0,PIN_C12,2.5 V,,,,,,,,,,,,,
+red[0],Output,PIN_B12,8A,B8A_N0,PIN_B12,2.5 V,,,,,,,,,,,,,
+reset,Input,PIN_AB12,3A,B3A_N0,PIN_AB12,2.5 V,,,,,,,,,,,,,
+snes1_in,Input,PIN_AD17,4A,B4A_N0,PIN_AD17,2.5 V,,,,,,,,,,,,,
+snes1_latch,Output,PIN_Y17,4A,B4A_N0,PIN_Y17,2.5 V,,,,,,,,,,,,,
+snes2_in,Input,PIN_AB17,4A,B4A_N0,PIN_AB17,2.5 V,,,,,,,,,,,,,
+snes2_latch,Output,PIN_AA21,4A,B4A_N0,PIN_AA21,2.5 V,,,,,,,,,,,,,
+snes_slow_clk,Output,PIN_AC18,4A,B4A_N0,PIN_AC18,2.5 V,,,,,,,,,,,,,
+vSync,Output,PIN_D11,8A,B8A_N0,PIN_D11,2.5 V,,,,,,,,,,,,,
+vga_slow_clk,Output,PIN_A11,8A,B8A_N0,PIN_A11,2.5 V,,,,,,,,,,,,,
