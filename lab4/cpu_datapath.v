@@ -10,17 +10,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 // Instantiates all modules and creates muxes
-module cpu_datapath(clk, reset, controller1_data, controller2_data, data_out);
+module cpu_datapath(clk, reset, controller1_data, controller2_data, addr_b, q_b);
 	// Global wires
 	input wire clk, reset;
 	input wire [15:0] controller1_data, controller2_data;
-	output wire [15:0] data_out;
+	input wire [15:0] addr_b; // Used by VGA
+	output wire [15:0] q_b; // Used by VGA
 
 	// Set up bram wires
 	wire [15:0] data_a, data_b;
-	wire [15:0] addr_b;
 	wire we_a, we_b, fsm_we;
-	wire [15:0] q_a, q_b;
+	wire [15:0] q_a;
 	
 	// Set up ALU wires
 	wire [15:0] DST, SRC, ALUOutput;
@@ -58,13 +58,9 @@ module cpu_datapath(clk, reset, controller1_data, controller2_data, data_out);
 	assign we_a = reset ? 1'b0 : fsm_we;
 	assign PCEnable = reset ? 1'b0 : fsm_pc;
 	
-	// Assign dummy values for unhooked up components (will be used by VGA later) 
-	assign addr_b = 16'b0;
+	// The b port is never being written to.
 	assign data_b = 16'b0;
 	assign we_b = 1'b0;
-	
-	// Makes reg15 visible to the outside
-	assign data_out = RegWire[15];
 	
 	// Instantiate our modules
 	flags FlagsRegUnit(clk, reset, FlagsEnable, ALUFlags, RegFlags);
