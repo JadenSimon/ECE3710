@@ -32,8 +32,8 @@ top of stack = 0000 1111 0000 0100
 bottom of stack = 0000 1110 1111 0000
 
 // this will hold the bitmap of the walls in the map so we can do collision detection
-end of wall coordinates = 0001 0000 0000 0111
-start of wall coordinates = 0000 1110 1101 1100
+end of wall coordinates = 0001 0001 0001 1011
+start of wall coordinates = 0000 1111 1111 0000
 
 // Register conventions
 REG0 - REG4 // temporary register

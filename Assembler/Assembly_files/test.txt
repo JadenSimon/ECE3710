@@ -37,6 +37,57 @@
       JCND NC REG4
 
 .game_loop_player1
+      MOVI REG0 0000000000000000
+      MOVI REG1 1111111111111111
+.wait_loop
+      ADDI REG0 00000001
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      MOVI REG2 .wait_loop
+      CMP REG0 REG1
+      JCND NE REG2
       // load snes input
       LCI REG0 player1
       MOV REG2 REG0
@@ -121,7 +172,7 @@
       JCND NC REG3
 
 .update_projectiles_player1
-      // load projectile x coord, y coord, and orientation respectively
+      // load projectile x coord, y coord, and orientation
       MOVI REG6 0000111100001011
       LOAD REG0 REG6
       MOVI REG7 0000111100001010
@@ -171,7 +222,6 @@
       JCND EQ REG8
       STOR REG0 REG6
       STOR REG1 REG7
-      STOR REG2 REG4
       MOVI REG3 .game_loop_player2
       JCND NC REG3
 .mark_invalid
@@ -223,136 +273,21 @@
       MOVI REG3 .check_proj2_collision
       JCND NC REG3
 .check_proj2_collision
-      // check the collision of the projectiles. If there is a no collision, store
-      // the new position in memory. If there is a collision with a wall,
-      // then don't store the updated position in memory, just mark it invalid. If there
-      // is a collision with a tank then don't store the updated position in memory,
-      // just mark it invalid then jump to update health of tank.
       MOV REG14 REG0
       MOV REG15 REG1
       MOVI REG8 .check_wall_collision
       JAL REG11 REG8
       MOVI REG8 .mark_invalid
       CMPI REG13 00000001
-      JCND EQ REG8
+      JCND EQ .mark_invalid
       STOR REG0 REG6
       STOR REG1 REG7
-      STOR REG2 REG4
-      MOVI REG0 .nops
-      JCND NC REG0
+      MOVI REG3 .game_loop_player1
+      JCND NC REG3
 .mark_invalid
       MOVI REG0 00000000
       STOR REG0 REG6
       STOR REG0 REG7
-.nops
-      MOVI REG0 0000000000000000
-      MOVI REG1 1111111111111111
-      // this is nops so we can control the frame rate
-.wait_loop
-      ADDI REG0 00000001
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      MOVI REG2 .wait_loop
-      CMP REG0 REG1
-      JCND NE REG2
       MOVI REG3 .game_loop_player1
       JCND NC REG3
 
@@ -510,14 +445,20 @@
       JCND NC REG4
 
 .spawn_projectile_player1
+      // projectile x addr
       MOVI REG0 0000111100001011
+      // projectile y addr
       MOVI REG1 0000111100001010
-      MOVI REG5 0000111001110010
-      MOVI REG2 0000111100001111
-      MOVI REG3 0000111100001110
+      // projectile orientation addr
       MOVI REG6 0000111001110000
-      LOAD REG0 REG0
-      LOAD REG1 REG1
+      // player1 x addr
+      MOVI REG2 0000111100001111
+      // player1 y addr
+      MOVI REG3 0000111100001110
+      // player1 orientation addr
+      MOVI REG5 0000111001110010
+      LOAD REG2 REG2
+      LOAD REG3 REG3
       LOAD REG5 REG5
       // calculate the offset
       MOVI REG7 .spawn_proj1_up
@@ -533,43 +474,49 @@
       CMPI REG5 00000001
       JCND EQ REG7
 .spawn_proj1_up
-      SUBI REG1 00010000
-      STOR REG0 REG2
-      STOR REG1 REG3
+      SUBI REG3 00010000
+      STOR REG2 REG0
+      STOR REG3 REG1
       STOR REG5 REG6
       MOVI REG4 .update_projectiles_player1
       JCND NC REG4
 .spawn_proj1_down
-      ADDI REG1 00010000
-      STOR REG0 REG2
-      STOR REG1 REG3
+      ADDI REG3 00010000
+      STOR REG2 REG0
+      STOR REG13REG1
       STOR REG5 REG6
       MOVI REG4 .update_projectiles_player1
       JCND NC REG4
 .spawn_proj1_left
-      SUBI REG0 00010000
-      STOR REG0 REG2
-      STOR REG1 REG3
+      SUBI REG2 00010000
+      STOR REG2 REG0
+      STOR REG3 REG1
       STOR REG5 REG6
       MOVI REG4 .update_projectiles_player1
       JCND NC REG4
 .spawn_proj1_right
-      ADDI REG0 00010000
-      STOR REG0 REG2
-      STOR REG1 REG3
+      ADDI REG2 00010000
+      STOR REG2 REG0
+      STOR REG3 REG1
       STOR REG5 REG6
       MOVI REG4 .update_projectiles_player1
       JCND NC REG4
 
 .spawn_projectile_player2
+      // proj x addr
       MOVI REG0 0000111100001001
+      // proj y addr
       MOVI REG1 0000111100001000
-      MOVI REG5 0000111001110001
-      MOVI REG2 0000111100001101
-      MOVI REG3 0000111100001100
+      // proj orientation addr
       MOVI REG6 0000111001101111
-      LOAD REG0 REG0
-      LOAD REG1 REG1
+      // player2 x addr
+      MOVI REG2 0000111100001101
+      // player2 y addr
+      MOVI REG3 0000111100001100
+      // player2 orientation addr
+      MOVI REG5 0000111001110001
+      LOAD REG2 REG2
+      LOAD REG3 REG3
       LOAD REG5 REG5
       // calculate the offset
       MOVI REG7 .spawn_proj2_up
@@ -585,30 +532,30 @@
       CMPI REG5 00000001
       JCND EQ REG7
 .spawn_proj2_up
-      SUBI REG1 00010000
-      STOR REG0 REG2
-      STOR REG1 REG3
+      SUBI REG3 00010000
+      STOR REG2 REG0
+      STOR REG3 REG1
       STOR REG5 REG6
       MOVI REG4 .update_projectiles_player2
       JCND NC REG4
 .spawn_proj2_down
-      ADDI REG1 00010000
-      STOR REG0 REG2
-      STOR REG1 REG3
+      ADDI REG3 00010000
+      STOR REG2 REG0
+      STOR REG3 REG1
       STOR REG5 REG6
       MOVI REG4 .update_projectiles_player2
       JCND NC REG4
 .spawn_proj2_left
-      SUBI REG0 00010000
-      STOR REG0 REG2
-      STOR REG1 REG3
+      SUBI REG2 00010000
+      STOR REG2 REG0
+      STOR REG3 REG1
       STOR REG5 REG6
       MOVI REG4 .update_projectiles_player2
       JCND NC REG4
 .spawn_proj2_right
-      ADDI REG0 00010000
-      STOR REG0 REG2
-      STOR REG1 REG3
+      ADDI REG2 00010000
+      STOR REG2 REG0
+      STOR REG3 REG1
       STOR REG5 REG6
       MOVI REG4 .update_projectiles_player2
       JCND NC REG4
