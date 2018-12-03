@@ -74,7 +74,7 @@ def decode_instruction(line):
     elif instruction[0] == 'MOV':
         output_line = "0000" + reg_to_bin[instruction[1]] + "1101" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'LOAD': # Special Instructions
-        output_line = "0100" + reg_to_bin[instruction[1]] + "0000" + reg_to_bin[instruction[1]]
+        output_line = "0100" + reg_to_bin[instruction[1]] + "0000" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'STOR':
         output_line = "0100" + reg_to_bin[instruction[1]] + "0100" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'JAL':
