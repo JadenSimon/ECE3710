@@ -95,9 +95,9 @@
       CMP REG0 REG1
       JCND NE REG2
       // move the address of the player1 loc to saved register
-      MOVI REG6 0000111100001111
-      LOAD REG14 REG6
+      // MOVI REG6 0000111100001111
+      // LOAD REG14 REG6
       // ADDI REG14 00000001
-      STOR REG14 REG6
+      // STOR REG14 REG6
       MOVI REG4 .game_loop_player1
       JCND NC REG4
