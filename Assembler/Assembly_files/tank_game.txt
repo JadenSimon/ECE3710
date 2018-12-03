@@ -186,7 +186,7 @@
       JAL REG11 REG8
       MOVI REG8 .mark_invalid
       CMPI REG13 00000001
-      JCND EQ .mark_invalid
+      JCND EQ REG8
       STOR REG0 REG6
       STOR REG1 REG7
       STOR REG2 REG4
@@ -293,8 +293,9 @@
       ADDI REG2 00000000
       ADDI REG2 00000000
       ADDI REG2 00000000
+      MOVI REG2 .wait_loop
       CMP REG0 REG1
-      JCND NE .wait_loop
+      JCND NE REG2
       MOVI REG3 .game_loop_player1
       JCND NC REG3
 
@@ -564,7 +565,7 @@
       MOVI REG8 0001000000000111
       MOVI REG9 .return_false
       CMP REG12 REG8
-      JCND GT .return_false
+      JCND GT REG9
       LOAD REG13 REG12
       MOVI REG8 .check_collision
       CMPI REG13 00000001
