@@ -35,7 +35,6 @@ bottom of stack = 0000 1110 1111 0000
 end of wall coordinates = 0001 0000 0000 0111
 start of wall coordinates = 0000 1110 1101 1100
 
-
 // Register conventions
 REG0 - REG4 // temporary register
 REG5 - REG10 // saved register

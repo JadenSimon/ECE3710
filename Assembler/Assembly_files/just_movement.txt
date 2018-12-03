@@ -1,0 +1,146 @@
+.game_setup
+      // set the initial tank location for player 1
+      MOVI REG0 0000111100001111
+      MOVI REG1 0000111100001110
+      MOVI REG2 0000000000111111
+      MOVI REG3 0000000000111111
+      STOR REG2 REG0
+      STOR REG3 REG1
+      // set the initial tank location for player 2
+      MOVI REG0 0000111100001101
+      MOVI REG1 0000111100001100
+      MOVI REG2 0000001000111111
+      MOVI REG3 0000000110011111
+      STOR REG2 REG0
+      STOR REG3 REG1
+      // set the initial tank health for player 1
+      MOVI REG0 0000111001110100
+      MOVI REG1 00000011
+      STOR REG1 REG0
+      // set the initial tank health for player 2
+      MOVI REG0 0000111001110011
+      MOVI REG1 00000011
+      STOR REG1 REG0
+      // set the initial orientation for player 1
+      MOVI REG0 0000111001110010
+      MOVI REG1 00000001
+      STOR REG1 REG0
+      // set the initial orientation for player 2
+      MOVI REG0 0000111001110001
+      MOVI REG1 00000011
+      STOR REG1 REG0
+      // set the game state to one to tell the vga to draw the map
+      MOVI REG0 0000111100000111
+      MOVI REG1 00000001
+      STOR REG1 REG0
+      MOVI REG4 .game_loop_player1
+      JCND NC REG4
+
+.game_loop_player1
+      // load snes input
+      LCI REG0 player1
+      MOV REG2 REG0
+      // if its a move UP: jump to update_tank_location_up
+      MOVI REG1 0000100000000000
+      AND REG2 REG1
+      MOVI REG3 .update_tank_location_up_player1
+      CMP REG2 REG1
+      JCND EQ REG3
+      // if its a move DOWN: jump to update_tank_location_down
+      MOV REG2 REG0
+      MOVI REG1 0000010000000000
+      AND REG2 REG1
+      MOVI REG3 .update_tank_location_down_player1
+      CMP REG2 REG1
+      JCND EQ REG3
+      // if its a move LEFT: jump to update_tank_location_left
+      MOV REG2 REG0
+      MOVI REG1 0000001000000000
+      AND REG2 REG1
+      MOVI REG3 .update_tank_location_left_player1
+      CMP REG2 REG1
+      JCND EQ REG3
+      // if its a move RIGHT: jump to update_tank_location_right
+      MOV REG2 REG0
+      MOVI REG1 0000000100000000
+      AND REG2 REG1
+      MOVI REG3 .update_tank_location_right_player1
+      CMP REG2 REG1
+      JCND EQ REG3
+
+.update_tank_location_right_player1
+      // move the address of the player1 loc to saved register
+      MOVI REG6 0000111100001111
+      LOAD REG14 REG6
+      MOVI REG7 0000111100001110
+      LOAD REG15 REG7
+      // mov the orientation address into reg10
+      MOVI REG10 0000111001110010
+      MOVI REG5 00000001
+      ADDI REG14 00000001
+      // MOVI REG4 .check_wall_collision
+      // JAL REG11 REG4
+      // MOVI REG4 .check_shoot_player1
+      // CMPI REG13 00000000
+      // JCND NE REG4
+      STOR REG14 REG6
+      STOR REG5 REG10
+      MOVI REG4 .game_loop_player1
+      JCND NC REG4
+
+.update_tank_location_left_player1
+      // move the address of the player1 loc to saved register
+      MOVI REG6 0000111100001111
+      LOAD REG14 REG6
+      MOVI REG7 0000111100001110
+      LOAD REG15 REG7
+      MOVI REG10 0000111001110010
+      MOVI REG5 00000011
+      SUBI REG14 00000001
+      // MOVI REG4 .check_wall_collision
+      // JAL REG11 REG4
+      // MOVI REG4 .check_shoot_player1
+      // CMPI REG13 00000000
+      // JCND NE REG4
+      STOR REG14 REG6
+      STOR REG5 REG10
+      MOVI REG4 .game_loop_player1
+      JCND NC REG4
+
+.update_tank_location_up_player1
+      // move the address of the player1 loc to saved register
+      MOVI REG6 0000111100001111
+      LOAD REG14 REG6
+      MOVI REG7 0000111100001110
+      LOAD REG15 REG7
+      MOVI REG10 0000111001110010
+      MOVI REG5 00000000
+      ADDI REG15 00000001
+      // MOVI REG4 .check_wall_collision
+      // JAL REG11 REG4
+      // MOVI REG4 .check_shoot_player1
+      // CMPI REG13 00000000
+      // JCND NE REG4
+      STOR REG15 REG7
+      STOR REG5 REG10
+      MOVI REG4 .game_loop_player1
+      JCND NC REG4
+
+.update_tank_location_down_player1
+      // move the address of the player1 loc to saved register
+      MOVI REG6 0000111100001111
+      LOAD REG14 REG6
+      MOVI REG7 0000111100001110
+      LOAD REG15 REG7
+      MOVI REG10 0000111001110010
+      MOVI REG5 00000010
+      SUBI REG15 00000001
+      // MOVI REG4 .check_wall_collision
+      // JAL REG11 REG4
+      // MOVI REG4 .check_shoot_player1
+      // CMPI REG13 00000000
+      // JCND NE REG4
+      STOR REG15 REG7
+      STOR REG5 REG10
+      MOVI REG4 .game_loop_player1
+      JCND NC REG4
