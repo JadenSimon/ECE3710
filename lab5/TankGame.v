@@ -1,7 +1,7 @@
 // Highest level module for the whole project
 // Ties everything together
 
-module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync, vSync, red, green, blue, vga_slow_clk, snes_slow_clk);
+module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync, vSync, red, green, blue, vga_slow_clk, snes_slow_clk, snes1_fake_data, snes2_fake_data);
 	// Input wires
 	input clk, reset;
 	input snes1_in, snes2_in;
@@ -14,7 +14,19 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	output reg snes_slow_clk;
 	
 	// SNES wires
-	wire [15:0] snes1_data, snes2_data;
+	wire [15:0] snes1_data, snes2_data; 
+	
+	input wire [4:0] snes1_fake_data; 
+	input wire [4:0] snes2_fake_data;
+	
+	wire [15:0] snes1_padded_data;
+	wire [15:0] snes2_padded_data;
+	wire new_reset;
+	
+	assign snes1_padded_data = {4'b0, snes1_fake_data, 7'b0};
+	assign snes2_padded_data = {4'b0, snes2_fake_data, 7'b0};
+	
+	assign new_reset = ~reset;
 	
 	// VGA wires
 	wire bright;
@@ -23,14 +35,14 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	wire [15:0] pixel;
 	
 	// Create the CPU
-	cpu_datapath CPU(clk, reset, snes1_data, snes2_data, vga_addr, vga_out);
+	cpu_datapath CPU(clk, new_reset, snes1_padded_data, snes2_padded_data, vga_addr, vga_out);
 
 	// Create the SNES controller modules
 	SNES_Controller controller1(snes_slow_clk, snes1_in, snes1_latch, snes1_data);
 	SNES_Controller controller2(snes_slow_clk, snes2_in, snes2_latch, snes2_data);
 	
 	// Create the VGA modules 
-	VGA_Display display(vga_slow_clk, reset, hSync, vSync, hCount, vCount, bright);
+	VGA_Display display(vga_slow_clk, new_reset, hSync, vSync, hCount, vCount, bright);
 	VGAController controller(clk, hCount, vCount, vga_addr, vga_out, pixel);
 	
 	// Assign VGA outputs based off bright/pixel.
@@ -40,7 +52,10 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	
 	always@(posedge clk)
 	begin
-		vga_slow_clk <= ~vga_slow_clk;
+		if (new_reset)
+			vga_slow_clk <= 1'b0;
+		else
+			vga_slow_clk <= ~vga_slow_clk;
 	end
 	
 	// Create a slow 5 MHz clock for the SNES controllers
