@@ -460,9 +460,11 @@
       LOAD REG2 REG2
       LOAD REG3 REG3
       LOAD REG5 REG5
+      LOAD REG0 REG0
       MOVI REG7 .update_projectiles_player1
-      CMPI REG2 00000000
+      CMPI REG0 00000000
       JCND NE REG7
+      MOVI REG0 0000111100001011
       // calculate the offset
       MOVI REG7 .spawn_proj1_up
       CMPI REG5 00000000
@@ -521,9 +523,11 @@
       LOAD REG2 REG2
       LOAD REG3 REG3
       LOAD REG5 REG5
+      LOAD REG0 REG0
       MOVI REG7 .update_projectiles_player2
-      CMPI REG2 00000000
+      CMPI REG0 00000000
       JCND NE REG7
+      MOVI REG0 0000111100001001
       // calculate the offset
       MOVI REG7 .spawn_proj2_up
       CMPI REG5 00000000
