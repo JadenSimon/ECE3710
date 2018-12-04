@@ -118,6 +118,7 @@
 .game_loop_player2
       // load snes input
       LCI REG0 player2
+      ADDI REG0 00000000
       MOV REG2 REG0
       // if its a move UP: jump to update_tank_location_up
       MOVI REG1 0000100000000000
