@@ -15,8 +15,8 @@ module Bram
 	
 	// Loads memory into the RAM
 	initial begin
-		$readmemh("program.txt", ram);
-		$readmemh("map.data", ram, 4080, 4379);
+		$readmemh("data.txt", ram);
+//		$readmemh("map.data", ram, 4080, 4379);
 	end
 
 	// Port A 

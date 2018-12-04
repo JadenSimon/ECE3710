@@ -68,7 +68,7 @@ module SNES_Controller(clk, data_in, latch, data_out);
 				state <= start;
 				
 				// set the data_out to our temp data
-				data_out <= temp_data;
+				data_out <= ~temp_data;
 			end
 			default:
 			begin
