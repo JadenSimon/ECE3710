@@ -75,6 +75,7 @@
       JCND NE REG2
       // load snes input
       LCI REG0 player1
+      ADDI REG0 00000000
       // if its a move UP: jump to update_tank_location_up
       MOV REG2 REG0
       MOVI REG1 0000100000000000
