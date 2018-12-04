@@ -75,6 +75,9 @@
       MOVI REG2 .wait_loop
       CMP REG0 REG1
       JCND NE REG2
+      // Progress the explosion animation
+      MOVI REG0 .progress_animations
+      JAL REG11 REG0
       // load snes input
       LCI REG0 player1
       // if its a move UP: jump to update_tank_location_up
@@ -205,7 +208,7 @@
       // Check wall collisions first
       MOVI REG8 .check_wall_collision
       JAL REG11 REG8
-      MOVI REG8 .mark_invalid
+      MOVI REG8 .mark_invalid1
       CMPI REG13 00000001
       JCND EQ REG8
       // Check player2 collision
@@ -232,8 +235,21 @@
       MOVI REG14 0000111001110011
       LOAD REG15 REG14
       SUBI REG15 00000001
-      STOR REG15 REG14 
-.mark_invalid
+      STOR REG15 REG14
+.mark_invalid1
+      PUSH REG8
+      PUSH REG9
+      MOVI REG8 0001000100100001
+      MOVI REG9 00000000
+      STOR REG9 REG8
+      MOVI REG8 0001000100100000
+      MOV REG9 REG6
+      STOR REG9 REG8
+      MOVI REG8 0001000100011111
+      MOV REG9 REG7
+      STOR REG9 REG8
+      POP REG9
+      POP REG8
       MOVI REG0 00000000
       STOR REG0 REG6
       STOR REG0 REG7
@@ -287,7 +303,7 @@
       MOV REG15 REG1
       MOVI REG8 .check_wall_collision
       JAL REG11 REG8
-      MOVI REG8 .mark_invalid
+      MOVI REG8 .mark_invalid2
       CMPI REG13 00000001
       JCND EQ REG8
       // Check player1 collision
@@ -313,8 +329,21 @@
       MOVI REG14 0000111001110100
       LOAD REG15 REG14
       SUBI REG15 00000001
-      STOR REG15 REG14       
-.mark_invalid
+      STOR REG15 REG14
+.mark_invalid2
+      PUSH REG8
+      PUSH REG9
+      MOVI REG8 0001000100011110
+      MOVI REG9 00000000
+      STOR REG9 REG8
+      MOVI REG8 0001000100011101
+      MOV REG9 REG6
+      STOR REG9 REG8
+      MOVI REG8 0001000100011100
+      MOV REG9 REG7
+      STOR REG9 REG8
+      POP REG9
+      POP REG8
       MOVI REG0 00000000
       STOR REG0 REG6
       STOR REG0 REG7
@@ -690,4 +719,29 @@
       JCND NC REG11
 .return_true
       MOVI REG13 00000001
+      JCND NC REG11
+
+.progress_animations
+      MOVI REG0 0001000100100000
+      LOAD REG1 REG0
+      MOVI REG2 .check_explosion2
+      CMPI REG1 00000000
+      JCND EQ REG2
+.increment_frame1
+      MOVI REG8 0001000100100001
+      LOAD REG9 REG8
+      ADDI REG9 00000001
+      STOR REG9 REG8
+.check_explosion2
+      MOVI REG0 0001000100011101
+      LOAD REG1 REG0
+      MOVI REG2 .return_to_loop
+      CMPI REG1 00000000
+      JCND EQ REG2
+.increment_frame2
+      MOVI REG8 0001000100011110
+      LOAD REG9 REG8
+      ADDI REG9 00000001
+      STOR REG9 REG8
+.return_to_loop
       JCND NC REG11

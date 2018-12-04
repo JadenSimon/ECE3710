@@ -6,7 +6,7 @@ module BackgroundController(clk, x_in, y_in, write_glyph, addr, glyph_id, pixel)
 	parameter INPUT_WIDTH = 10;
 	parameter PIXEL_SIZE = 16;
 	parameter GLYPH_SIZE = 32;
-	parameter ID_SIZE = 4;
+	parameter ID_SIZE = 6;
 	parameter MAP_SIZE_X = 20;
 	parameter MAP_SIZE_Y = 15;
 	
@@ -39,13 +39,18 @@ module BackgroundController(clk, x_in, y_in, write_glyph, addr, glyph_id, pixel)
 	// Upper 5 bits of x/y determine the location of the glyph id in the mapping
 	// Some wires to help with computing x/y offsets
 	wire [6:0] x_offset, y_offset;
-	assign x_offset = glyph_mapping[y_in[9:5] * MAP_SIZE_X + x_in[9:5]][1:0] * GLYPH_SIZE;
-	assign y_offset = glyph_mapping[y_in[9:5] * MAP_SIZE_X + x_in[9:5]][3:2] * GLYPH_SIZE;
+	assign x_offset = glyph_mapping[y_in[9:5] * MAP_SIZE_X + x_in[9:5]][3:2] * GLYPH_SIZE;
+	assign y_offset = glyph_mapping[y_in[9:5] * MAP_SIZE_X + x_in[9:5]][5:4] * GLYPH_SIZE;
 	
 	// Given an x/y position, the correct pixel value will be found based off the glyph_mapping
 	always@(posedge clk) 
 	begin
-		pixel <= glyph_buffer[((y_in[4:0] + y_offset) * GLYPH_SIZE * ID_SIZE) + (x_in[4:0] + x_offset)];
+		case (glyph_mapping[y_in[9:5] * MAP_SIZE_X + x_in[9:5]][1:0])
+			2'b00: pixel <= glyph_buffer[((y_in[4:0] + y_offset) * GLYPH_SIZE * (ID_SIZE - 2)) + x_in[4:0] + x_offset]; // Normal orientation
+			2'b11: pixel <= glyph_buffer[((x_in[4:0] + y_offset) * GLYPH_SIZE * (ID_SIZE - 2)) + (GLYPH_SIZE - y_in[4:0]) + x_offset]; // 90 deg: (x, y) -> (-y, x)
+			2'b10: pixel <= glyph_buffer[((GLYPH_SIZE - y_in[4:0] + y_offset) * GLYPH_SIZE * (ID_SIZE - 2)) + (GLYPH_SIZE - x_in[4:0]) + x_offset]; // 180 deg: (x, y) -> (-x, -y)
+			2'b01: pixel <= glyph_buffer[((GLYPH_SIZE - x_in[4:0] + y_offset) * GLYPH_SIZE * (ID_SIZE - 2)) + y_in[4:0] + x_offset]; // 270 deg: (x, y) -> (y, -x)
+		endcase
 	end
 
 endmodule
