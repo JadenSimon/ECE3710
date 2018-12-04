@@ -85,9 +85,7 @@ module control_fsm(clk, reset, instr, flags, ld_mux, pc_mux, jal_mux, pc_load, b
 						fsm_state <= 3'b001; // LOAD can only move data into the register on the next cycle
 					else if (instr[15:12] == Special && instr[7:4] == STOR)
 						fsm_state <= 3'b010; // STOR must wait a cycle for the next instruction
-					else if (instr[15:12] == Special && instr[7:4] == LCI)
-						fsm_state <= 3'b011;
-					else
+					else 
 						fsm_state <= 3'b000;
 				end
 				
