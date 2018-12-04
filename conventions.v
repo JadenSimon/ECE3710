@@ -49,8 +49,8 @@ start of wall coordinates = 0000 1111 1111 0000
 // Register conventions
 REG0 - REG4 // temporary register
 REG5 - REG10 // saved register
-REG11 // Return register
+REG11 // Return address register
 REG12 // Stack pointer
-REG13 // Jump target register
+REG13 // Return value register
 REG14 // arg1
 REG15 // arg2

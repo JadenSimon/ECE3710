@@ -29,6 +29,8 @@
       MOVI REG0 0000111001110001
       MOVI REG1 00000011
       STOR REG1 REG0
+      // initialize stack pointer
+      MOVI REG12 0000111100000100
       // set the game state to one to tell the vga to draw the map
       MOVI REG0 0000111100000111
       MOVI REG1 00000001
@@ -558,21 +560,34 @@
       JCND NC REG4
 
 .check_wall_collision
+      PUSH REG5
+      PUSH REG6
+      PUSH REG11
       MOVI REG3 00001111
       MOVI REG4 00001111
-      MOVI REG12 0000111111110000
+      MOVI REG5 0000111111110000
 .next_tile
       // end of wall coordinates in reg8 so we can compare if we've gotten to the end of tiles
       MOVI REG8 0001000100011011
-      MOVI REG9 .return_false
-      CMP REG12 REG8
+      MOVI REG9 .return_check_wall_collision
+      MOVI REG13 00000000
+      CMP REG5 REG8
       JCND GT REG9
-      LOAD REG13 REG12
-      MOVI REG8 .check_collision
+      LOAD REG13 REG5
+      MOVI REG9 .check_collision
       CMPI REG13 00000010
-      JCND EQ REG8
+      BCND NE 00000001
+      JAL REG11 REG9
+      MOVI REG9 .increment
+      CMPI REG13 00000000
+      JCND EQ REG9
+.return_check_wall_collision
+      POP REG11
+      POP REG6
+      POP REG5
+      JCND NC REG11
 .increment
-      ADDI REG12 00000001
+      ADDI REG5 00000001
       ADDI REG3 00100000
       MOVI REG8 0000001001111111
       MOVI REG9 .next_tile
@@ -581,6 +596,7 @@
       MOVI REG3 00001111
       ADDI REG4 00100000
       JCND NC REG9
+
 .check_collision
       MOVI REG13 .reverse_x
       CMP REG14 REG3
@@ -590,7 +606,7 @@
       MOVI REG13 .check_y
       CMPI REG8 00100000
       JCND LT REG13
-      MOVI REG13 .increment
+      MOVI REG13 .return_false
       JCND NC REG13
 .reverse_x
       MOV REG8 REG3
@@ -598,7 +614,7 @@
       MOVI REG13 .check_y
       CMPI REG8 00100000
       JCND LT REG13
-      MOVI REG13 .increment
+      MOVI REG13 .return_false
       JCND NC REG13
 .check_y
       MOVI REG13 .reverse_y
@@ -609,7 +625,7 @@
       MOVI REG13 .return_true
       CMPI REG8 00100000
       JCND LT REG13
-      MOVI REG13 .increment
+      MOVI REG13 .return_false
       JCND NC REG13
 .reverse_y
       MOV REG8 REG4
@@ -617,7 +633,7 @@
       MOVI REG13 .return_true
       CMPI REG8 00100000
       JCND LT REG13
-      MOVI REG13 .increment
+      MOVI REG13 .return_false
       JCND NC REG13
 .return_false
       MOVI REG13 00000000
