@@ -92,7 +92,7 @@ def decode_instruction(line):
         output_line = "0101" + reg_to_bin["REG12"] + "00000001\n"
         output_line += "0100" + reg_to_bin[instruction[1]] + "0000" + reg_to_bin["REG12"]
     elif instruction[0] == 'LSH': # Shift Instructions
-        output_line = "0100" + reg_to_bin[instruction[1]] + "1100" + instruction[2]
+        output_line = "1000" + reg_to_bin[instruction[1]] + "0100" + instruction[2]
     elif instruction[0] == 'JCND':
         output_line = "0100" + cond_to_bin[instruction[1]] + "1100" + reg_to_bin[instruction[2]]
     elif instruction[0] == 'BCND': # Immediate Instructions

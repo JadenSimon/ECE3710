@@ -119,16 +119,15 @@
       CMP REG2 REG1
       JCND EQ REG3
 
-.update_tank_location_right_player1
+.update_tank_location_left_player1
       // move the address of the player1 loc to saved register
       MOVI REG6 0000111100001111
       LOAD REG14 REG6
       MOVI REG7 0000111100001110
       LOAD REG15 REG7
-      // mov the orientation address into reg10
       MOVI REG10 0000111001110010
-      MOVI REG5 00000001
-      ADDI REG14 00000001
+      MOVI REG5 00000011
+      SUBI REG14 00000001
       // MOVI REG4 .check_wall_collision
       // JAL REG11 REG4
       // MOVI REG4 .check_shoot_player1
@@ -139,15 +138,16 @@
       MOVI REG4 .game_loop_player1
       JCND NC REG4
 
-.update_tank_location_left_player1
+.update_tank_location_right_player1
       // move the address of the player1 loc to saved register
       MOVI REG6 0000111100001111
       LOAD REG14 REG6
       MOVI REG7 0000111100001110
       LOAD REG15 REG7
+      // mov the orientation address into reg10
       MOVI REG10 0000111001110010
-      MOVI REG5 00000011
-      SUBI REG14 00000001
+      MOVI REG5 00000001
+      ADDI REG14 00000001
       // MOVI REG4 .check_wall_collision
       // JAL REG11 REG4
       // MOVI REG4 .check_shoot_player1

@@ -90,8 +90,8 @@
       JCND NE REG2
       // load snes input
       LCI REG0 player1
-      MOV REG2 REG0
       // if its a move UP: jump to update_tank_location_up
+      MOV REG2 REG0
       MOVI REG1 0000100000000000
       AND REG2 REG1
       MOVI REG3 .update_tank_location_up_player1
@@ -279,7 +279,7 @@
       JAL REG11 REG8
       MOVI REG8 .mark_invalid
       CMPI REG13 00000001
-      JCND EQ .mark_invalid
+      JCND EQ REG8
       STOR REG0 REG6
       STOR REG1 REG7
       MOVI REG3 .game_loop_player1
@@ -291,16 +291,15 @@
       MOVI REG3 .game_loop_player1
       JCND NC REG3
 
-.update_tank_location_right_player1
+.update_tank_location_left_player1
       // move the address of the player1 loc to saved register
       MOVI REG6 0000111100001111
       LOAD REG14 REG6
       MOVI REG7 0000111100001110
       LOAD REG15 REG7
-      // mov the orientation address into reg10
       MOVI REG10 0000111001110010
-      MOVI REG5 00000001
-      ADDI REG14 00000001
+      MOVI REG5 00000011
+      SUBI REG14 00000001
       MOVI REG4 .check_wall_collision
       JAL REG11 REG4
       MOVI REG4 .check_shoot_player1
@@ -311,15 +310,16 @@
       MOVI REG4 .check_shoot_player1
       JCND NC REG4
 
-.update_tank_location_left_player1
+.update_tank_location_right_player1
       // move the address of the player1 loc to saved register
       MOVI REG6 0000111100001111
       LOAD REG14 REG6
       MOVI REG7 0000111100001110
       LOAD REG15 REG7
+      // mov the orientation address into reg10
       MOVI REG10 0000111001110010
-      MOVI REG5 00000011
-      SUBI REG14 00000001
+      MOVI REG5 00000001
+      ADDI REG14 00000001
       MOVI REG4 .check_wall_collision
       JAL REG11 REG4
       MOVI REG4 .check_shoot_player1
@@ -483,7 +483,7 @@
 .spawn_proj1_down
       ADDI REG3 00010000
       STOR REG2 REG0
-      STOR REG13REG1
+      STOR REG3 REG1
       STOR REG5 REG6
       MOVI REG4 .update_projectiles_player1
       JCND NC REG4
