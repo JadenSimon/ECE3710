@@ -17,7 +17,7 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	wire [15:0] snes1_data, snes2_data; 
 	
 	input wire [4:0] snes1_fake_data; 
-	input wire [4:0] snes2_fake_data;
+	input wire [4:0] snes2_fake_data; 
 	
 	wire [15:0] snes1_padded_data;
 	wire [15:0] snes2_padded_data;

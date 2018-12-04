@@ -32,9 +32,9 @@ module HardwareSprite(clk, x_in, y_in, x_pos, y_pos, angle, d_en, pixel);
 			// Do some rotation
 			case (angle)
 				2'b00: pixel <= sprite_buffer[((y_in - y_pos) * SPRITE_SIZE) + (x_in - x_pos)]; // Normal orientation
-				2'b01: pixel <= sprite_buffer[((x_in - x_pos) * SPRITE_SIZE) + (SPRITE_SIZE - (y_in - y_pos))]; // 90 deg: (x, y) -> (-y, x)
+				2'b11: pixel <= sprite_buffer[((x_in - x_pos) * SPRITE_SIZE) + (SPRITE_SIZE - (y_in - y_pos))]; // 90 deg: (x, y) -> (-y, x)
 				2'b10: pixel <= sprite_buffer[((SPRITE_SIZE - (y_in - y_pos)) * SPRITE_SIZE) + (SPRITE_SIZE - (x_in - x_pos))]; // 180 deg: (x, y) -> (-x, -y)
-				2'b11: pixel <= sprite_buffer[((SPRITE_SIZE - (x_in - x_pos)) * SPRITE_SIZE) + (y_in - y_pos)]; // 270 deg: (x, y) -> (y, -x)
+				2'b01: pixel <= sprite_buffer[((SPRITE_SIZE - (x_in - x_pos)) * SPRITE_SIZE) + (y_in - y_pos)]; // 270 deg: (x, y) -> (y, -x)
 			endcase
 
 		end

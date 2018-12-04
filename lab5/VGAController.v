@@ -187,7 +187,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 		font_color_mask <= 16'b1111100000111110;
 		font_scale <= 2'b00;
 		
-		if (font_state == 5'b11111)
+		if (font_state == 5'b00000)
 		begin
 			font_state <= font_state;
 			write_font <= 1'b0;
