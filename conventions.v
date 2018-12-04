@@ -32,15 +32,14 @@ top of stack = 0000 1111 0000 0100
 bottom of stack = 0000 1110 1111 0000
 
 // Frame id, x, and y of proj1
-Projectile 1 frame id = 0001 0001 0010 0001
-Projectile 1 frame x coord = 0001 0001 0010 0000
-Projectile 1 frame y coord = 0001 0001 0001 1111
+explosion 1 frame id = 0001 0001 0010 0001
+explosion 1 frame x coord = 0001 0001 0010 0000
+explosion 1 frame y coord = 0001 0001 0001 1111
 
 // Frame id, x, and y of proj2
-Projectile 2 frame id = 0001 0001 0001 1110
-Projectile 2 frame x coord = 0001 0001 0001 1101
-Projectile 2 frame y coord = 0001 0001 0001 1100
-
+explosion 2 frame id = 0001 0001 0001 1110
+explosion 2 frame x coord = 0001 0001 0001 1101
+explosion 2 frame y coord = 0001 0001 0001 1100
 
 // this will hold the bitmap of the walls in the map so we can do collision detection
 end of wall coordinates = 0001 0001 0001 1011
