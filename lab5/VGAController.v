@@ -68,17 +68,17 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 	HardwareSprite #(10, 16, 32, "nuke.data") proj2(clk, x_in, y_in, proj2_x, proj2_y, proj2_angle, proj2_draw, proj2_pixel);
 	
 	// Logic to account for counters being able to go off screen plus one to account for delay
-	assign x_in = h_count - 10'd143;
-	assign y_in = v_count - 10'd34;
+	assign x_in = h_count - 10'd142;
+	assign y_in = v_count - 10'd33;
 	
 	// Handles sprite overlap stuff
 	always@(posedge clk) 
 	begin 
 		if (font_pixel[0] == 1) 
 			pixel <= font_pixel;
-		else if (proj1_draw && proj1_pixel[0] == 1 && proj1_x != 10'b0)
+		else if (proj1_draw && proj1_pixel[0] == 1)
 			pixel <= proj1_pixel;
-		else if (proj2_draw && proj2_pixel[0] == 1 && proj2_x != 10'b0)
+		else if (proj2_draw && proj2_pixel[0] == 1)
 			pixel <= proj2_pixel;
 		else if (player1_draw && player1_pixel[0] == 1)
 			pixel <= player1_pixel;
@@ -194,7 +194,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 		end
 		
 		case (font_state)
-			5'b00000:	font_addr <= 13'd2559;
+			5'b00000: font_addr <= 13'd2559;
 			5'b00001: font_id <= 7'd65;
 			5'b00010: font_id <= 7'd66;
 			5'b00011: font_id <= 7'd67;

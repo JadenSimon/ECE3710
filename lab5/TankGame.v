@@ -23,7 +23,7 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	wire [15:0] snes2_padded_data;
 	wire new_reset;
 	
-	assign snes1_padded_data = {4'b0, snes1_fake_data, 7'b0};
+	assign snes1_padded_data = {4'b0, snes1_fake_data, 7'b0};  
 	assign snes2_padded_data = {4'b0, snes2_fake_data, 7'b0};
 	
 	assign new_reset = ~reset;
@@ -42,7 +42,7 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	SNES_Controller controller2(snes_slow_clk, snes2_in, snes2_latch, snes2_data);
 	
 	// Create the VGA modules 
-	VGA_Display display(vga_slow_clk, new_reset, hSync, vSync, hCount, vCount, bright);
+	VGA_Display display(clk, vga_slow_clk, new_reset, hSync, vSync, hCount, vCount, bright);
 	VGAController controller(clk, hCount, vCount, vga_addr, vga_out, pixel);
 	
 	// Assign VGA outputs based off bright/pixel.
@@ -50,6 +50,7 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	assign green = bright ? pixel[10:6] : 5'b0;
 	assign blue = bright ? pixel[5:1] : 5'b0;
 	
+	// Create a slower vga signal
 	always@(posedge clk)
 	begin
 		if (new_reset)

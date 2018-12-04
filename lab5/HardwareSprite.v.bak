@@ -1,0 +1,19 @@
+// Sprite Module
+// 1 bit of the pixel is reserved for transparency (either opaque or transparent)
+module HardwareSprite(x_in, y_in, x_pos, y_pos, d_en, pixel, z_index);
+	parameter INPUT_WIDTH = 10;
+	parameter PIXEL_SIZE = 8;
+	parameter SPRITE_SIZE = 64;
+	
+	input [(INPUT_WIDTH-1):0] x_in, y_in;
+	output [(PIXEL_SIZE-1):0] pixel;
+	output d_en; // d_en is whether or not this sprite's pixel is visible
+	output [3:0] z_index = 4'b0; // z_index is for z-buffering, 0 is closest to screen, 15 is farthest
+	
+	// Holds all pixels for the sprite
+	reg [(PIXEL_SIZE-1):0] sprite_buffer [(SPRITE_SIZE * SPRITE_SIZE - 1):0];
+	
+	// Hardware sprite logic is purely combinational
+	
+	
+endmodule

@@ -1,6 +1,7 @@
-module VGA_Display(clock, clear, hSync, vSync, hCount, vCount, bright);
+module VGA_Display(clock, enable, clear, hSync, vSync, hCount, vCount, bright);
 
 input clock;
+input enable;
 input clear;
 
 reg [1:0] hState = 2'b0;
@@ -24,13 +25,12 @@ localparam HFRONT = 15;					 // Horizontal frontporch
 localparam VSYNC = 1;					 // Vertical sync time
 localparam VBACK = 32; 					 // Vertical backporch
 localparam VFRONT = 9;					 // Vertical frontporch
-localparam LINE   = 640;             // complete line (pixels)
-localparam SCREEN = 480;             // complete screen (lines)
+localparam LINE   = 639;             // complete line (pixels)
+localparam SCREEN = 479;             // complete screen (lines)
 
 // True when a new line is starting to draw
 wire horizontalStart;
 assign horizontalStart = (hState == 2'b01) && (hCount == (HSYNC + HBACK));
-
 
 //Handles hCount
 always@(posedge clock)
@@ -40,12 +40,12 @@ begin
 		hCount <= 10'b0;
 		hState <= 2'b00;
 	end
-	else
+	else if (enable)
 	begin 
 		hCount <= hCount + 1'b1;
 	
 		case (hState)
-			2'b00 : hState <= hCount == HSYNC ? 2'b01 : 2'b00; 									// Horizontal sync pulse state
+			2'b00 : hState <= hCount == (HSYNC) ? 2'b01 : 2'b00; 									// Horizontal sync pulse state
 			2'b01 : hState <= hCount == (HSYNC + HBACK) ? 2'b10 : 2'b01;   					// Horizontal back porch state
 			2'b10 : hState <= hCount == (HSYNC + HBACK + LINE) ? 2'b11 : 2'b10;  			// Horizontal active state
 			2'b11 : hState <= hCount == (HSYNC + HBACK + LINE + HFRONT) ? 2'b00 : 2'b11;  // Horizontal front porch state
@@ -57,8 +57,6 @@ begin
 end
 
 //Handles vCount
-// Note that vcount is incremented using blocking assignments due to the fact that
-// vertical increments only occur when the horizontal line ends, thus we need to immediately increment vcount
 always@(posedge clock)
 begin
 	if (clear)
@@ -66,19 +64,19 @@ begin
 		vCount <= 10'b0;
 		vState <= 2'b00;
 	end
-	else if (horizontalStart)
+	else if (enable && horizontalStart)
 	begin 
-		vCount = vCount + 1'b1;
+		vCount <= vCount + 1'b1;
 	
 		case (vState)
-			2'b00 : vState <= vCount == VSYNC ? 2'b01 : 2'b00; 									  // Vertical sync pulse state
+			2'b00 : vState <= vCount == (VSYNC) ? 2'b01 : 2'b00; 									  // Vertical sync pulse state
 			2'b01 : vState <= vCount == (VSYNC + VBACK) ? 2'b10 : 2'b01;   					  // Vertical back porch state
 			2'b10 : vState <= vCount == (VSYNC + VBACK + SCREEN) ? 2'b11 : 2'b10;  		  	  // Vertical active state
 			2'b11 : vState <= vCount == (VSYNC + VBACK + SCREEN + VFRONT) ? 2'b00 : 2'b11;  // Vertical front porch state
 		endcase
 			
 		if (vCount == VSYNC + VBACK + SCREEN + VFRONT)
-			vCount = 10'b0;
+			vCount <= 10'b0;
 	end
 	else
 	begin
