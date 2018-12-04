@@ -21,7 +21,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 	localparam MAPPING = 					16'b0000_1111_1111_0000;
 	/***************************/
 	
-	
+	 
 	input clk;
 	input wire [(INPUT_WIDTH-1):0] h_count, v_count;
 	input wire [15:0] mem_out; // Used to read from main memory
@@ -65,16 +65,16 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 	HardwareSprite #(10, 16, 32, "murica_tank_up.data") player1(clk, x_in, y_in, player1_x, player1_y, player1_angle, player1_draw, player1_pixel);
 	HardwareSprite #(10, 16, 32, "ussr_tank_up.data") player2(clk, x_in, y_in, player2_x, player2_y, player2_angle, player2_draw, player2_pixel);
 	HardwareSprite #(10, 16, 32, "eagle_up.data") proj1(clk, x_in, y_in, proj1_x, proj1_y, proj1_angle, proj1_draw, proj1_pixel);
-	HardwareSprite #(10, 16, 32, "bear_up.data") proj2(clk, x_in, y_in, proj2_x, proj2_y, proj2_angle, proj2_draw, proj2_pixel);
+	HardwareSprite #(10, 16, 32, "nuke.data") proj2(clk, x_in, y_in, proj2_x, proj2_y, proj2_angle, proj2_draw, proj2_pixel);
 	
 	// Logic to account for counters being able to go off screen plus one to account for delay
 	assign x_in = h_count - 10'd143;
-	assign y_in = v_count - 10'd33;
+	assign y_in = v_count - 10'd34;
 	
 	// Handles sprite overlap stuff
-	always@(posedge clk)
-	begin
-		if (font_pixel[0] == 1)
+	always@(posedge clk) 
+	begin 
+		if (font_pixel[0] == 1) 
 			pixel <= font_pixel;
 		else if (proj1_draw && proj1_pixel[0] == 1 && proj1_x != 10'b0)
 			pixel <= proj1_pixel;
@@ -138,20 +138,20 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 			case (load_state)
 				8'b00000000: player1_x <= player1_x;
 				8'b00000001: player1_x <= player1_x;
-				8'b00000010: player1_x <= mem_out[9:0];
-				8'b00000011: player1_y <= mem_out[9:0];
-				8'b00000100: player2_x <= mem_out[9:0];
-				8'b00000101: player2_y <= mem_out[9:0];
+				8'b00000010: player1_x <= mem_out[9:0] - 10'd16;
+				8'b00000011: player1_y <= mem_out[9:0] - 10'd16;
+				8'b00000100: player2_x <= mem_out[9:0] - 10'd16;
+				8'b00000101: player2_y <= mem_out[9:0] - 10'd16;
 				8'b00000110: player1_health <= mem_out[3:0];
 				8'b00000111: player2_health <= mem_out[3:0];
 				8'b00001000: player1_angle <= mem_out[1:0];
 				8'b00001001: player2_angle <= mem_out[1:0];
 				8'b00001010: proj1_angle <= mem_out[1:0];
 				8'b00001011: proj2_angle <= mem_out[1:0];
-				8'b00001100: proj1_x <= mem_out[9:0];
-				8'b00001101: proj1_y <= mem_out[9:0];
-				8'b00001110: proj2_x <= mem_out[9:0];
-				8'b00001111: proj2_y <= mem_out[9:0];
+				8'b00001100: proj1_x <= mem_out[9:0] - 10'd16;
+				8'b00001101: proj1_y <= mem_out[9:0] - 10'd16;
+				8'b00001110: proj2_x <= mem_out[9:0] - 10'd16;
+				8'b00001111: proj2_y <= mem_out[9:0] - 10'd16;
 				8'b00010000: game_state <= mem_out[1:0];
 				8'b00010001: // Game mapping load state
 					begin
@@ -185,7 +185,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 		font_addr <= font_addr + 1'b1;
 		font_state <= font_state + 1'b1;
 		font_color_mask <= 16'b1111100000111110;
-		font_scale <= 2'b11;
+		font_scale <= 2'b00;
 		
 		if (font_state == 5'b11111)
 		begin
@@ -199,7 +199,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 			5'b00010: font_id <= 7'd66;
 			5'b00011: font_id <= 7'd67;
 			5'b00100: font_id <= 7'd68;
-			5'b00101: font_id <= 7'd69;
+			5'b00101: font_id <= 7'd69; 
 			5'b00110: font_id <= 7'd70;
 			5'b00111: font_id <= 7'd71;
 			5'b01000: font_id <= 7'd72;
