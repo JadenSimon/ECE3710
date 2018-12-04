@@ -28,8 +28,8 @@ projectile 2 y-coordinate = 0000 1111 0000 1000
 game state = 0000 1111 0000 0111
 
 // Stack region of memory
-top of stack = 0000 1111 0000 0100
-bottom of stack = 0000 1110 1111 0000
+top of stack = 1111 0000 0000 0000
+bottom of stack = 1110 1111 1110 0000
 
 // Frame id, x, and y of proj1
 explosion 1 frame id = 0001 0001 0010 0001
@@ -40,6 +40,12 @@ explosion 1 frame y coord = 0001 0001 0001 1111
 explosion 2 frame id = 0001 0001 0001 1110
 explosion 2 frame x coord = 0001 0001 0001 1101
 explosion 2 frame y coord = 0001 0001 0001 1100
+
+// Frame ids for players and projectiles
+player 1 frame id = 0000 1111 0001 0000
+player 2 frame id = 0000 1111 0001 0001
+projectile 1 frame id = 0000 1111 0001 0010
+projectile 2 frame id = 0000 1111 0001 0011
 
 // this will hold the bitmap of the walls in the map so we can do collision detection
 end of wall coordinates = 0001 0001 0001 1011
