@@ -17,7 +17,7 @@ module BackgroundController(clk, x_in, y_in, write_glyph, addr, glyph_id, pixel)
 	output reg [(PIXEL_SIZE-1):0] pixel;
 	
 	// Holds the glyph sprite sheet
-	reg [(PIXEL_SIZE-1):0] glyph_buffer [(ID_SIZE * ID_SIZE * GLYPH_SIZE * GLYPH_SIZE - 1):0];
+	reg [(PIXEL_SIZE-1):0] glyph_buffer [((ID_SIZE - 2) * (ID_SIZE - 2) * GLYPH_SIZE * GLYPH_SIZE - 1):0];
 	
 	// Holds the glyph id mapping
 	reg [(ID_SIZE-1):0] glyph_mapping [(MAP_SIZE_X * MAP_SIZE_Y - 1):0];
