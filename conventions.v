@@ -57,9 +57,10 @@ end of wall coordinates = 0001 0001 0001 1011
 start of wall coordinates = 0000 1111 1111 0000
 
 // holds glyph mapping for font
-font scale = 0001 0001 0001 1110 (2 bits)
-font map = 0001 0001 0001 1111 (size = 4800)
-string variable = 0010 0011 1101 1111
+font scale = 0001 0001 0010 0010 (2 bits)
+font map = 0001 0001 0010 0011 (size = 4800)
+end font map = 0010 0011 1110 0010
+string variable = 0010 0011 1110 0011
 
 
 // Register conventions
