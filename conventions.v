@@ -47,6 +47,11 @@ player 2 frame id = 0000 1111 0001 0001
 projectile 1 frame id = 0000 1111 0001 0010
 projectile 2 frame id = 0000 1111 0001 0011
 
+// Some global variables/counters
+animation frame counter = 1111 0000 0000 0001
+last player1 input = 1111 0000 0000 0010
+last player2 input = 1111 0000 0000 0011
+
 // this will hold the bitmap of the walls in the map so we can do collision detection
 end of wall coordinates = 0001 0001 0001 1011
 start of wall coordinates = 0000 1111 1111 0000
