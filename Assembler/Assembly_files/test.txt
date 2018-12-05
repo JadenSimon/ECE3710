@@ -15,11 +15,11 @@
       STOR REG3 REG1
       // set the initial tank health for player 1
       MOVI REG0 0000111001110100
-      MOVI REG1 00000011
+      MOVI REG1 00000101
       STOR REG1 REG0
       // set the initial tank health for player 2
       MOVI REG0 0000111001110011
-      MOVI REG1 00000011
+      MOVI REG1 00000101
       STOR REG1 REG0
       // set the initial orientation for player 1
       MOVI REG0 0000111001110010
@@ -68,10 +68,6 @@
       ADDI REG2 00000000
       ADDI REG2 00000000
       ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
       MOVI REG2 .wait_loop
       CMP REG0 REG1
       JCND NE REG2
@@ -80,6 +76,16 @@
       JAL REG11 REG0
       // load snes input
       LCI REG0 player1
+      // secret button press
+      MOV REG2 REG0
+      MOVI REG1 0000001100000000
+      AND REG2 REG1
+      CMP REG2 REG1
+      BCND NE 00000101
+      MOVI REG0 0000111100010000
+      LOAD REG1 REG0
+      ORI REG1 00000100
+      STOR REG1 REG0
       // if its a move UP: jump to update_tank_location_up
       MOV REG2 REG0
       MOVI REG1 0000100000000000
@@ -371,6 +377,18 @@
       MOVI REG4 .check_shoot_player1
       CMPI REG13 00000000
       JCND NE REG4
+
+      // check collision with the other tank
+      MOVI REG3 0000111100001101
+      MOVI REG4 0000111100001100
+      LOAD REG3 REG3
+      LOAD REG4 REG4
+      MOVI REG8 .check_collision
+      JAL REG11 REG8
+      MOVI REG8 .check_shoot_player1
+      CMPI REG13 00000000
+      JCND NE REG8
+
       STOR REG14 REG6
       STOR REG5 REG10
       MOVI REG4 .check_shoot_player1
@@ -396,6 +414,18 @@
       MOVI REG4 .check_shoot_player1
       CMPI REG13 00000000
       JCND NE REG4
+
+      // check collision with the other tank
+      MOVI REG3 0000111100001101
+      MOVI REG4 0000111100001100
+      LOAD REG3 REG3
+      LOAD REG4 REG4
+      MOVI REG8 .check_collision
+      JAL REG11 REG8
+      MOVI REG8 .check_shoot_player1
+      CMPI REG13 00000000
+      JCND NE REG8
+
       STOR REG14 REG6
       STOR REG5 REG10
       MOVI REG4 .check_shoot_player1
@@ -420,6 +450,18 @@
       MOVI REG4 .check_shoot_player1
       CMPI REG13 00000000
       JCND NE REG4
+
+      // check collision with the other tank
+      MOVI REG3 0000111100001101
+      MOVI REG4 0000111100001100
+      LOAD REG3 REG3
+      LOAD REG4 REG4
+      MOVI REG8 .check_collision
+      JAL REG11 REG8
+      MOVI REG8 .check_shoot_player1
+      CMPI REG13 00000000
+      JCND NE REG8
+
       STOR REG15 REG7
       STOR REG5 REG10
       MOVI REG4 .check_shoot_player1
@@ -444,6 +486,18 @@
       MOVI REG4 .check_shoot_player1
       CMPI REG13 00000000
       JCND NE REG4
+
+      // check collision with the other tank
+      MOVI REG3 0000111100001101
+      MOVI REG4 0000111100001100
+      LOAD REG3 REG3
+      LOAD REG4 REG4
+      MOVI REG8 .check_collision
+      JAL REG11 REG8
+      MOVI REG8 .check_shoot_player1
+      CMPI REG13 00000000
+      JCND NE REG8
+
       STOR REG15 REG7
       STOR REG5 REG10
       MOVI REG4 .check_shoot_player1
@@ -468,6 +522,18 @@
       MOVI REG4 .check_shoot_player2
       CMPI REG13 00000000
       JCND NE REG4
+
+      // check collision with the other tank
+      MOVI REG3 0000111100001111
+      MOVI REG4 0000111100001110
+      LOAD REG3 REG3
+      LOAD REG4 REG4
+      MOVI REG8 .check_collision
+      JAL REG11 REG8
+      MOVI REG8 .check_shoot_player2
+      CMPI REG13 00000000
+      JCND NE REG8
+
       STOR REG14 REG6
       STOR REG5 REG10
       MOVI REG4 .check_shoot_player2
@@ -492,6 +558,18 @@
       MOVI REG4 .check_shoot_player2
       CMPI REG13 00000000
       JCND NE REG4
+
+      // check collision with the other tank
+      MOVI REG3 0000111100001111
+      MOVI REG4 0000111100001110
+      LOAD REG3 REG3
+      LOAD REG4 REG4
+      MOVI REG8 .check_collision
+      JAL REG11 REG8
+      MOVI REG8 .check_shoot_player2
+      CMPI REG13 00000000
+      JCND NE REG8
+
       STOR REG14 REG6
       STOR REG5 REG10
       MOVI REG4 .check_shoot_player2
@@ -516,6 +594,18 @@
       MOVI REG4 .check_shoot_player2
       CMPI REG13 00000000
       JCND NE REG4
+
+      // check collision with the other tank
+      MOVI REG3 0000111100001111
+      MOVI REG4 0000111100001110
+      LOAD REG3 REG3
+      LOAD REG4 REG4
+      MOVI REG8 .check_collision
+      JAL REG11 REG8
+      MOVI REG8 .check_shoot_player2
+      CMPI REG13 00000000
+      JCND NE REG8
+
       STOR REG15 REG7
       STOR REG5 REG10
       MOVI REG4 .check_shoot_player2
@@ -540,17 +630,24 @@
       MOVI REG4 .check_shoot_player2
       CMPI REG13 00000000
       JCND NE REG4
+
+      // check collision with the other tank
+      MOVI REG3 0000111100001111
+      MOVI REG4 0000111100001110
+      LOAD REG3 REG3
+      LOAD REG4 REG4
+      MOVI REG8 .check_collision
+      JAL REG11 REG8
+      MOVI REG8 .check_shoot_player2
+      CMPI REG13 00000000
+      JCND NE REG8
+
       STOR REG15 REG7
       STOR REG5 REG10
       MOVI REG4 .check_shoot_player2
       JCND NC REG4
 
 .spawn_projectile_player1
-      // animation stuff
-      MOVI REG0 0000111100010000
-      LOAD REG1 REG0
-      ADDI REG1 00000010
-      STOR REG1 REG0
       // projectile x addr
       MOVI REG0 0000111100001011
       // projectile y addr
@@ -570,6 +667,15 @@
       MOVI REG7 .update_projectiles_player1
       CMPI REG0 00000000
       JCND NE REG7
+      // animation stuff
+      PUSH REG0
+      PUSH REG1
+      MOVI REG0 0000111100010000
+      LOAD REG1 REG0
+      ORI REG1 00000010
+      STOR REG1 REG0
+      POP REG1
+      POP REG0
       MOVI REG0 0000111100001011
       // calculate the offset
       MOVI REG7 .spawn_proj1_up
@@ -614,11 +720,6 @@
       JCND NC REG4
 
 .spawn_projectile_player2
-      // animation stuff
-      MOVI REG0 0000111100010001
-      LOAD REG1 REG0
-      ADDI REG1 00000010
-      STOR REG1 REG0
       // proj x addr
       MOVI REG0 0000111100001001
       // proj y addr
@@ -638,6 +739,15 @@
       MOVI REG7 .update_projectiles_player2
       CMPI REG0 00000000
       JCND NE REG7
+      // animation stuff
+      PUSH REG0
+      PUSH REG1
+      MOVI REG0 0000111100010001
+      LOAD REG1 REG0
+      ORI REG1 00000010
+      STOR REG1 REG0
+      POP REG1
+      POP REG0
       MOVI REG0 0000111100001001
       // calculate the offset
       MOVI REG7 .spawn_proj2_up
@@ -781,9 +891,20 @@
       JCND NC REG11
 
 // This subroutine does a some animation stuff
-// Increments all explosion frames
 // If explosion frame_id is 4, then remove it from the game
 .progress_animations
+      // Increment a frame counter to tweak animation length
+      MOVI REG0 1111000000000001
+      LOAD REG4 REG0
+      ADDI REG4 00000001
+      STOR REG4 REG0
+
+      // Skip reseting tank shooting animations if frame % 4 != 0
+      MOV REG0 REG4
+      ANDI REG0 00000011
+      CMPI REG0 00000000
+      BCND NE 00001010
+
       // Reset tank shooting animations
       MOVI REG0 0000111100010000
       LOAD REG1 REG0
@@ -793,7 +914,13 @@
       LOAD REG1 REG0
       ANDI REG1 00001101
       STOR REG1 REG0
-      
+
+      // Skip explosions if frame % 2 != 0
+      MOV REG0 REG4
+      ANDI REG0 00000001
+      CMPI REG0 00000000
+      BCND NE 00010110
+
       // Explosion 1
       MOVI REG0 0001000100100001
       LOAD REG1 REG0
