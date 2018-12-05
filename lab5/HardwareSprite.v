@@ -39,9 +39,9 @@ module HardwareSprite(clk, x_in, y_in, x_pos, y_pos, angle, frame_id, d_en, pixe
 			// Do some rotation
 			case (angle)
 				2'b00: pixel <= sprite_buffer[((y_in - y_pos + y_offset) * SPRITE_SIZE * FRAME_ID_SIZE) + (x_in - x_pos) + x_offset]; // Normal orientation
-				2'b11: pixel <= sprite_buffer[((x_in - x_pos + y_offset) * SPRITE_SIZE * FRAME_ID_SIZE) + (SPRITE_SIZE - (y_in - y_pos)) + x_offset]; // 90 deg: (x, y) -> (-y, x)
-				2'b10: pixel <= sprite_buffer[((SPRITE_SIZE - (y_in - y_pos) + y_offset) * SPRITE_SIZE * FRAME_ID_SIZE) + (SPRITE_SIZE - (x_in - x_pos)) + x_offset]; // 180 deg: (x, y) -> (-x, -y)
-				2'b01: pixel <= sprite_buffer[((SPRITE_SIZE - (x_in - x_pos) + y_offset) * SPRITE_SIZE * FRAME_ID_SIZE) + (y_in - y_pos) + x_offset]; // 270 deg: (x, y) -> (y, -x)
+				2'b11: pixel <= sprite_buffer[((x_in - x_pos + y_offset) * SPRITE_SIZE * FRAME_ID_SIZE) + (SPRITE_SIZE - (y_in - y_pos)) + x_offset - 7'b1]; // 90 deg: (x, y) -> (-y, x)
+				2'b10: pixel <= sprite_buffer[((SPRITE_SIZE - (y_in - y_pos) + y_offset - 7'b1) * SPRITE_SIZE * FRAME_ID_SIZE) + (SPRITE_SIZE - (x_in - x_pos)) + x_offset - 7'b1]; // 180 deg: (x, y) -> (-x, -y)
+				2'b01: pixel <= sprite_buffer[((SPRITE_SIZE - (x_in - x_pos) + y_offset - 7'b1) * SPRITE_SIZE * FRAME_ID_SIZE) + (y_in - y_pos) + x_offset]; // 270 deg: (x, y) -> (y, -x)
 			endcase
 
 		end

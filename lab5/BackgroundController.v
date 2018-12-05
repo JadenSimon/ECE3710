@@ -43,13 +43,13 @@ module BackgroundController(clk, x_in, y_in, write_glyph, addr, glyph_id, pixel)
 	assign y_offset = glyph_mapping[y_in[9:5] * MAP_SIZE_X + x_in[9:5]][5:4] * GLYPH_SIZE;
 	
 	// Given an x/y position, the correct pixel value will be found based off the glyph_mapping
-	always@(posedge clk) 
+	always@(posedge clk)  
 	begin
 		case (glyph_mapping[y_in[9:5] * MAP_SIZE_X + x_in[9:5]][1:0])
 			2'b00: pixel <= glyph_buffer[((y_in[4:0] + y_offset) * GLYPH_SIZE * (ID_SIZE - 2)) + x_in[4:0] + x_offset]; // Normal orientation
-			2'b11: pixel <= glyph_buffer[((x_in[4:0] + y_offset) * GLYPH_SIZE * (ID_SIZE - 2)) + (GLYPH_SIZE - y_in[4:0]) + x_offset]; // 90 deg: (x, y) -> (-y, x)
-			2'b10: pixel <= glyph_buffer[((GLYPH_SIZE - y_in[4:0] + y_offset) * GLYPH_SIZE * (ID_SIZE - 2)) + (GLYPH_SIZE - x_in[4:0]) + x_offset]; // 180 deg: (x, y) -> (-x, -y)
-			2'b01: pixel <= glyph_buffer[((GLYPH_SIZE - x_in[4:0] + y_offset) * GLYPH_SIZE * (ID_SIZE - 2)) + y_in[4:0] + x_offset]; // 270 deg: (x, y) -> (y, -x)
+			2'b11: pixel <= glyph_buffer[((x_in[4:0] + y_offset) * GLYPH_SIZE * (ID_SIZE - 2)) + (GLYPH_SIZE - y_in[4:0]) + x_offset - 7'b1]; // 90 deg: (x, y) -> (-y, x)
+			2'b10: pixel <= glyph_buffer[((GLYPH_SIZE - y_in[4:0] + y_offset - 7'b1) * GLYPH_SIZE * (ID_SIZE - 2)) + (GLYPH_SIZE - x_in[4:0]) + x_offset - 7'b1]; // 180 deg: (x, y) -> (-x, -y)
+			2'b01: pixel <= glyph_buffer[((GLYPH_SIZE - x_in[4:0] + y_offset - 7'b1) * GLYPH_SIZE * (ID_SIZE - 2)) + y_in[4:0] + x_offset]; // 270 deg: (x, y) -> (y, -x)
 		endcase
 	end
 

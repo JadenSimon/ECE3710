@@ -225,7 +225,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 		if (v_count >= 10'd514)
 		begin
 			font_state <= 5'b0;
-			font_color_mask <= alternate ? 16'b0000_0000_0011_1110 : 16'b1111_1000_0000_0000;
+			font_color_mask <= alternate ? 16'b1111_1000_0000_0000 : 16'b0000_0000_0011_1110;
 		end
 	
 		write_font <= 1'b1;
@@ -242,7 +242,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 		if (!alternate)
 		begin
 			case (font_state)
-				5'b00000: font_addr <= 13'd168;
+				5'b00000: font_addr <= 13'd172;
 				5'b00001: font_id <= 7'd80;
 				5'b00010: font_id <= 7'd108;
 				5'b00011: font_id <= 7'd97;
@@ -261,7 +261,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 		else
 		begin
 			case (font_state)
-				5'b00000: font_addr <= 13'd168;
+				5'b00000: font_addr <= 13'd172;
 				5'b01110: font_id <= 7'd80;
 				5'b01111: font_id <= 7'd108;
 				5'b10000: font_id <= 7'd97;
