@@ -32,7 +32,7 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	wire bright;
 	wire [9:0] hCount, vCount;
 	wire [15:0] vga_addr, vga_out;
-	wire [15:0] pixel;
+	wire [15:0] pixel; 
 	
 	// Create the CPU
 	cpu_datapath CPU(clk, new_reset, snes1_padded_data, snes2_padded_data, vga_addr, vga_out);
@@ -62,9 +62,9 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	// Create a slow 5 MHz clock for the SNES controllers
 	reg [2:0] snes_slow_clk_counter = 3'b0;
 	
-	always@(posedge clk)
+	always@(posedge clk) 
 	begin
-		snes_slow_clk_counter <= snes_slow_clk_counter + 1'b1;
+		snes_slow_clk_counter <= snes_slow_clk_counter + 1'b1; 
 		if (snes_slow_clk_counter == 3'b100)
 		begin
 			snes_slow_clk <= !snes_slow_clk;

@@ -28,8 +28,8 @@ projectile 2 y-coordinate = 0000 1111 0000 1000
 game state = 0000 1111 0000 0111
 
 // Stack region of memory
-top of stack = 0000 1111 0000 0100
-bottom of stack = 0000 1110 1111 0000
+top of stack = 1111 0000 0000 0000
+bottom of stack = 1110 1111 1110 0000
 
 // Frame id, x, and y of proj1
 explosion 1 frame id = 0001 0001 0010 0001
@@ -41,9 +41,27 @@ explosion 2 frame id = 0001 0001 0001 1110
 explosion 2 frame x coord = 0001 0001 0001 1101
 explosion 2 frame y coord = 0001 0001 0001 1100
 
+// Frame ids for players and projectiles
+player 1 frame id = 0000 1111 0001 0000
+player 2 frame id = 0000 1111 0001 0001
+projectile 1 frame id = 0000 1111 0001 0010
+projectile 2 frame id = 0000 1111 0001 0011
+
+// Some global variables/counters
+animation frame counter = 1111 0000 0000 0001
+last player1 input = 1111 0000 0000 0010
+last player2 input = 1111 0000 0000 0011
+
 // this will hold the bitmap of the walls in the map so we can do collision detection
 end of wall coordinates = 0001 0001 0001 1011
 start of wall coordinates = 0000 1111 1111 0000
+
+// holds glyph mapping for font
+font scale = 0001 0001 0010 0010 (2 bits)
+font map = 0001 0001 0010 0011 (size = 4800)
+end font map = 0010 0011 1110 0010
+string variable = 0010 0011 1110 0011
+
 
 // Register conventions
 REG0 - REG4 // temporary register
