@@ -210,7 +210,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 						if (mem_addr > MAPPING)
 						begin
 							write_background <= 1'b1;
-							background_id <= game_state == 2'b01 ? mem_out[5:0] : 4'b0000; // If not the playing state, draw a black background
+							background_id <= game_state == 2'b01 ? mem_out[5:0] : 6'b000000; // If not the playing state, draw a black background
 							
 							if (write_background == 1'b1)
 								background_addr <= background_addr + 1'b1;
@@ -219,7 +219,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 				8'b00011101: font_scale <= font_scale; // do nothing to sync with other case
 				8'b00011110: // Font mapping load state
 					begin
-						if (mem_addr > FONT_MAPPING)
+						if (mem_addr > FONT_MAPPING) 
 						begin
 							write_font <= 1'b1;
 							font_id <= mem_out[15:0];
@@ -243,80 +243,5 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 			write_background <= 1'b0; 
 		end
 	end
-	
-	// Font drawing logic, could be done in software as well
-	// Draws Player1: HEALTH Player2: HEALTH onto the screen
-//	reg [4:0] font_state = 5'b0;
-//	
-//	always@(posedge clk)
-//	begin
-//		if (v_count >= 10'd511)
-//			font_state <= 5'b0;
-//	
-//		write_font <= 1'b1;
-//		font_addr <= font_addr + (4'b1 << font_scale);
-//		font_state <= font_state + 1'b1;
-//
-//		if (font_addr >= 13'd4799)
-//		begin
-//			font_state <= font_state;
-//			write_font <= 1'b0;
-//		end
-//
-//		case (game_state)
-//			2'b00: // Title screen
-//			begin
-//				font_scale <= 2'b11;
-//			
-//				case (font_state)
-//					5'b00000: font_addr <= 13'd2584 - 13'd2;
-//					5'b00001: font_id <= {9'b111111111, 7'd84};
-//					5'b00010: font_id <= {9'b111111111, 7'd65};
-//					5'b00011: font_id <= {9'b111111111, 7'd78};
-//					5'b00100: font_id <= {9'b111111111, 7'd75};
-//					5'b00101: font_id <= {9'b111111111, 7'd83};
-//				
-//					default: font_id <= 7'd0;
-//				endcase 
-//			end
-//		
-//			2'b01: // Playing state
-//			begin
-//				font_scale <= 2'b01;
-//
-//				case (font_state)
-//					5'b00000: font_addr <= 13'd176 - 13'd2;
-//					5'b00001: font_id <= {9'b111000000, 7'd80};
-//					5'b00010: font_id <= {9'b111000000, 7'd108};
-//					5'b00011: font_id <= {9'b111000000, 7'd97};
-//					5'b00100: font_id <= {9'b111000000, 7'd121};
-//					5'b00101: font_id <= {9'b111000000, 7'd101}; 
-//					5'b00110: font_id <= {9'b111000000, 7'd114};
-//					5'b00111: font_id <= {9'b111000000, 7'd49};
-//					5'b01000: font_id <= {9'b111000000, 7'd58};
-//					5'b01001: font_id <= 7'd00;
-//					5'b01010: font_id <= {9'b111000000, 7'd48 + player1_health};
-//					5'b01110: font_id <= {9'b000000111, 7'd80};
-//					5'b01111: font_id <= {9'b000000111, 7'd108};
-//					5'b10000: font_id <= {9'b000000111, 7'd97};
-//					5'b10001: font_id <= {9'b000000111, 7'd121};
-//					5'b10010: font_id <= {9'b000000111, 7'd101};
-//					5'b10011: font_id <= {9'b000000111, 7'd114};
-//					5'b10100: font_id <= {9'b000000111, 7'd50};
-//					5'b10101: font_id <= {9'b000000111, 7'd58};
-//					5'b10110: font_id <= 7'd00;
-//					5'b10111: font_id <= {9'b000000111, 7'd48 + player2_health};			
-//					
-//					default: font_id <= 7'd0;
-//				endcase
-//			end
-//			
-//			default: 
-//			begin
-//				font_scale <= 2'b00;
-//				font_id <= 7'd0;
-//			end
-//		endcase
-//	end
 	
 endmodule
