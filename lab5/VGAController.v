@@ -29,8 +29,8 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 	localparam PROJ2_ID =					16'b0000_1111_0001_0011;
 	localparam GAME_STATE = 				16'b0000_1111_0000_0111;
 	localparam MAPPING = 					16'b0000_1111_1111_0000;
-	localparam FONT_MAPPING = 				16'b0001_0001_0001_1111;
-	localparam FONT_SCALE =					16'b0001_0001_0001_1110;
+	localparam FONT_MAPPING = 				16'b0001_0001_0010_0011;
+	localparam FONT_SCALE =					16'b0001_0001_0010_0010;
 	/***************************/ 
 	
 	 
@@ -56,7 +56,7 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 	
 	// Background module inputs
 	reg [8:0] background_addr;
-	reg [3:0] background_id;
+	reg [5:0] background_id;
 	reg write_background;
 	
 	// Font module inputs
@@ -153,7 +153,8 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 				8'b00011000: mem_addr <= GAME_STATE;
 				8'b00011001: mem_addr <= FONT_SCALE;
 				8'b00011010: mem_addr <= MAPPING;
-				8'b00011011: // Game mapping load state
+				8'b00011011: mem_addr <= mem_addr; // Syncs both case statments
+				8'b00011100: // Game mapping load state
 					begin
 						if (background_addr < 9'd300)
 						begin
@@ -161,15 +162,15 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 							mem_addr <= mem_addr + 1'b1;
 						end
 					end
-//				8'b00011100: mem_addr <= FONT_MAPPING;
-//				8'b00011101: // Font mapping load state
-//					begin
-//						if (font_addr < 13'd4800)
-//						begin
-//							load_state <= load_state;
-//							mem_addr <= mem_addr + 1'b1;
-//						end
-//					end
+				8'b00011101: mem_addr <= FONT_MAPPING;
+				8'b00011110: // Font mapping load state
+					begin
+						if (font_addr < 13'd4800)
+						begin
+							load_state <= load_state;
+							mem_addr <= mem_addr + 1'b1;
+						end
+					end
 				
 				default: load_state <= 8'b11111111; // End
 			endcase
@@ -203,85 +204,119 @@ module VGAController(clk, h_count, v_count, mem_addr, mem_out, pixel);
 				8'b00011000: proj1_frame <= mem_out[3:0];
 				8'b00011001: proj2_frame <= mem_out[3:0];
 				8'b00011010: game_state <= mem_out[1:0];
-				8'b00011011: game_state <= game_state; //font_scale <= mem_out[1:0];
+				8'b00011011: font_scale <= mem_out[1:0];
 				8'b00011100: // Game mapping load state
 					begin
-						write_background <= 1'b1;
-						background_id <= mem_out[3:0];
-						
-						// Don't increment it on the first iteration
-						if (write_background == 1'b1)
-							background_addr <= background_addr + 1'b1;
+						if (mem_addr > MAPPING)
+						begin
+							write_background <= 1'b1;
+							background_id <= game_state == 2'b01 ? mem_out[5:0] : 4'b0000; // If not the playing state, draw a black background
+							
+							if (write_background == 1'b1)
+								background_addr <= background_addr + 1'b1;
+						end
 					end
-//				8'b00011101: // Font mapping load state
-//					begin
-//						write_font <= 1'b1;
-//						font_id <= mem_out[15:0];
-//						
-//						// Don't increment it on the first iteration
-//						if (write_font == 1'b1)
-//							font_addr <= font_addr + 1'b1;
-//					end
+				8'b00011101: font_scale <= font_scale; // do nothing to sync with other case
+				8'b00011110: // Font mapping load state
+					begin
+						if (mem_addr > FONT_MAPPING)
+						begin
+							write_font <= 1'b1;
+							font_id <= mem_out[15:0];
+							
+							if (write_font == 1'b1)
+								font_addr <= font_addr + 1'b1;
+						end
+					end
 					
 				default: load_state <= 8'b11111111; // End
 			endcase
 		end
 		else 
 		begin
-			//font_addr <= 13'b0;
+			font_addr <= 13'b0;
 			background_addr <= 9'b0;
 			load_state <= 8'b0;
 			background_id <= 4'b0;
-			//font_id <= 16'b0;
-			//write_font <= 1'b0;
-			write_background <= 1'b0;
-		end
-	end
-	
-	
-	// Draws Player1: HEALTH Player2: HEALTH onto the screen
-	reg [4:0] font_state = 5'b0;
-	
-	always@(posedge clk)
-	begin
-		if (v_count >= 10'd514)
-			font_state <= 5'b0;
-	
-		write_font <= 1'b1;
-		font_addr <= font_addr + 2'b10;
-		font_state <= font_state + 1'b1;
-		font_scale <= 2'b01;
-
-		if (font_state == 5'b11111 && v_count < 10'd514)
-		begin
-			font_state <= font_state;
+			font_id <= 16'b0;
 			write_font <= 1'b0;
+			write_background <= 1'b0; 
 		end
-
-		case (font_state)
-			5'b00000: font_addr <= 13'd172;
-			5'b00001: font_id <= {9'b111000000, 7'd80};
-			5'b00010: font_id <= {9'b111000000, 7'd108};
-			5'b00011: font_id <= {9'b111000000, 7'd97};
-			5'b00100: font_id <= {9'b111000000, 7'd121};
-			5'b00101: font_id <= {9'b111000000, 7'd101}; 
-			5'b00110: font_id <= {9'b111000000, 7'd114};
-			5'b00111: font_id <= {9'b111000000, 7'd49};
-			5'b01000: font_id <= {9'b111000000, 7'd58};
-			5'b01001: font_id <= 7'd00;
-			5'b01010: font_id <= {9'b111000000, 7'd48 + player1_health};
-			5'b01110: font_id <= {9'b000000111, 7'd80};
-			5'b01111: font_id <= {9'b000000111, 7'd108};
-			5'b10000: font_id <= {9'b000000111, 7'd97};
-			5'b10001: font_id <= {9'b000000111, 7'd121};
-			5'b10010: font_id <= {9'b000000111, 7'd101};
-			5'b10011: font_id <= {9'b000000111, 7'd114};
-			5'b10100: font_id <= {9'b000000111, 7'd50};
-			5'b10101: font_id <= {9'b000000111, 7'd58};
-			5'b10110: font_id <= 7'd00;
-			5'b10111: font_id <= {9'b000000111, 7'd48 + player2_health};				
-			default: font_id <= 7'd0;
-		endcase
 	end
+	
+	// Font drawing logic, could be done in software as well
+	// Draws Player1: HEALTH Player2: HEALTH onto the screen
+//	reg [4:0] font_state = 5'b0;
+//	
+//	always@(posedge clk)
+//	begin
+//		if (v_count >= 10'd511)
+//			font_state <= 5'b0;
+//	
+//		write_font <= 1'b1;
+//		font_addr <= font_addr + (4'b1 << font_scale);
+//		font_state <= font_state + 1'b1;
+//
+//		if (font_addr >= 13'd4799)
+//		begin
+//			font_state <= font_state;
+//			write_font <= 1'b0;
+//		end
+//
+//		case (game_state)
+//			2'b00: // Title screen
+//			begin
+//				font_scale <= 2'b11;
+//			
+//				case (font_state)
+//					5'b00000: font_addr <= 13'd2584 - 13'd2;
+//					5'b00001: font_id <= {9'b111111111, 7'd84};
+//					5'b00010: font_id <= {9'b111111111, 7'd65};
+//					5'b00011: font_id <= {9'b111111111, 7'd78};
+//					5'b00100: font_id <= {9'b111111111, 7'd75};
+//					5'b00101: font_id <= {9'b111111111, 7'd83};
+//				
+//					default: font_id <= 7'd0;
+//				endcase 
+//			end
+//		
+//			2'b01: // Playing state
+//			begin
+//				font_scale <= 2'b01;
+//
+//				case (font_state)
+//					5'b00000: font_addr <= 13'd176 - 13'd2;
+//					5'b00001: font_id <= {9'b111000000, 7'd80};
+//					5'b00010: font_id <= {9'b111000000, 7'd108};
+//					5'b00011: font_id <= {9'b111000000, 7'd97};
+//					5'b00100: font_id <= {9'b111000000, 7'd121};
+//					5'b00101: font_id <= {9'b111000000, 7'd101}; 
+//					5'b00110: font_id <= {9'b111000000, 7'd114};
+//					5'b00111: font_id <= {9'b111000000, 7'd49};
+//					5'b01000: font_id <= {9'b111000000, 7'd58};
+//					5'b01001: font_id <= 7'd00;
+//					5'b01010: font_id <= {9'b111000000, 7'd48 + player1_health};
+//					5'b01110: font_id <= {9'b000000111, 7'd80};
+//					5'b01111: font_id <= {9'b000000111, 7'd108};
+//					5'b10000: font_id <= {9'b000000111, 7'd97};
+//					5'b10001: font_id <= {9'b000000111, 7'd121};
+//					5'b10010: font_id <= {9'b000000111, 7'd101};
+//					5'b10011: font_id <= {9'b000000111, 7'd114};
+//					5'b10100: font_id <= {9'b000000111, 7'd50};
+//					5'b10101: font_id <= {9'b000000111, 7'd58};
+//					5'b10110: font_id <= 7'd00;
+//					5'b10111: font_id <= {9'b000000111, 7'd48 + player2_health};			
+//					
+//					default: font_id <= 7'd0;
+//				endcase
+//			end
+//			
+//			default: 
+//			begin
+//				font_scale <= 2'b00;
+//				font_id <= 7'd0;
+//			end
+//		endcase
+//	end
 	
 endmodule

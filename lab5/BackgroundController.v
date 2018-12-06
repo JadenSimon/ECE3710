@@ -25,7 +25,7 @@ module BackgroundController(clk, x_in, y_in, write_glyph, addr, glyph_id, pixel)
 	// Load the two ROM files into memory
 	initial begin
 		$readmemh("background.data", glyph_buffer);
-		$readmemh("map.data", glyph_mapping);
+		//$readmemh("map.data", glyph_mapping);
 	end
 	
 	// Simply writing logic
@@ -36,7 +36,7 @@ module BackgroundController(clk, x_in, y_in, write_glyph, addr, glyph_id, pixel)
 	end
 	
 	// Lower 5 bits of x/y determine the corresponding x/y pixel position in a glyph
-	// Upper 5 bits of x/y determine the location of the glyph id in the mapping
+	// Upper 5 bits of x/y determine the location of the glyph id in the mapping 
 	// Some wires to help with computing x/y offsets
 	wire [6:0] x_offset, y_offset;
 	assign x_offset = glyph_mapping[y_in[9:5] * MAP_SIZE_X + x_in[9:5]][3:2] * GLYPH_SIZE;

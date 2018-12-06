@@ -28,7 +28,7 @@ module HardwareSprite(clk, x_in, y_in, x_pos, y_pos, angle, frame_id, d_en, pixe
 	assign x_offset = frame_id[1:0] * SPRITE_SIZE;
 	assign y_offset = frame_id[3:2] * SPRITE_SIZE;
 	
-	// Hardware sprite logic is triggered on positive clock edge
+	// Hardware sprite logic is triggered on positive clock edge  
 	always@(posedge clk) 
 	begin
 		// Only draw if in range
