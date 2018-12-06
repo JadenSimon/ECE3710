@@ -1,3 +1,20 @@
+.program_initialize
+      // initialize stack pointer
+      MOVI REG12 1111000000000000
+      // set the game state to zero for the start screen
+      MOVI REG0 0000111100000111
+      MOVI REG1 00000001
+      STOR REG1 REG0
+      // go to start menu loop
+      MOVI REG0 .game_setup
+      JCND NC REG0
+
+.start_menu
+      MOVI REG0 .reset_locations
+      JAL REG11 REG0
+      MOVI REG0 .start_menu
+      JCND NC REG0 // stay in a loop
+   
 .game_setup
       // set the initial tank location for player 1
       MOVI REG0 0000111100001111
@@ -29,9 +46,7 @@
       MOVI REG0 0000111001110001
       MOVI REG1 00000011
       STOR REG1 REG0
-      // initialize stack pointer
-      MOVI REG12 1111000000000000
-      // set the game state to one to tell the vga to draw the map
+      // set the game state to one for the playing state
       MOVI REG0 0000111100000111
       MOVI REG1 00000001
       STOR REG1 REG0
@@ -71,9 +86,15 @@
       MOVI REG2 .wait_loop
       CMP REG0 REG1
       JCND NE REG2
-      // Progress the explosion animation
+
+      // Write health to the screen
+      MOVI REG0 .draw_player_health
+      JAL REG11 REG0
+
+      // Progress animations
       MOVI REG0 .progress_animations
       JAL REG11 REG0
+
       // load snes input
       LCI REG0 player1
       // secret button press
@@ -240,10 +261,16 @@
       MOVI REG3 .game_loop_player2
       JCND NC REG3
 .damage_player2
+      // decrease player2's health by 1
       MOVI REG14 0000111001110011
       LOAD REG15 REG14
-      SUBI REG15 00000001
+      SUBI REG15 00000001      
       STOR REG15 REG14
+
+      // if player2's health is 0, then we can end the game
+      MOVI REG14 .game_setup
+      CMPI REG15 00000000
+      JCND EQ REG14
 .mark_invalid1
       PUSH REG8
       PUSH REG9
@@ -334,10 +361,16 @@
       MOVI REG3 .game_loop_player1
       JCND NC REG3
 .damage_player1
+      // decrease player1's health by 1
       MOVI REG14 0000111001110100
       LOAD REG15 REG14
       SUBI REG15 00000001
       STOR REG15 REG14
+
+       // if player1's health is 0, then we can end the game
+      MOVI REG14 .game_setup
+      CMPI REG15 00000000
+      JCND EQ REG14
 .mark_invalid2
       PUSH REG8
       PUSH REG9
@@ -944,3 +977,191 @@
       STOR REG1 REG0
 
       JCND NC REG11 
+
+
+// Draws text onto the screen at the specified location.
+// The location is in increments of 8 i.e. (1, 1) corresponds
+// to (8, 8) on the screen.
+// If a scale other than 1 is used, then the location must
+// be divisble by that scale. The string pointer must point
+// to a null-terminated string.
+// ARGS:
+//    REG14 -> pos_x
+//    REG15 -> pos_y
+//    STACK[0] -> string pointer
+.draw_string
+      POP REG0 // start of string to write
+      MOVI REG1 0001000100100011 // font map location
+      MOVI REG2 0001000100100010 // font scale location
+      LOAD REG2 REG2
+
+      // compute offset font_map[(pos_y * 80) + pos_x] 
+      MOV REG3 REG15
+      MOV REG4 REG15
+      LSH REG3 0110 // pos_y * 64
+      LSH REG4 0100 // pos_y * 14
+      ADD REG1 REG3
+      ADD REG1 REG4
+      ADD REG1 REG14
+
+      // assign font scale to either 1, 2, 4, or 8
+      MOVI REG3 00000001
+      CMPI REG2 00000000
+      BCND EQ 00000011
+      LSH REG3 0001
+      SUBI REG2 00000001
+      BCND NC 11111011
+      MOV REG2 REG3
+
+      // start writing until we hit a NULL terminator
+      LOAD REG3 REG0
+      CMPI REG3 00000000
+      BCND EQ 00000100 // jump to end if a null terminator
+      STOR REG3 REG1
+      ADD REG1 REG2
+      ADDI REG0 00000001
+      BCND NC 11111001
+
+      JCND NC REG11
+
+// Clears all text on the screen
+.clear_text
+      MOVI REG0 0001000100100011 // font map location
+      MOVI REG1 0010001111100010 // end of font map location
+      MOVI REG2 00000000
+
+      CMP REG0 REG1
+      JCND EQ REG11 // returns if they are equal
+      STOR REG2 REG0
+      ADDI REG0 00000001
+      BCND NC 11111011
+
+// Writes both player's healths to the screen as text
+.draw_player_health
+      PUSH REG11
+      MOVI REG0 0010001111100011 // string we will use
+      MOVI REG1 0000111001110100 // player1 health
+      LOAD REG1 REG1
+
+      // set scale to 2x
+      MOVI REG3 0001000100100010
+      MOVI REG4 00000001
+      STOR REG4 REG3
+
+      // blue string: P1: HEALTH
+      MOVI REG3 0000001111010000 // P
+      STOR REG3 REG0
+      ADDI REG0 00000001
+
+      MOVI REG3 0000001110110001 // 1
+      STOR REG3 REG0
+      ADDI REG0 00000001
+
+      MOVI REG3 0000001110111010 // :
+      STOR REG3 REG0
+      ADDI REG0 00000001
+
+      MOVI REG3 0000000000000001 // SPACE
+      STOR REG3 REG0
+      ADDI REG0 00000001
+
+      MOVI REG3 0001110000100000 // health bar loop
+      CMPI REG1 00000000
+      BCND EQ 00000100
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      SUBI REG1 00000001
+      BCND NC 11111010
+
+      // write some spaces to clear old healthbar
+      MOVI REG3 0000000000000001
+      MOVI REG1 00000101
+      CMPI REG1 00000000
+      BCND EQ 00000100
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      SUBI REG1 00000001
+      BCND NC 11111010
+
+      // null terminator
+      MOVI REG3 0000000000000000
+      STOR REG3 REG0
+
+       // put the original address back then call the draw string subroutine
+      MOVI REG0 0010001111100011
+      MOVI REG14 00000010
+      MOVI REG15 00000010
+      PUSH REG0
+      MOVI REG0 .draw_string
+      JAL REG11 REG0
+
+      MOVI REG0 0010001111100011
+      MOVI REG1 0000111001110011 // player2 health
+      LOAD REG1 REG1
+
+      // red string P2: HEALTH 
+      MOVI REG3 1110000001010000 // P
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1110000000110010 // 2
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1110000000111010 // :
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 0000000000000001 // SPACE
+      STOR REG3 REG0
+      ADDI REG0 00000001
+
+      MOVI REG3 0001110000100000 // health bar loop
+      CMPI REG1 00000000
+      BCND EQ 00000100
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      SUBI REG1 00000001
+      BCND NC 11111010
+
+      // write some spaces to clear old healthbar
+      MOVI REG3 0000000000000001
+      MOVI REG1 00000101
+      CMPI REG1 00000000
+      BCND EQ 00000100
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      SUBI REG1 00000001
+      BCND NC 11111010
+
+      // null terminator
+      MOVI REG3 0000000000000000
+      STOR REG3 REG0
+
+      // put the original address back then call the draw string subroutine
+      MOVI REG0 0010001111100011
+      MOVI REG14 00100000
+      MOVI REG15 00000010
+      PUSH REG0
+      MOVI REG0 .draw_string
+      JAL REG11 REG0
+
+      POP REG11
+      JCND NC REG11
+
+
+
+// Resets all tank/proj/explosion/power-up locations
+.reset_locations   
+      MOVI REG1 0000000000000000
+      MOVI REG0 0000111100001111 // tank1_x
+      STOR REG1 REG0
+      MOVI REG0 0000111100001101 // tank2_x
+      STOR REG1 REG0
+      MOVI REG0 0000111100001011 // proj1_x
+      STOR REG1 REG0
+      MOVI REG0 0000111100001010 // proj2_x
+      STOR REG1 REG0
+      MOVI REG0 0001000100100000 // explo1_x
+      STOR REG1 REG0
+      MOVI REG0 0001000100011101 // explo2_x
+      STOR REG1 REG0
+
+      JCND NC REG11
