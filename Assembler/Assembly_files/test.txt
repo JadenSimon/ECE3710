@@ -1,20 +1,72 @@
+// Intializes the program
 .program_initialize
       // initialize stack pointer
       MOVI REG12 1111000000000000
-      // set the game state to zero for the start screen
-      MOVI REG0 0000111100000111
-      MOVI REG1 00000001
-      STOR REG1 REG0
+
       // go to start menu loop
+      MOVI REG0 .start_menu
+      JCND NC REG0
+
+// Displays the start menu
+.start_menu
+      // set game state to 0
+      MOVI REG0 0000111100000111
+      MOVI REG1 00000000
+      STOR REG1 REG0
+
+      // clear the screen of any previous text
+      MOVI REG0 .clear_text
+      JAL REG11 REG0
+
+      // reset the locations of all objects
+      MOVI REG0 .reset_locations
+      JAL REG11 REG0
+
+      // draw title screen text
+
+      // keep checking for start input from player1
+      MOVI REG1 0001000000000000
+      LCI REG0 player1
+      AND REG0 REG1
+      CMP REG0 REG1
+      BCND NE 11111100
+
+      // user pressed start, go to game_setup
       MOVI REG0 .game_setup
       JCND NC REG0
 
-.start_menu
+// Displays a winners screen
+// ARGS:
+//    REG14 -> 0 for player1, 1 for player2
+.winner_screen
+      // set game state to 2
+      MOVI REG0 0000111100000111
+      MOVI REG1 00000010
+      STOR REG1 REG0
+
+      // clear the screen of any previous text
+      MOVI REG0 .clear_text
+      JAL REG11 REG0
+
+      // reset the locations of all objects
       MOVI REG0 .reset_locations
       JAL REG11 REG0
+
+      // draw winner screen text
+      MOVI REG0 .draw_winner_text
+      JAL REG11 REG0
+
+      // wait 3 seconds then just go to the start menu
+      MOVI REG5 00000000
+      MOVI REG1 .wait_loop
+      JAL REG11 REG1
+      ADDI REG5 00000001
+      CMPI REG5 01011010
+      BCND NE 11111011
+
       MOVI REG0 .start_menu
-      JCND NC REG0 // stay in a loop
-   
+      JCND NC REG0
+
 .game_setup
       // set the initial tank location for player 1
       MOVI REG0 0000111100001111
@@ -54,38 +106,9 @@
       JCND NC REG4
 
 .game_loop_player1
-      MOVI REG0 0000000000000000
-      MOVI REG1 1111111111111111
-.wait_loop
-      ADDI REG0 00000001
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      MOVI REG2 .wait_loop
-      CMP REG0 REG1
-      JCND NE REG2
+      // Call the wait loop to slow the game down
+      MOVI REG0 .wait_loop
+      JAL REG11 REG0
 
       // Write health to the screen
       MOVI REG0 .draw_player_health
@@ -97,6 +120,7 @@
 
       // load snes input
       LCI REG0 player1
+
       // secret button press
       MOV REG2 REG0
       MOVI REG1 0000001100000000
@@ -107,34 +131,48 @@
       LOAD REG1 REG0
       ORI REG1 00000100
       STOR REG1 REG0
-      // if its a move UP: jump to update_tank_location_up
+
+      // handle move inputs
+      MOVI REG14 10000000 // means no movement
+
+      // if its a move UP: set REG14 to 00
       MOV REG2 REG0
       MOVI REG1 0000100000000000
       AND REG2 REG1
-      MOVI REG3 .update_tank_location_up_player1
       CMP REG2 REG1
-      JCND EQ REG3
-      // if its a move DOWN: jump to update_tank_location_down
+      BCND NE 00000001
+      MOVI REG14 00000000
+
+      // if its a move DOWN: set REG14 to 10
       MOV REG2 REG0
       MOVI REG1 0000010000000000
       AND REG2 REG1
-      MOVI REG3 .update_tank_location_down_player1
       CMP REG2 REG1
-      JCND EQ REG3
-      // if its a move LEFT: jump to update_tank_location_left
+      BCND NE 00000001
+      MOVI REG14 00000010
+
+      // if its a move LEFT: set REG14 to 11
       MOV REG2 REG0
       MOVI REG1 0000001000000000
       AND REG2 REG1
-      MOVI REG3 .update_tank_location_left_player1
       CMP REG2 REG1
-      JCND EQ REG3
-      // if its a move RIGHT: jump to update_tank_location_right
+      BCND NE 00000001
+      MOVI REG14 00000011
+
+      // if its a move RIGHT: set REG14 to 01
       MOV REG2 REG0
       MOVI REG1 0000000100000000
       AND REG2 REG1
-      MOVI REG3 .update_tank_location_right_player1
       CMP REG2 REG1
-      JCND EQ REG3
+      BCND NE 00000001
+      MOVI REG14 00000001
+
+      // check if REG14 is valid, then call update tank location
+      MOVI REG1 .update_tank_location_player1
+      CMPI REG14 10000000
+      BCND EQ 00000001
+      JAL REG11 REG1
+
 .check_shoot_player1
       // if its a shoot: jump to spawn_projectile
       LCI REG0 player1
@@ -150,34 +188,48 @@
 .game_loop_player2
       // load snes input
       LCI REG0 player2
+
+      // handle move inputs
+      MOVI REG14 10000000 // means no movement
+
+      // if its a move UP: set REG14 to 00
       MOV REG2 REG0
-      // if its a move UP: jump to update_tank_location_up
       MOVI REG1 0000100000000000
       AND REG2 REG1
-      MOVI REG3 .update_tank_location_up_player2
       CMP REG2 REG1
-      JCND EQ REG3
-      // if its a move DOWN: jump to update_tank_location_down
+      BCND NE 00000001
+      MOVI REG14 00000000
+
+      // if its a move DOWN: set REG14 to 10
       MOV REG2 REG0
       MOVI REG1 0000010000000000
       AND REG2 REG1
-      MOVI REG3 .update_tank_location_down_player2
       CMP REG2 REG1
-      JCND EQ REG3
-      // if its a move LEFT: jump to update_tank_location_left
+      BCND NE 00000001
+      MOVI REG14 00000010
+
+      // if its a move LEFT: set REG14 to 11
       MOV REG2 REG0
       MOVI REG1 0000001000000000
       AND REG2 REG1
-      MOVI REG3 .update_tank_location_left_player2
       CMP REG2 REG1
-      JCND EQ REG3
-      // if its a move RIGHT: jump to update_tank_location_right
+      BCND NE 00000001
+      MOVI REG14 00000011
+
+      // if its a move RIGHT: set REG14 to 01
       MOV REG2 REG0
       MOVI REG1 0000000100000000
       AND REG2 REG1
-      MOVI REG3 .update_tank_location_right_player2
       CMP REG2 REG1
-      JCND EQ REG3
+      BCND NE 00000001
+      MOVI REG14 00000001
+
+      // check if REG14 is valid, then call update tank location
+      MOVI REG1 .update_tank_location_player2
+      CMPI REG14 10000000
+      BCND EQ 00000001
+      JAL REG11 REG1
+
 .check_shoot_player2
       // if its a shoot: jump to spawn_projectile
       LCI REG0 player2
@@ -234,15 +286,48 @@
 .check_proj1_collision
       MOV REG14 REG0
       MOV REG15 REG1
-      // Check wall collisions first
-      MOVI REG8 .check_wall_collision
-      JAL REG11 REG8
-      MOVI REG8 .mark_invalid1
-      CMPI REG13 00000001
-      JCND EQ REG8
-      // Check player2 collision
+
+      PUSH REG0
+      PUSH REG1
       PUSH REG3
       PUSH REG4
+
+      // Check wall collisions first, need to compute bounds, push twice for use later
+      // For orientation up/down bounds are (23, 28)
+      MOVI REG2 0000111001110000
+      LOAD REG2 REG2
+      MOVI REG0 00010111
+      MOVI REG1 00011100
+      ANDI REG2 00000001
+      CMPI REG2 00000000
+      BCND EQ 00000010
+      MOVI REG1 00010111
+      MOVI REG0 00011100
+      PUSH REG0
+      PUSH REG1
+      PUSH REG0
+      PUSH REG1
+
+      // Check wall collisions
+      MOVI REG8 .check_wall_collision
+      JAL REG11 REG8
+      POP REG0
+      MOVI REG8 .mark_invalid1
+      CMPI REG13 00000001
+      BCND NE 00000101 // dump old bounding info
+      POP REG0
+      POP REG0
+      JCND NC REG8
+
+      // Check player2 collision
+      // Recompute bounds for tanks then put back on the stack
+      MOV REG8 REG14
+      MOVI REG14 0000111001110001
+      LOAD REG14 REG14
+      MOVI REG0 .recompute_object_bounds
+      JAL REG11 REG0
+      MOV REG14 REG8
+
       // Get player2 x and y position
       MOVI REG3 0000111100001101
       MOVI REG4 0000111100001100
@@ -252,9 +337,12 @@
       JAL REG11 REG8
       POP REG4
       POP REG3
+      POP REG1
+      POP REG0
       MOVI REG8 .damage_player2
       CMPI REG13 00000001
       JCND EQ REG8
+
       // Update projectile locations
       STOR REG0 REG6
       STOR REG1 REG7
@@ -268,9 +356,10 @@
       STOR REG15 REG14
 
       // if player2's health is 0, then we can end the game
-      MOVI REG14 .game_setup
+      MOVI REG14 00000000
+      MOVI REG0 .winner_screen
       CMPI REG15 00000000
-      JCND EQ REG14
+      JCND EQ REG0
 .mark_invalid1
       PUSH REG8
       PUSH REG9
@@ -336,14 +425,48 @@
 .check_proj2_collision
       MOV REG14 REG0
       MOV REG15 REG1
-      MOVI REG8 .check_wall_collision
-      JAL REG11 REG8
-      MOVI REG8 .mark_invalid2
-      CMPI REG13 00000001
-      JCND EQ REG8
-      // Check player1 collision
+
+      PUSH REG0
+      PUSH REG1
       PUSH REG3
       PUSH REG4
+
+      // Check wall collisions first, need to compute bounds, push twice for use later
+      // For orientation up/down bounds are (23, 28)
+      MOVI REG2 0000111001101111
+      LOAD REG2 REG2
+      MOVI REG0 00010111
+      MOVI REG1 00011100
+      ANDI REG2 00000001
+      CMPI REG2 00000000
+      BCND EQ 00000010
+      MOVI REG1 00010111
+      MOVI REG0 00011100
+      PUSH REG0
+      PUSH REG1
+      PUSH REG0
+      PUSH REG1
+
+      // Check for wall collision
+      MOVI REG8 .check_wall_collision
+      JAL REG11 REG8
+      POP REG0
+      MOVI REG8 .mark_invalid2
+      CMPI REG13 00000001
+      BCND NE 00000101 // dump old bounding info
+      POP REG0
+      POP REG0
+      JCND NC REG8
+
+      // Check player1 collision
+      // Recompute bounds for tanks then put back on the stack
+      MOV REG8 REG14
+      MOVI REG14 0000111001110010
+      LOAD REG14 REG14
+      MOVI REG0 .recompute_object_bounds
+      JAL REG11 REG0
+      MOV REG14 REG8
+
       // Get player1 x and y position
       MOVI REG3 0000111100001111
       MOVI REG4 0000111100001110
@@ -353,6 +476,8 @@
       JAL REG11 REG8
       POP REG4
       POP REG3
+      POP REG1
+      POP REG0
       MOVI REG8 .damage_player1
       CMPI REG13 00000001
       JCND EQ REG8
@@ -367,10 +492,11 @@
       SUBI REG15 00000001
       STOR REG15 REG14
 
-       // if player1's health is 0, then we can end the game
-      MOVI REG14 .game_setup
+      // if player1's health is 0, then we can end the game
+      MOVI REG14 00000001
+      MOVI REG0 .winner_screen
       CMPI REG15 00000000
-      JCND EQ REG14
+      JCND EQ REG0
 .mark_invalid2
       PUSH REG8
       PUSH REG9
@@ -391,294 +517,238 @@
       MOVI REG3 .game_loop_player1
       JCND NC REG3
 
-.update_tank_location_left_player1
-      // do some animation stuff
-      MOVI REG0 0000111100010000
-      LOAD REG1 REG0
-      XORI REG1 00000001
-      STOR REG1 REG0
-      // move the address of the player1 loc to saved register
-      MOVI REG6 0000111100001111
-      LOAD REG14 REG6
-      MOVI REG7 0000111100001110
-      LOAD REG15 REG7
-      MOVI REG10 0000111001110010
-      MOVI REG5 00000011
-      SUBI REG14 00000001
-      MOVI REG4 .check_wall_collision
-      JAL REG11 REG4
-      MOVI REG4 .check_shoot_player1
-      CMPI REG13 00000000
-      JCND NE REG4
+// Updates the location of the player1 tank based off the desired direction
+// ARGS:
+//    REG14 -> new orientation of the tank
+.update_tank_location_player1
+      PUSH REG11
+      PUSH REG5
+      PUSH REG6
+      PUSH REG7
+      PUSH REG8
+      PUSH REG9
 
-      // check collision with the other tank
+      MOV REG8 REG14 // Put our new direction in REG8
+      MOVI REG5 0000111100001111 // pos_x
+      MOVI REG6 0000111100001110 // pos_y
+      MOVI REG7 0000111001110010 // orientation
+
+      // do some animation stuff
+      MOVI REG1 0000111100010000
+      LOAD REG2 REG1
+      XORI REG2 00000001
+      STOR REG2 REG1
+
+      // move the address of the player1 loc to saved register
+      LOAD REG14 REG5
+      LOAD REG15 REG6
+
+      // Use new orientation to decide bounding box and push on stack
+      // Bounding box should have a width of 27 and height of 30 against walls
+      MOVI REG2 00011011
+      MOVI REG3 00011110
+      MOV REG1 REG8
+      ANDI REG1 00000001
+      CMPI REG1 00000000
+      BCND EQ 00000010
+      MOVI REG2 00011110
+      MOVI REG3 00011011
+      // Push our bounding box twice
+      PUSH REG2
+      PUSH REG3
+      PUSH REG2
+      PUSH REG3
+
+      // Use new orientation to offset position
+      CMPI REG8 00000000
+      BCND NE 00000010
+      SUBI REG15 00000001 // up
+      BCND NC 00001001
+      CMPI REG8 00000010 
+      BCND NE 00000010
+      ADDI REG15 00000001 // down
+      BCND NC 00000101
+      CMPI REG8 00000001 
+      BCND NE 00000010
+      ADDI REG14 00000001 // right
+      BCND NC 00000001
+      SUBI REG14 00000001 // left
+
+      // Bounding box is pushed on stack so we can call check wall collision
+      MOVI REG1 .check_wall_collision
+      JAL REG11 REG1
+      POP REG1 // pop off location of hit wall
+
+      MOVI REG1 .return_update_tank_location_player1
+      CMPI REG13 00000000
+      BCND EQ 00000101 // Dump the bounding box parameters
+      POP REG0 
+      POP REG0 
+      JCND NC REG1
+
+      // Update our new bounding box based on other tank's orientation
+      MOV REG9 REG14
+      MOVI REG14 0000111001110001
+      LOAD REG14 REG14
+      MOVI REG0 .recompute_object_bounds
+      JAL REG11 REG0
+      MOV REG14 REG9
+
+      // Load player 2's location
       MOVI REG3 0000111100001101
       MOVI REG4 0000111100001100
       LOAD REG3 REG3
       LOAD REG4 REG4
-      MOVI REG8 .check_collision
-      JAL REG11 REG8
-      MOVI REG8 .check_shoot_player1
-      CMPI REG13 00000000
-      JCND NE REG8
+      MOVI REG1 .check_collision
+      JAL REG11 REG1
 
-      STOR REG14 REG6
-      STOR REG5 REG10
-      MOVI REG4 .check_shoot_player1
-      JCND NC REG4
+      MOVI REG1 .return_update_tank_location_player1
+      CMPI REG13 00000001
+      JCND EQ REG1
 
-.update_tank_location_right_player1
+      // No collisions now, so update new orientation/location
+      STOR REG14 REG5
+      STOR REG15 REG6
+      STOR REG8 REG7
+
+.return_update_tank_location_player1
+      POP REG9
+      POP REG8
+      POP REG7
+      POP REG6
+      POP REG5
+      POP REG11
+
+      JCND NC REG11
+
+// Updates the location of the player2 tank based off the desired direction
+// ARGS:
+//    REG14 -> new orientation of the tank
+.update_tank_location_player2
+      PUSH REG11
+      PUSH REG5
+      PUSH REG6
+      PUSH REG7
+      PUSH REG8
+      PUSH REG9
+
+      MOV REG8 REG14 // Put our new direction in REG8
+      MOVI REG5 0000111100001101 // pos_x
+      MOVI REG6 0000111100001100 // pos_y
+      MOVI REG7 0000111001110001 // orientation
+
       // do some animation stuff
-      MOVI REG0 0000111100010000
-      LOAD REG1 REG0
-      XORI REG1 00000001
-      STOR REG1 REG0
+      MOVI REG1 0000111100010001
+      LOAD REG2 REG1
+      XORI REG2 00000001
+      STOR REG2 REG1
+
       // move the address of the player1 loc to saved register
-      MOVI REG6 0000111100001111
-      LOAD REG14 REG6
-      MOVI REG7 0000111100001110
-      LOAD REG15 REG7
-      // mov the orientation address into reg10
-      MOVI REG10 0000111001110010
-      MOVI REG5 00000001
-      ADDI REG14 00000001
-      MOVI REG4 .check_wall_collision
-      JAL REG11 REG4
-      MOVI REG4 .check_shoot_player1
+      LOAD REG14 REG5
+      LOAD REG15 REG6
+
+      // Use new orientation to decide bounding box and push on stack
+      // Bounding box should have a width of 27 and height of 30 against walls
+      MOVI REG2 00011011
+      MOVI REG3 00011110
+      MOV REG1 REG8
+      ANDI REG1 00000001
+      CMPI REG1 00000000
+      BCND EQ 00000010
+      MOVI REG2 00011110
+      MOVI REG3 00011011
+      // Push our bounding box twice
+      PUSH REG2
+      PUSH REG3
+      PUSH REG2
+      PUSH REG3
+
+      // Use new orientation to offset position
+      CMPI REG8 00000000
+      BCND NE 00000010
+      SUBI REG15 00000001 // up
+      BCND NC 00001001
+      CMPI REG8 00000010 
+      BCND NE 00000010
+      ADDI REG15 00000001 // down
+      BCND NC 00000101
+      CMPI REG8 00000001 
+      BCND NE 00000010
+      ADDI REG14 00000001 // right
+      BCND NC 00000001
+      SUBI REG14 00000001 // left
+
+      // Bounding box is pushed on stack so we can call check wall collision
+      MOVI REG1 .check_wall_collision
+      JAL REG11 REG1
+      POP REG1 // pop off location of hit wall
+
+      MOVI REG1 .return_update_tank_location_player1
       CMPI REG13 00000000
-      JCND NE REG4
+      BCND EQ 00000101 // Dump the bounding box parameters
+      POP REG0 
+      POP REG0 
+      JCND NC REG1
 
-      // check collision with the other tank
-      MOVI REG3 0000111100001101
-      MOVI REG4 0000111100001100
-      LOAD REG3 REG3
-      LOAD REG4 REG4
-      MOVI REG8 .check_collision
-      JAL REG11 REG8
-      MOVI REG8 .check_shoot_player1
-      CMPI REG13 00000000
-      JCND NE REG8
+      // Update our new bounding box based on other tank's orientation
+      MOV REG9 REG14
+      MOVI REG14 0000111001110010
+      LOAD REG14 REG14
+      MOVI REG0 .recompute_object_bounds
+      JAL REG11 REG0
+      MOV REG14 REG9
 
-      STOR REG14 REG6
-      STOR REG5 REG10
-      MOVI REG4 .check_shoot_player1
-      JCND NC REG4
-
-.update_tank_location_up_player1
-      // do some animation stuff
-      MOVI REG0 0000111100010000
-      LOAD REG1 REG0
-      XORI REG1 00000001
-      STOR REG1 REG0
-      // move the address of the player1 loc to saved register
-      MOVI REG6 0000111100001111
-      LOAD REG14 REG6
-      MOVI REG7 0000111100001110
-      LOAD REG15 REG7
-      MOVI REG10 0000111001110010
-      MOVI REG5 00000000
-      SUBI REG15 00000001
-      MOVI REG4 .check_wall_collision
-      JAL REG11 REG4
-      MOVI REG4 .check_shoot_player1
-      CMPI REG13 00000000
-      JCND NE REG4
-
-      // check collision with the other tank
-      MOVI REG3 0000111100001101
-      MOVI REG4 0000111100001100
-      LOAD REG3 REG3
-      LOAD REG4 REG4
-      MOVI REG8 .check_collision
-      JAL REG11 REG8
-      MOVI REG8 .check_shoot_player1
-      CMPI REG13 00000000
-      JCND NE REG8
-
-      STOR REG15 REG7
-      STOR REG5 REG10
-      MOVI REG4 .check_shoot_player1
-      JCND NC REG4
-
-.update_tank_location_down_player1
-      // do some animation stuff
-      MOVI REG0 0000111100010000
-      LOAD REG1 REG0
-      XORI REG1 00000001
-      STOR REG1 REG0
-      // move the address of the player1 loc to saved register
-      MOVI REG6 0000111100001111
-      LOAD REG14 REG6
-      MOVI REG7 0000111100001110
-      LOAD REG15 REG7
-      MOVI REG10 0000111001110010
-      MOVI REG5 00000010
-      ADDI REG15 00000001
-      MOVI REG4 .check_wall_collision
-      JAL REG11 REG4
-      MOVI REG4 .check_shoot_player1
-      CMPI REG13 00000000
-      JCND NE REG4
-
-      // check collision with the other tank
-      MOVI REG3 0000111100001101
-      MOVI REG4 0000111100001100
-      LOAD REG3 REG3
-      LOAD REG4 REG4
-      MOVI REG8 .check_collision
-      JAL REG11 REG8
-      MOVI REG8 .check_shoot_player1
-      CMPI REG13 00000000
-      JCND NE REG8
-
-      STOR REG15 REG7
-      STOR REG5 REG10
-      MOVI REG4 .check_shoot_player1
-      JCND NC REG4
-
-.update_tank_location_right_player2
-      // do some animation stuff
-      MOVI REG0 0000111100010001
-      LOAD REG1 REG0
-      XORI REG1 00000001
-      STOR REG1 REG0
-      // move the address of the player2 loc to saved register
-      MOVI REG6 0000111100001101
-      LOAD REG14 REG6
-      MOVI REG7 0000111100001100
-      LOAD REG15 REG7
-      MOVI REG10 0000111001110001
-      MOVI REG5 00000001
-      ADDI REG14 00000001
-      MOVI REG4 .check_wall_collision
-      JAL REG11 REG4
-      MOVI REG4 .check_shoot_player2
-      CMPI REG13 00000000
-      JCND NE REG4
-
-      // check collision with the other tank
+      // Load player 1's location
       MOVI REG3 0000111100001111
       MOVI REG4 0000111100001110
       LOAD REG3 REG3
       LOAD REG4 REG4
-      MOVI REG8 .check_collision
-      JAL REG11 REG8
-      MOVI REG8 .check_shoot_player2
-      CMPI REG13 00000000
-      JCND NE REG8
+      MOVI REG1 .check_collision
+      JAL REG11 REG1
 
-      STOR REG14 REG6
-      STOR REG5 REG10
-      MOVI REG4 .check_shoot_player2
-      JCND NC REG4
+      MOVI REG1 .return_update_tank_location_player2
+      CMPI REG13 00000001
+      JCND EQ REG1
 
-.update_tank_location_left_player2
-      // do some animation stuff
-      MOVI REG0 0000111100010001
-      LOAD REG1 REG0
-      XORI REG1 00000001
-      STOR REG1 REG0
-      // move the address of the player2 loc to saved register
-      MOVI REG6 0000111100001101
-      LOAD REG14 REG6
-      MOVI REG7 0000111100001100
-      LOAD REG15 REG7
-      MOVI REG10 0000111001110001
-      MOVI REG5 00000011
-      SUBI REG14 00000001
-      MOVI REG4 .check_wall_collision
-      JAL REG11 REG4
-      MOVI REG4 .check_shoot_player2
-      CMPI REG13 00000000
-      JCND NE REG4
+      // No collisions now, so update new orientation/location
+      STOR REG14 REG5
+      STOR REG15 REG6
+      STOR REG8 REG7
 
-      // check collision with the other tank
-      MOVI REG3 0000111100001111
-      MOVI REG4 0000111100001110
-      LOAD REG3 REG3
-      LOAD REG4 REG4
-      MOVI REG8 .check_collision
-      JAL REG11 REG8
-      MOVI REG8 .check_shoot_player2
-      CMPI REG13 00000000
-      JCND NE REG8
+.return_update_tank_location_player2
+      POP REG9
+      POP REG8
+      POP REG7
+      POP REG6
+      POP REG5
+      POP REG11
 
-      STOR REG14 REG6
-      STOR REG5 REG10
-      MOVI REG4 .check_shoot_player2
-      JCND NC REG4
+      JCND NC REG11
 
-.update_tank_location_up_player2
-      // do some animation stuff
-      MOVI REG0 0000111100010001
-      LOAD REG1 REG0
-      XORI REG1 00000001
-      STOR REG1 REG0
-      // move the address of the player2 loc to saved register
-      MOVI REG6 0000111100001101
-      LOAD REG14 REG6
-      MOVI REG7 0000111100001100
-      LOAD REG15 REG7
-      MOVI REG10 0000111001110001
-      MOVI REG5 00000000
-      SUBI REG15 00000001
-      MOVI REG4 .check_wall_collision
-      JAL REG11 REG4
-      MOVI REG4 .check_shoot_player2
-      CMPI REG13 00000000
-      JCND NE REG4
+// Recomputes the bounds for an object hitting a tank.
+// ARGS:
+//    REG14 -> tank orientation
+//    STACK[0] -> x_bounds
+//    STACK[1] -> y_bounds
+// RETURNS:
+//    STACK[0] -> adjusted x_bounds
+//    STACK[1] -> adjusted y_bounds
+.recompute_object_bounds
+      MOV REG0 REG14
+      POP REG2
+      POP REG1
+      ANDI REG0 00000001
+      CMPI REG0 00000001
+      BCND EQ 00000011
+      SUBI REG1 00000101
+      SUBI REG2 00000011
+      BCND NC 00000010
+      SUBI REG1 00000011
+      SUBI REG2 00000101
+      PUSH REG1
+      PUSH REG2
 
-      // check collision with the other tank
-      MOVI REG3 0000111100001111
-      MOVI REG4 0000111100001110
-      LOAD REG3 REG3
-      LOAD REG4 REG4
-      MOVI REG8 .check_collision
-      JAL REG11 REG8
-      MOVI REG8 .check_shoot_player2
-      CMPI REG13 00000000
-      JCND NE REG8
-
-      STOR REG15 REG7
-      STOR REG5 REG10
-      MOVI REG4 .check_shoot_player2
-      JCND NC REG4
-
-.update_tank_location_down_player2
-      // do some animation stuff
-      MOVI REG0 0000111100010001
-      LOAD REG1 REG0
-      XORI REG1 00000001
-      STOR REG1 REG0
-      // move the address of the player2 loc to saved register
-      MOVI REG6 0000111100001101
-      LOAD REG14 REG6
-      MOVI REG7 0000111100001100
-      LOAD REG15 REG7
-      MOVI REG10 0000111001110001
-      MOVI REG5 00000010
-      ADDI REG15 00000001
-      MOVI REG4 .check_wall_collision
-      JAL REG11 REG4
-      MOVI REG4 .check_shoot_player2
-      CMPI REG13 00000000
-      JCND NE REG4
-
-      // check collision with the other tank
-      MOVI REG3 0000111100001111
-      MOVI REG4 0000111100001110
-      LOAD REG3 REG3
-      LOAD REG4 REG4
-      MOVI REG8 .check_collision
-      JAL REG11 REG8
-      MOVI REG8 .check_shoot_player2
-      CMPI REG13 00000000
-      JCND NE REG8
-
-      STOR REG15 REG7
-      STOR REG5 REG10
-      MOVI REG4 .check_shoot_player2
-      JCND NC REG4
+      JCND NC REG11
 
 .spawn_projectile_player1
       // projectile x addr
@@ -828,72 +898,87 @@
 // ARGS:
 //    REG14 -> pox_x
 //    REG15 -> pos_y
+//    STACK[0] -> collision_width
+//    STACK[1] -> collision_height
 // RETURNS:
 //    REG13 -> 0 (FALSE) or 1 (TRUE)
+//    STACK[0] -> wall pointer of hit object, junk if REG13 is false
 .check_wall_collision
+      POP REG1 // collision height
+      POP REG0 // collision width
       PUSH REG5
       PUSH REG6
+      PUSH REG7
       PUSH REG11
       MOVI REG3 00001111
       MOVI REG4 00001111
       MOVI REG5 0000111111110000
 .next_tile
       // end of wall coordinates in reg8 so we can compare if we've gotten to the end of tiles
-      MOVI REG8 0001000100011011
-      MOVI REG9 .return_check_wall_collision
+      MOVI REG6 0001000100011011
+      MOVI REG7 .return_check_wall_collision
       MOVI REG13 00000000
-      CMP REG5 REG8
-      JCND GT REG9
+      CMP REG5 REG6
+      JCND GT REG7
       LOAD REG13 REG5
-      MOVI REG8 .increment
-      MOVI REG9 .check_collision
+      MOVI REG6 .increment
+      MOVI REG7 .check_collision
       LSH REG13 1110
       CMPI REG13 00000110
-      JCND LT REG8
-      JAL REG11 REG9
-      MOVI REG8 .increment
+      JCND LT REG6
+      PUSH REG0
+      PUSH REG1
+      JAL REG11 REG7
+      MOVI REG6 .increment
       CMPI REG13 00000000
-      JCND EQ REG8
+      JCND EQ REG6
 .return_check_wall_collision
       POP REG11
+      POP REG7
       POP REG6
       POP REG5
+      PUSH REG5 // store the resulting wall pointer on the stack
       JCND NC REG11
 .increment
       ADDI REG5 00000001
       ADDI REG3 00100000
-      MOVI REG8 0000001001111111
-      MOVI REG9 .next_tile
-      CMP REG3 REG8
-      JCND LT REG9
+      MOVI REG6 0000001001111111
+      MOVI REG7 .next_tile
+      CMP REG3 REG6
+      JCND LT REG7
       MOVI REG3 00001111
       ADDI REG4 00100000
-      JCND NC REG9
+      JCND NC REG7
 
-// Checks collisions between two positions, assumes 32x32 size for both
+// Checks collisions between two positions.
+// The width and height of the bounding box is stored onto the stack.
 // ARGS:
 //    REG3 -> pos1_x
 //    REG4 -> pox1_y
 //    REG14 -> pox2_x
 //    REG15 -> pos2_y
+//    STACK[0] -> collision_width
+//    STACK[1] -> collision_height
 // RETURNS:
 //    REG13 -> 0 (FALSE) or 1 (TRUE)
 .check_collision
+      POP REG1 // collision height
+      POP REG0 // collision width 
       MOVI REG13 .reverse_x
       CMP REG14 REG3
       JCND LT REG13
-      MOV REG8 REG14
-      SUB REG8 REG3
+      MOV REG2 REG14
+      SUB REG2 REG3
       MOVI REG13 .check_y
-      CMPI REG8 00100000
+      CMP REG2 REG0
       JCND LT REG13
       MOVI REG13 .return_false
       JCND NC REG13
 .reverse_x
-      MOV REG8 REG3
-      SUB REG8 REG14
+      MOV REG2 REG3
+      SUB REG2 REG14
       MOVI REG13 .check_y
-      CMPI REG8 00100000
+      CMP REG2 REG0
       JCND LT REG13
       MOVI REG13 .return_false
       JCND NC REG13
@@ -901,18 +986,18 @@
       MOVI REG13 .reverse_y
       CMP REG15 REG4
       JCND LT REG13
-      MOV REG8 REG15
-      SUB REG8 REG4
+      MOV REG2 REG15
+      SUB REG2 REG4
       MOVI REG13 .return_true
-      CMPI REG8 00100000
+      CMP REG2 REG1
       JCND LT REG13
       MOVI REG13 .return_false
       JCND NC REG13
 .reverse_y
-      MOV REG8 REG4
-      SUB REG8 REG15
+      MOV REG2 REG4
+      SUB REG2 REG15
       MOVI REG13 .return_true
-      CMPI REG8 00100000
+      CMP REG2 REG1
       JCND LT REG13
       MOVI REG13 .return_false
       JCND NC REG13
@@ -1052,16 +1137,13 @@
       MOVI REG3 0000001111010000 // P
       STOR REG3 REG0
       ADDI REG0 00000001
-
       MOVI REG3 0000001110110001 // 1
       STOR REG3 REG0
       ADDI REG0 00000001
-
       MOVI REG3 0000001110111010 // :
       STOR REG3 REG0
       ADDI REG0 00000001
-
-      MOVI REG3 0000000000000001 // SPACE
+      MOVI REG3 0000000000000001 // [SPACE]
       STOR REG3 REG0
       ADDI REG0 00000001
 
@@ -1087,7 +1169,7 @@
       MOVI REG3 0000000000000000
       STOR REG3 REG0
 
-       // put the original address back then call the draw string subroutine
+       // draw at (2, 2)
       MOVI REG0 0010001111100011
       MOVI REG14 00000010
       MOVI REG15 00000010
@@ -1109,7 +1191,7 @@
       MOVI REG3 1110000000111010 // :
       STOR REG3 REG0
       ADDI REG0 00000001
-      MOVI REG3 0000000000000001 // SPACE
+      MOVI REG3 0000000000000001 // [SPACE]
       STOR REG3 REG0
       ADDI REG0 00000001
 
@@ -1135,9 +1217,9 @@
       MOVI REG3 0000000000000000
       STOR REG3 REG0
 
-      // put the original address back then call the draw string subroutine
+      // draw at (60, 2)
       MOVI REG0 0010001111100011
-      MOVI REG14 00100000
+      MOVI REG14 00111100
       MOVI REG15 00000010
       PUSH REG0
       MOVI REG0 .draw_string
@@ -1145,8 +1227,6 @@
 
       POP REG11
       JCND NC REG11
-
-
 
 // Resets all tank/proj/explosion/power-up locations
 .reset_locations   
@@ -1157,11 +1237,125 @@
       STOR REG1 REG0
       MOVI REG0 0000111100001011 // proj1_x
       STOR REG1 REG0
-      MOVI REG0 0000111100001010 // proj2_x
+      MOVI REG0 0000111100001001 // proj2_x
       STOR REG1 REG0
       MOVI REG0 0001000100100000 // explo1_x
       STOR REG1 REG0
       MOVI REG0 0001000100011101 // explo2_x
       STOR REG1 REG0
 
+      JCND NC REG11
+
+// Waits a certain amount of clock cycles
+// This equals approximately 33 ms, thus 30 of these calls will be about 1 second.
+.wait_loop
+      MOVI REG0 00000000
+
+      // Actual loop part
+      ADDI REG0 00000001
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      ADDI REG2 00000000
+      CMPI REG0 00000000
+      BCND NE 11100111
+
+      JCND NC REG11     
+
+// Draws text describing who won
+// ARGS:
+//    REG14 -> 0 for player1, 1 for player2
+.draw_winner_text
+      PUSH REG11
+      MOVI REG0 0010001111100011 // string we will use
+
+      // set scale to 8x
+      MOVI REG3 0001000100100010
+      MOVI REG4 00000011
+      STOR REG4 REG3
+
+      // white string: PLAYER[SPACE][PLAYER_NUMBER]
+      MOVI REG3 1111111111010000 // P
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1111111111001100 // L
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1111111111000001 // A
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1111111111011001 // Y
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1111111111000101 // E
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1111111111010010 // R
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1111111110000001 // [SPACE]
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1111111110110001 // 1
+      ADD REG3 REG14 // if 1 then changes to 2
+      STOR REG3 REG0
+      ADDI REG0 00000001
+
+      MOVI REG3 00000000 // null terminator
+      STOR REG3 REG0
+
+      // draw string at (8, 16)
+      MOVI REG0 0010001111100011
+      MOVI REG14 00001000
+      MOVI REG15 00010000
+      PUSH REG0
+      MOVI REG0 .draw_string
+      JAL REG11 REG0
+
+      MOVI REG0 0010001111100011
+
+      // white string: WINS
+      MOVI REG3 1111111111010111 // W
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1111111111001001 // I
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1111111111001110 // N
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 1111111111010011 // S
+      STOR REG3 REG0
+      ADDI REG0 00000001
+
+      MOVI REG3 00000000 // null terminator
+      STOR REG3 REG0
+
+      // draw string at (24, 24)
+      MOVI REG0 0010001111100011
+      MOVI REG14 00011000
+      MOVI REG15 00011000
+      PUSH REG0
+      MOVI REG0 .draw_string
+      JAL REG11 REG0
+
+      POP REG11
       JCND NC REG11
