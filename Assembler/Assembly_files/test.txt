@@ -27,12 +27,31 @@
       JAL REG11 REG0
 
       // draw title screen text
+      MOVI REG0 .draw_start_text
+      JAL REG11 REG0
 
-      // keep checking for start input from player1
-      MOVI REG1 0001000000000000
+      // keep checking for start input from player1, also does alt skins
       LCI REG0 player1
-      AND REG0 REG1
-      CMP REG0 REG1
+
+      MOVI REG1 0000000000010000 // right bumper
+      MOV REG2 REG0
+      AND REG2 REG1
+      CMP REG2 REG1
+      BCND NE 00001011
+      MOVI REG2 1111000000000010
+      LOAD REG3 REG2
+      AND REG3 REG1
+      CMP REG3 REG1
+      BCND EQ 00000101
+      STOR REG0 REG2
+      MOVI REG3 0000111100010000
+      LOAD REG4 REG3
+      ADDI 00000100
+
+      MOVI REG1 0001000000000000 // check for start
+      MOV REG2 REG0
+      AND REG2 REG1
+      CMP REG2 REG1
       BCND NE 11111100
 
       // user pressed start, go to game_setup
@@ -1406,4 +1425,51 @@
       ADDI REG0 00000001
       CMP REG0 REG3
       BCND LE 11110111
+      JCND NC REG11
+
+// Draws start screen text
+.draw_start_text
+      PUSH REG11
+      MOVI REG0 0010001111100011 // string we will use
+      MOVI REG1 0000111001110100 // player1 health
+      LOAD REG1 REG1
+
+      // set scale to 8x
+      MOVI REG3 0001000100100010
+      MOVI REG4 00000011
+      STOR REG4 REG3
+
+      // white string: TANK$!
+      MOVI REG3 111111111 1010100 // T
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 111111111 1000001 // A
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 111111111 1001110 // N
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 111111111 1001011 // K
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 111111111 0100100 // $
+      STOR REG3 REG0
+      ADDI REG0 00000001
+      MOVI REG3 111111111 0100001 // !
+      STOR REG3 REG0
+      ADDI REG0 00000001
+
+      // null terminator
+      MOVI REG3 0000000000000000
+      STOR REG3 REG0
+
+      // draw at (16, 24)
+      MOVI REG0 0010001111100011
+      MOVI REG14 00010000
+      MOVI REG15 00011000
+      PUSH REG0
+      MOVI REG0 .draw_string
+      JAL REG11 REG0
+
+      POP REG11
       JCND NC REG11
