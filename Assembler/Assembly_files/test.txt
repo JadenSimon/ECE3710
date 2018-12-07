@@ -82,6 +82,8 @@
 
  // Keep checking for start input from player1, also does alt skins
 .start_menu_loop
+      MOVI REG0 .wait_loop
+      JAL REG11 REG0
       LCI REG0 player1
       LCI REG5 player2
 
@@ -149,7 +151,7 @@
       ADDI REG4 00000100
       STOR REG4 REG3
 
-      // update player1's last pressed 
+      // update player1's last pressed
       MOVI REG1 1111000000000010
       STOR REG0 REG1
 
