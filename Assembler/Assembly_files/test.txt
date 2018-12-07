@@ -33,20 +33,22 @@
       // keep checking for start input from player1, also does alt skins
       LCI REG0 player1
 
-      MOVI REG1 0000000000010000 // right bumper
+      // right bumper
+      MOVI REG1 0000000000010000
       MOV REG2 REG0
       AND REG2 REG1
       CMP REG2 REG1
-      BCND NE 00001011
+      BCND NE 00001100
       MOVI REG2 1111000000000010
       LOAD REG3 REG2
       AND REG3 REG1
       CMP REG3 REG1
-      BCND EQ 00000101
+      BCND EQ 00000110
       STOR REG0 REG2
       MOVI REG3 0000111100010000
       LOAD REG4 REG3
-      ADDI 00000100
+      ADDI REG4 00000100
+      STOR REG4 REG3
 
       MOVI REG1 0001000000000000 // check for start
       MOV REG2 REG0
