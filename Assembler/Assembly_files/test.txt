@@ -22,6 +22,10 @@
       MOVI REG0 .reset_locations
       JAL REG11 REG0
 
+      // reset destroyed walls
+      MOVI REG0 .reset_wall_destruction
+      JAL REG11 REG0
+
       // draw title screen text
 
       // keep checking for start input from player1
@@ -311,7 +315,21 @@
       // Check wall collisions
       MOVI REG8 .check_wall_collision
       JAL REG11 REG8
+
+      // Does wall destruction
       POP REG0
+      LOAD REG1 REG0
+      MOV REG2 REG1
+      LSH REG2 1110
+      ANDI REG2 00001111
+      CMPI REG2 00001001
+      BCND GT 00000101
+      CMPI REG2 00000111
+      BCND LT 00000011
+      SUBI REG1 00000100
+      ADDI REG1 01000000
+      STOR REG1 REG0
+
       MOVI REG8 .mark_invalid1
       CMPI REG13 00000001
       BCND NE 00000101 // dump old bounding info
@@ -352,7 +370,7 @@
       // decrease player2's health by 1
       MOVI REG14 0000111001110011
       LOAD REG15 REG14
-      SUBI REG15 00000001      
+      SUBI REG15 00000001
       STOR REG15 REG14
 
       // if player2's health is 0, then we can end the game
@@ -450,7 +468,21 @@
       // Check for wall collision
       MOVI REG8 .check_wall_collision
       JAL REG11 REG8
+
+      // Does wall destruction
       POP REG0
+      LOAD REG1 REG0
+      MOV REG2 REG1
+      LSH REG2 1110
+      ANDI REG2 00001111
+      CMPI REG2 00001001
+      BCND GT 00000101
+      CMPI REG2 00000111
+      BCND LT 00000011
+      SUBI REG1 00000100
+      ADDI REG1 01000000
+      STOR REG1 REG0
+
       MOVI REG8 .mark_invalid2
       CMPI REG13 00000001
       BCND NE 00000101 // dump old bounding info
@@ -564,11 +596,11 @@
       BCND NE 00000010
       SUBI REG15 00000001 // up
       BCND NC 00001001
-      CMPI REG8 00000010 
+      CMPI REG8 00000010
       BCND NE 00000010
       ADDI REG15 00000001 // down
       BCND NC 00000101
-      CMPI REG8 00000001 
+      CMPI REG8 00000001
       BCND NE 00000010
       ADDI REG14 00000001 // right
       BCND NC 00000001
@@ -582,8 +614,8 @@
       MOVI REG1 .return_update_tank_location_player1
       CMPI REG13 00000000
       BCND EQ 00000101 // Dump the bounding box parameters
-      POP REG0 
-      POP REG0 
+      POP REG0
+      POP REG0
       JCND NC REG1
 
       // Update our new bounding box based on other tank's orientation
@@ -668,11 +700,11 @@
       BCND NE 00000010
       SUBI REG15 00000001 // up
       BCND NC 00001001
-      CMPI REG8 00000010 
+      CMPI REG8 00000010
       BCND NE 00000010
       ADDI REG15 00000001 // down
       BCND NC 00000101
-      CMPI REG8 00000001 
+      CMPI REG8 00000001
       BCND NE 00000010
       ADDI REG14 00000001 // right
       BCND NC 00000001
@@ -686,8 +718,8 @@
       MOVI REG1 .return_update_tank_location_player1
       CMPI REG13 00000000
       BCND EQ 00000101 // Dump the bounding box parameters
-      POP REG0 
-      POP REG0 
+      POP REG0
+      POP REG0
       JCND NC REG1
 
       // Update our new bounding box based on other tank's orientation
@@ -924,7 +956,8 @@
       MOVI REG6 .increment
       MOVI REG7 .check_collision
       LSH REG13 1110
-      CMPI REG13 00000110
+      ANDI REG13 00001111
+      CMPI REG13 00000111
       JCND LT REG6
       PUSH REG0
       PUSH REG1
@@ -963,7 +996,7 @@
 //    REG13 -> 0 (FALSE) or 1 (TRUE)
 .check_collision
       POP REG1 // collision height
-      POP REG0 // collision width 
+      POP REG0 // collision width
       MOVI REG13 .reverse_x
       CMP REG14 REG3
       JCND LT REG13
@@ -1048,7 +1081,7 @@
       MOVI REG3 00000000
       STOR REG3 REG2
       ADDI REG1 00000001
-      STOR REG1 REG0 
+      STOR REG1 REG0
 
       // Explosion 2
       MOVI REG0 0001000100011110
@@ -1061,7 +1094,7 @@
       ADDI REG1 00000001
       STOR REG1 REG0
 
-      JCND NC REG11 
+      JCND NC REG11
 
 
 // Draws text onto the screen at the specified location.
@@ -1080,7 +1113,7 @@
       MOVI REG2 0001000100100010 // font scale location
       LOAD REG2 REG2
 
-      // compute offset font_map[(pos_y * 80) + pos_x] 
+      // compute offset font_map[(pos_y * 80) + pos_x]
       MOV REG3 REG15
       MOV REG4 REG15
       LSH REG3 0110 // pos_y * 64
@@ -1181,7 +1214,7 @@
       MOVI REG1 0000111001110011 // player2 health
       LOAD REG1 REG1
 
-      // red string P2: HEALTH 
+      // red string P2: HEALTH
       MOVI REG3 1110000001010000 // P
       STOR REG3 REG0
       ADDI REG0 00000001
@@ -1229,7 +1262,7 @@
       JCND NC REG11
 
 // Resets all tank/proj/explosion/power-up locations
-.reset_locations   
+.reset_locations
       MOVI REG1 0000000000000000
       MOVI REG0 0000111100001111 // tank1_x
       STOR REG1 REG0
@@ -1278,7 +1311,7 @@
       CMPI REG0 00000000
       BCND NE 11100111
 
-      JCND NC REG11     
+      JCND NC REG11
 
 // Draws text describing who won
 // ARGS:
@@ -1358,4 +1391,19 @@
       JAL REG11 REG0
 
       POP REG11
+      JCND NC REG11
+
+// Iterates over the map and resets destroyed walls
+.reset_wall_destruction
+      MOVI REG0 0000111111110000
+      MOVI REG3 0001000100011011
+      LOAD REG1 REG0
+      MOV REG2 REG1
+      LSH REG1 1010
+      LSH REG1 0010
+      ADD REG2 REG1
+      STOR REG2 REG0
+      ADDI REG0 00000001
+      CMP REG0 REG3
+      BCND LE 11110111
       JCND NC REG11
