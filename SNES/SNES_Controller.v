@@ -13,10 +13,10 @@
 // Modified to use an additional register to act as a buffer for user input.
 // In this way we can be sure that the output of the module is always valid.
 // Input clock should be a slow clock
-module SNES_Controller(clk, data_in, latch, data_out);
+module SNES_Controller(clk, slow_clk, data_in, latch, data_out);
 
 	// Global wires
-	input wire clk, data_in;
+	input wire clk, slow_clk, data_in;
 
 	// state variable
 	reg [1:0] state = 2'b00;
@@ -35,47 +35,50 @@ module SNES_Controller(clk, data_in, latch, data_out);
 	// capture serial data on serial line on negedge clk
 	always@(negedge clk)
 	begin
-		if (state == reading)
+		if (slow_clk && state == reading)
 			temp_data <= (temp_data << 1'b1) | data_in;
 	end
 		
 	// state logic
 	always@(posedge clk)
 	begin
-		case (state)
-			start:
-			begin
-				state <= latch_set;
- 			end
-			latch_set:
-			begin
-				state <= reading;
-			end
-			reading:
-			begin
-			   // count to 15 go to next state
-				counter <= counter + 1'b1;
-				
-				if (counter == 4'b1111)
+		if (slow_clk)
+		begin
+			case (state)
+				start:
 				begin
-					state <= done_reading;
+					state <= latch_set;
 				end
-			end
-			done_reading:
-			begin
-				// reset counter
-				counter <= 4'b0000;
-				state <= start;
-				
-				// set the data_out to our temp data
-				data_out <= ~temp_data;
-			end
-			default:
-			begin
-				counter <= 4'b0000;
-				state <= start;
-			end
-		endcase
+				latch_set:
+				begin
+					state <= reading;
+				end
+				reading:
+				begin
+					// count to 15 go to next state
+					counter <= counter + 1'b1;
+					
+					if (counter == 4'b1111)
+					begin
+						state <= done_reading;
+					end
+				end
+				done_reading:
+				begin
+					// reset counter
+					counter <= 4'b0000;
+					state <= start;
+					
+					// set the data_out to our temp data
+					data_out <= ~temp_data;
+				end
+				default:
+				begin
+					counter <= 4'b0000;
+					state <= start;
+				end
+			endcase
+		end
 	end
 	
 	always@(*)
