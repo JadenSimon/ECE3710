@@ -11,8 +11,7 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	output wire hSync, vSync;
 	output wire [4:0] red, green, blue;
 	output reg vga_slow_clk;
-	output wire snes1_slow_clk, snes2_slow_clk;
-	reg snes_slow_clk;
+	output reg snes1_slow_clk, snes2_slow_clk;
 	
 	// SNES wires
 	wire [15:0] snes1_data, snes2_data; 
@@ -29,8 +28,6 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	assign snes2_padded_data = snes2_data | {4'b0, snes2_fake_data, 7'b0};
 	
 	assign new_reset = ~reset;
-	assign snes1_slow_clk = snes_slow_clk;
-	assign snes2_slow_clk = snes_slow_clk;
 	
 	// VGA wires
 	wire bright;
@@ -42,8 +39,8 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	cpu_datapath CPU(clk, new_reset, snes1_padded_data, snes2_padded_data, vga_addr, vga_out);
 
 	// Create the SNES controller modules
-	SNES_Controller controller1(clk, snes_slow_clk, snes1_in, snes1_latch, snes1_data);
-	SNES_Controller controller2(clk, snes_slow_clk, snes2_in, snes2_latch, snes2_data);
+	SNES_Controller controller1(snes1_slow_clk, snes1_in, snes1_latch, snes1_data);
+	SNES_Controller controller2(snes2_slow_clk, snes2_in, snes2_latch, snes2_data);
 	
 	// Create the VGA modules 
 	VGA_Display display(clk, vga_slow_clk, new_reset, hSync, vSync, hCount, vCount, bright);
@@ -64,17 +61,24 @@ module TankGame(clk, reset, snes1_in, snes2_in, snes1_latch, snes2_latch, hSync,
 	end
 	
 	// Create a slow 5 MHz clock for the SNES controllers
-	reg [2:0] snes_slow_clk_counter = 3'b0;
+	reg [2:0] snes1_slow_clk_counter = 3'b0;
+	reg [2:0] snes2_slow_clk_counter = 3'b0;
+
 	
 	always@(posedge clk) 
 	begin
-		snes_slow_clk_counter <= snes_slow_clk_counter + 1'b1; 
-		if (snes_slow_clk_counter == 3'b100)
+		snes1_slow_clk_counter <= snes1_slow_clk_counter + 1'b1; 
+		snes2_slow_clk_counter <= snes2_slow_clk_counter + 1'b1;
+		if (snes1_slow_clk_counter == 3'b100)
 		begin
-			snes_slow_clk <= !snes_slow_clk;
-			snes_slow_clk_counter <= 3'b0;
+			snes1_slow_clk <= ~snes1_slow_clk;
+			snes1_slow_clk_counter <= 3'b0;
+		end
+		if (snes2_slow_clk_counter == 3'b100)
+		begin
+			snes2_slow_clk <= ~snes2_slow_clk;
+			snes2_slow_clk_counter <= 3'b0;
 		end
 	end
-	
 	
 endmodule

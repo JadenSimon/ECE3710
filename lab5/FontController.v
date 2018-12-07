@@ -17,7 +17,7 @@ module FontController(clk, x_in, y_in, write_glyph, addr, glyph_id, scale, pixel
 	input [(INPUT_WIDTH-1):0] x_in, y_in;
 	input [15:0] glyph_id;
 	input [12:0] addr;
-	input [1:0] scale;
+	input [1:0] scale; 
 	output reg [(PIXEL_SIZE-1):0] pixel;
 	
 	// Holds the glyph sprite sheet
@@ -28,7 +28,7 @@ module FontController(clk, x_in, y_in, write_glyph, addr, glyph_id, scale, pixel
 
 	// Load the glyph file.
 	initial begin
-		$readmemh("font.data", glyph_buffer);
+		$readmemh("font.data", glyph_buffer); 
 	end
 	
 	// Simply writing logic 

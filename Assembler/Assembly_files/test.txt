@@ -55,7 +55,7 @@
       MOV REG2 REG0
       AND REG2 REG1
       CMP REG2 REG1
-      BCND NE 11111100
+      BCND NE 11100110
 
       // user pressed start, go to game_setup
       MOVI REG0 .game_setup
