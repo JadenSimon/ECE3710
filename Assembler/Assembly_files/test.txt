@@ -1225,7 +1225,7 @@
 
       // Skip reseting tank shooting animations if frame % 8 != 0
       MOV REG0 REG4
-      MOVI REG1 000000000000111
+      MOVI REG1 000000000001111
       AND REG0 REG1
       CMPI REG0 00000000
       BCND NE 00001011
@@ -1462,11 +1462,6 @@
 
       // Actual loop part
       ADDI REG0 00000001
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
-      ADDI REG2 00000000
       ADDI REG2 00000000
       ADDI REG2 00000000
       ADDI REG2 00000000
