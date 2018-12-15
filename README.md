@@ -21,15 +21,15 @@ images: png files and their corresponding .data (raw rgb data) files for the tan
 lab5: tank game files (VGA files, top-level tank game file, game assembly code, .data glyph files, VGA testbench, font/background controllers)
 
 The lab5 directory was used as the final working directory for the complete project. To rebuild the project, all dependencies must be included and all data files and instructionset.v must be located in the directory. TankGame.v should be the top level module. Also, an assembled machine code file, called "machine_code.txt" should be placed there as well. Dependencies include:
-  ALU.v
-  BRAM.v
-  Regfile.v
-  flags.v
-  cpu_atapath.v
-  control_fsm.v
-  SNES_Controller.v
-  BackgroundController.v
-  FontController.v
-  VGADisplay.v
-  VGAController.v
+  ALU.v,
+  BRAM.v,
+  Regfile.v,
+  flags.v,
+  cpu_datapath.v,
+  control_fsm.v,
+  SNES_Controller.v,
+  BackgroundController.v,
+  FontController.v,
+  VGADisplay.v,
+  VGAController.v,
   HardwareSprite.v
